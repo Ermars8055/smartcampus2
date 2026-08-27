@@ -9,9 +9,17 @@ import 'package:facilityflow/pages/gate_entry_screen.dart';
 import 'package:facilityflow/services/api_service.dart';
 
 @NowaGenerated()
-class GateEntriesListScreen extends StatelessWidget {
+class GateEntriesListScreen extends StatefulWidget {
   @NowaGenerated({'loader': 'auto-constructor'})
   const GateEntriesListScreen({super.key});
+
+  @override
+  State<GateEntriesListScreen> createState() => _GateEntriesListScreenState();
+}
+
+class _GateEntriesListScreenState extends State<GateEntriesListScreen> {
+  String _selectedStatus = 'All';
+  final List<String> _statusOptions = ['All', 'Awaiting GRN', 'Completed'];
 
   Color _getStatusColor(String status) {
     switch (status) {
@@ -218,18 +226,53 @@ class GateEntriesListScreen extends StatelessWidget {
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: appState.gateEntries.length,
-            itemBuilder: (context, index) {
-              final entry = appState.gateEntries[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: InkWell(
-                  onTap: () => _showGateEntryDetails(context, entry),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
+          final filteredEntries = appState.gateEntries.where((entry) {
+            return _selectedStatus == 'All' || entry.status == _selectedStatus;
+          }).toList();
+
+          return Column(
+            children: [
+              SizedBox(
+                height: 50,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  itemCount: _statusOptions.length,
+                  itemBuilder: (context, index) {
+                    final status = _statusOptions[index];
+                    final isSelected = status == _selectedStatus;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: FilterChip(
+                        label: Text(status),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedStatus = selected ? status : 'All';
+                          });
+                        },
+                        selectedColor: Theme.of(context).colorScheme.primaryContainer,
+                        checkmarkColor: Theme.of(context).colorScheme.primary,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Expanded(
+                child: filteredEntries.isEmpty 
+                  ? const Center(child: Text('No entries match the selected status.'))
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: filteredEntries.length,
+                      itemBuilder: (context, index) {
+                        final entry = filteredEntries[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          child: InkWell(
+                            onTap: () => _showGateEntryDetails(context, entry),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -285,8 +328,11 @@ class GateEntriesListScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-              );
-            },
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         },
       ),

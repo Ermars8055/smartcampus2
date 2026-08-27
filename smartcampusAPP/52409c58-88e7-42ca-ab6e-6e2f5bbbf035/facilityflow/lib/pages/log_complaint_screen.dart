@@ -119,7 +119,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
     try {
       final api = ApiService();
       final roomsRes = await api.getRooms(deptName);
-      final fetchedRooms = roomsRes.data ?? [];
+      var fetchedRooms = roomsRes.data ?? [];
 
       final uniqueBuildings = <String, dynamic>{};
       final uniqueFloors = <String, dynamic>{};
@@ -150,12 +150,35 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
         }
       }
 
-      for (var b in _allBuildings) {
-        if (b['department_name'] == deptName) {
-          uniqueBuildings[b['id'].toString()] = {
-            'id': b['id'],
-            'name': b['name']
-          };
+      if (uniqueBuildings.isEmpty) {
+        // Fallback: If no buildings are mapped to this department, show all buildings for the selected institution
+        for (var b in _allBuildings) {
+          if (b['institution_id'].toString() == _selectedInstitutionId) {
+            uniqueBuildings[b['id'].toString()] = {
+              'id': b['id'],
+              'name': b['name']
+            };
+          }
+        }
+      }
+
+      if (uniqueFloors.isEmpty) {
+        // Fallback: If no floors are mapped to this department, fetch all rooms and extract floors
+        try {
+          final allRoomsRes = await api.getRooms(null);
+          final allRooms = allRoomsRes.data ?? [];
+          fetchedRooms = allRooms; // Update fetchedRooms so Room dropdown works
+          for (var room in allRooms) {
+            if (room['floor_id'] != null) {
+              uniqueFloors[room['floor_id'].toString()] = {
+                'id': room['floor_id'],
+                'name': room['floor_name'],
+                'building_id': room['building_id']
+              };
+            }
+          }
+        } catch (e) {
+          // ignore
         }
       }
 
@@ -200,9 +223,9 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImage(ImageSource source) async {
     try {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      final XFile? image = await _picker.pickImage(source: source, imageQuality: 50);
       if (image != null) {
         setState(() {
           _attachedImages.add(File(image.path));
@@ -214,6 +237,40 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
         const SnackBar(content: Text('Failed to pick image')),
       );
     }
+  }
+
+  void _showImageSourceActionSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Take a Photo'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from Gallery'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _removeAttachedPhoto(int index) {
@@ -634,7 +691,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                 Row(
                   children: [
                     ElevatedButton.icon(
-                      onPressed: _pickImage,
+                      onPressed: _showImageSourceActionSheet,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.colorScheme.secondary,
                         foregroundColor: Colors.white,

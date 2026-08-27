@@ -49,26 +49,25 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> {
           c.location.toLowerCase().contains(q);
     }).toList();
 
+    final allComplaints = complaints;
     final openComplaints = complaints
         .where(
           (c) =>
               c.status == 'Registered' ||
               c.status == 'Open' ||
-              c.status == 'Assigned' ||
-              c.status == 'Under Inspection' ||
-              c.status == 'Reopened',
+              c.status == 'Assigned',
         )
         .toList();
-    final inProgressComplaints = complaints
-        .where(
-          (c) => c.status == 'In Progress' || c.status == 'Material Pending',
-        )
-        .toList();
+    final underInspectionComplaints = complaints.where((c) => c.status == 'Under Inspection').toList();
+    final materialPendingComplaints = complaints.where((c) => c.status == 'Material Pending').toList();
+    final pendingApprovalComplaints = complaints.where((c) => c.status == 'Pending Approval').toList();
+    final inProgressComplaints = complaints.where((c) => c.status == 'In Progress').toList();
+    final reopenedComplaints = complaints.where((c) => c.status == 'Reopened').toList();
     final closedComplaints =
         complaints.where((c) => c.status == 'Closed' || c.status == 'Resolved' || c.status == 'Rejected').toList();
 
     return DefaultTabController(
-      length: 3,
+      length: 8,
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -87,12 +86,19 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> {
             ),
           ],
           bottom: const TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
             indicatorColor: Colors.white,
             labelColor: Colors.white,
             unselectedLabelColor: Color(0xFF93C5FD),
             tabs: [
+              Tab(text: 'All'),
               Tab(text: 'Open / Assigned'),
+              Tab(text: 'Under Inspection'),
+              Tab(text: 'Material Pending'),
+              Tab(text: 'Pending Approval'),
               Tab(text: 'In Progress'),
+              Tab(text: 'Reopened'),
               Tab(text: 'Closed'),
             ],
           ),
@@ -127,21 +133,14 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> {
               Expanded(
                 child: TabBarView(
                   children: [
-                    _buildComplaintList(
-                      context,
-                      openComplaints,
-                      'No open complaints match your search.',
-                    ),
-                    _buildComplaintList(
-                      context,
-                      inProgressComplaints,
-                      'No in-progress complaints match your search.',
-                    ),
-                    _buildComplaintList(
-                      context,
-                      closedComplaints,
-                      'No closed complaints match your search.',
-                    ),
+                    _buildComplaintList(context, allComplaints, 'No complaints match your search.'),
+                    _buildComplaintList(context, openComplaints, 'No open complaints match your search.'),
+                    _buildComplaintList(context, underInspectionComplaints, 'No under inspection complaints match your search.'),
+                    _buildComplaintList(context, materialPendingComplaints, 'No material pending complaints match your search.'),
+                    _buildComplaintList(context, pendingApprovalComplaints, 'No pending approval complaints match your search.'),
+                    _buildComplaintList(context, inProgressComplaints, 'No in-progress complaints match your search.'),
+                    _buildComplaintList(context, reopenedComplaints, 'No reopened complaints match your search.'),
+                    _buildComplaintList(context, closedComplaints, 'No closed complaints match your search.'),
                   ],
                 ),
               ),

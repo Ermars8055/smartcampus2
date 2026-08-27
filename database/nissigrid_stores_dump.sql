@@ -29,10 +29,8 @@ SET row_security = off;
 ALTER SCHEMA public OWNER TO postgres;
 
 --
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
 --
 
-COMMENT ON SCHEMA public IS '';
 
 
 SET default_tablespace = '';
@@ -32278,11 +32276,8 @@ ALTER TABLE ONLY public.write_offs
 
 
 --
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
 --
 
-REVOKE USAGE ON SCHEMA public FROM PUBLIC;
-GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --

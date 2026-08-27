@@ -167,9 +167,12 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                                 materialRequired,
                                 controller.text);
                             if (ctx.mounted) {
-                              Navigator.pop(ctx);
+                              Navigator.pop(ctx); // Pop dialog
                             }
                             _refreshComplaints();
+                            if (Navigator.canPop(context)) {
+                              Navigator.pop(context); // Pop detail screen
+                            }
                           } catch (e) {
                             if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -229,7 +232,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                     ElevatedButton.icon(
                       onPressed: () async {
                         final picked =
-                            await picker.pickImage(source: ImageSource.camera);
+                            await picker.pickImage(source: ImageSource.camera, imageQuality: 50);
                         if (picked != null) {
                           setStateDialog(() => images.add(File(picked.path)));
                         }
@@ -288,9 +291,12 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                             await api.resolveComplaint(widget.complaint.id,
                                 controller.text, imageUrls);
                             if (ctx.mounted) {
-                              Navigator.pop(ctx);
+                              Navigator.pop(ctx); // Pop dialog
                             }
                             _refreshComplaints();
+                            if (Navigator.canPop(context)) {
+                              Navigator.pop(context); // Pop detail screen
+                            }
                           } catch (e) {
                             if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(

@@ -109,22 +109,26 @@ class ApiService {
   // --- Gate Entry endpoints ---
   Future<Response> uploadInvoice(File file) async {
     String fileName = file.path.split('/').last;
+    File uploadFile = file;
     if (!fileName.contains('.')) {
       fileName = '$fileName.jpg';
+      uploadFile = await file.copy('${file.path}.jpg');
     }
     FormData formData = FormData.fromMap({
-      "file": await MultipartFile.fromFile(file.path, filename: fileName),
+      "file": await MultipartFile.fromFile(uploadFile.path, filename: fileName),
     });
     return await dio.post('/api/upload', data: formData);
   }
 
   Future<Response> uploadComplaintImage(File file) async {
     String fileName = file.path.split('/').last;
+    File uploadFile = file;
     if (!fileName.contains('.')) {
       fileName = '$fileName.jpg';
+      uploadFile = await file.copy('${file.path}.jpg');
     }
     FormData formData = FormData.fromMap({
-      "file": await MultipartFile.fromFile(file.path, filename: fileName),
+      "file": await MultipartFile.fromFile(uploadFile.path, filename: fileName),
     });
     return await dio.post('/api/upload',
         queryParameters: {'folder': 'complaints'}, data: formData);

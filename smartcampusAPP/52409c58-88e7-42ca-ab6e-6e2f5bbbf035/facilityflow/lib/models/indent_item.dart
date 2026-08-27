@@ -12,6 +12,7 @@ class IndentItem {
     required this.acknowledgedQuantity,
     this.uomName = '',
     this.materialCode = '',
+    this.uomAllowDecimal = false,
   });
 
   factory IndentItem.fromJson(Map<String, dynamic> json) {
@@ -27,6 +28,7 @@ class IndentItem {
           (json['acknowledged_quantity'] as num?)?.toDouble() ?? 0,
       uomName: json['uom_name'] as String? ?? '',
       materialCode: json['material_code'] as String? ?? '',
+      uomAllowDecimal: json['uom_allow_decimal'] as bool? ?? false,
     );
   }
 
@@ -39,6 +41,7 @@ class IndentItem {
   final double acknowledgedQuantity;
   final String uomName;
   final String materialCode;
+  final bool uomAllowDecimal;
 
   Map<String, dynamic> toJson() {
     return {

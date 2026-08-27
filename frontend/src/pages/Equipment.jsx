@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import {
   Search, Build, QrCode, UploadFile, CheckCircle, Warning, OpenInNew,
-  LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh, Assignment, DeleteOutline, Print, Science, CompareArrows, Add, History
+  LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh, Assignment, DeleteOutline, Print, Science, CompareArrows, Add, History, PhotoCamera
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -976,7 +976,7 @@ export default function Equipment() {
                       Update Serial
                     </Button>
                   )}
-                  <Button size="small" variant="outlined" color="primary" startIcon={<Edit color="primary" />} onClick={(e) => { 
+                  <Button size="small" variant="outlined" color="primary" disabled={item.status === 'RBER'} startIcon={<Edit color="primary" />} onClick={(e) => { 
                     e.stopPropagation(); 
                     const itemToEdit = { ...item };
                     if (!itemToEdit.linked_reagents || itemToEdit.linked_reagents.length === 0) {
@@ -1005,6 +1005,16 @@ export default function Equipment() {
                   {item.installation_status === 'Installed' && (
                     <Button size="small" variant="outlined" color="primary" startIcon={<UploadFile />} onClick={(e) => { e.stopPropagation(); setUploadDocsFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setUploadDocsDialog(item); }}>
                       Upload Docs
+                    </Button>
+                  )}
+                  {item.equipment_photo_url && (
+                    <Button size="small" variant="outlined" color="primary" startIcon={<PhotoCamera />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.equipment_photo_url), '_blank'); }}>
+                      Eq. Photo
+                    </Button>
+                  )}
+                  {item.serial_number_photo_url && (
+                    <Button size="small" variant="outlined" color="secondary" startIcon={<PhotoCamera />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.serial_number_photo_url), '_blank'); }}>
+                      SN Photo
                     </Button>
                   )}
                   {item.installation_report_url && (
@@ -1159,18 +1169,20 @@ export default function Equipment() {
                     </TableCell>
                     <TableCell align="right">
                       <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end', alignItems: 'center' }}>
-                        <Tooltip title="Edit Equipment">
-                          <IconButton size="small" color="primary" onClick={(e) => { 
-                            e.stopPropagation(); 
-                            const itemToEdit = { ...item };
-                            if (!itemToEdit.linked_reagents || itemToEdit.linked_reagents.length === 0) {
-                              itemToEdit.linked_reagents = [{ material_id: '' }];
-                            }
-                            setEditForm(itemToEdit); 
-                            setEditDialog(item); 
-                          }}>
-                            <Edit color="primary" fontSize="small" />
-                          </IconButton>
+                        <Tooltip title={item.status === 'RBER' ? "Cannot edit RBER equipment" : "Edit Equipment"}>
+                          <span>
+                            <IconButton size="small" color="primary" disabled={item.status === 'RBER'} onClick={(e) => { 
+                              e.stopPropagation(); 
+                              const itemToEdit = { ...item };
+                              if (!itemToEdit.linked_reagents || itemToEdit.linked_reagents.length === 0) {
+                                itemToEdit.linked_reagents = [{ material_id: '' }];
+                              }
+                              setEditForm(itemToEdit); 
+                              setEditDialog(item); 
+                            }}>
+                              <Edit color={item.status === 'RBER' ? 'disabled' : 'primary'} fontSize="small" />
+                            </IconButton>
+                          </span>
                         </Tooltip>
                         {(item.installation_status === 'Pending Installation' || item.installation_status === 'Installation Requested') && (
                           <Tooltip title="Complete Installation">
@@ -1200,6 +1212,20 @@ export default function Equipment() {
                             </IconButton>
                           </Tooltip>
                         )}
+                        {item.equipment_photo_url && (
+                          <Tooltip title="View Equipment Photo">
+                            <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.equipment_photo_url), '_blank'); }}>
+                              <PhotoCamera fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {item.serial_number_photo_url && (
+                          <Tooltip title="View Serial Number Photo">
+                            <IconButton size="small" color="secondary" onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.serial_number_photo_url), '_blank'); }}>
+                              <PhotoCamera fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
                         {item.installation_report_url && (
                           <Tooltip title="View Installation Report">
                             <IconButton size="small" color="success" onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.installation_report_url), '_blank'); }}>
@@ -1207,13 +1233,13 @@ export default function Equipment() {
                             </IconButton>
                           </Tooltip>
                         )}
-                        {item.status === 'Operational' && (
-                          <Tooltip title="Print QR Code">
-                            <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); handleOpenQr(item); }}>
+                        <Tooltip title="Print QR Code">
+                          <span>
+                            <IconButton size="small" color="primary" disabled={item.status !== 'Operational'} onClick={(e) => { e.stopPropagation(); handleOpenQr(item); }}>
                               <QrCode fontSize="small" />
                             </IconButton>
-                          </Tooltip>
-                        )}
+                          </span>
+                        </Tooltip>
                         {item.status === 'Operational' && (item.cost_per_test > 0 || item.rental_type === 'Cost per test') && (
                           <Tooltip title="Log Usage">
                             <IconButton size="small" color="secondary" onClick={(e) => { e.stopPropagation(); setConsumptionDialog(item); setConsumptionDate(new Date().toISOString().split('T')[0]); setTestsPerformed(''); setConsumptionRemarks(''); }}>
@@ -1221,16 +1247,16 @@ export default function Equipment() {
                             </IconButton>
                           </Tooltip>
                         )}
-                        {item.status === 'Operational' && (
-                          <Tooltip title="Relocate Equipment">
-                            <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setRelocateDialog(item); setRelocateDate(new Date().toISOString().split('T')[0]); setRelocateLocation(item.location_id || ''); setRelocateRemarks(''); }}>
+                        <Tooltip title="Relocate Equipment">
+                          <span>
+                            <IconButton size="small" color="primary" disabled={item.status !== 'Operational'} onClick={(e) => { e.stopPropagation(); setRelocateDialog(item); setRelocateDate(new Date().toISOString().split('T')[0]); setRelocateLocation(item.location_id || ''); setRelocateRemarks(''); }}>
                               <CompareArrows fontSize="small" />
                             </IconButton>
-                          </Tooltip>
-                        )}
-                        {item.status !== 'Written Off' && (
-                          <Tooltip title="Write-off Equipment">
-                            <IconButton size="small" color="error" onClick={(e) => {
+                          </span>
+                        </Tooltip>
+                        <Tooltip title="Write-off Equipment">
+                          <span>
+                            <IconButton size="small" color="error" disabled={item.status === 'Written Off'} onClick={(e) => {
                               e.stopPropagation();
                               navigate('/write-offs', {
                                 state: {
@@ -1246,11 +1272,11 @@ export default function Equipment() {
                             }}>
                               <DeleteOutline fontSize="small" />
                             </IconButton>
-                          </Tooltip>
-                        )}
-                        {item.status !== 'Written Off' && item.status !== 'RBER' && (
-                          <Tooltip title="Mark as RBER">
-                            <IconButton size="small" color="warning" onClick={(e) => {
+                          </span>
+                        </Tooltip>
+                        <Tooltip title="Mark as RBER">
+                          <span>
+                            <IconButton size="small" color="warning" disabled={item.status === 'Written Off' || item.status === 'RBER'} onClick={(e) => {
                               e.stopPropagation();
                               setRberDialog(item);
                               setRberDate(new Date().toISOString().split('T')[0]);
@@ -1258,8 +1284,8 @@ export default function Equipment() {
                             }}>
                               <Warning fontSize="small" />
                             </IconButton>
-                          </Tooltip>
-                        )}
+                          </span>
+                        </Tooltip>
                       </Box>
                     </TableCell>
                   </TableRow>

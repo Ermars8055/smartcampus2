@@ -1291,6 +1291,7 @@ class IssueItemOut(IssueItemBase):
     id: int
     material_name: Optional[str] = None
     material_code: Optional[str] = None
+    material_hsn_code: Optional[str] = None
     uom_name: Optional[str] = None
     warehouse_id: Optional[int] = None
     warehouse_name: Optional[str] = None
@@ -2203,6 +2204,7 @@ class ComplaintCloseRequest(BaseModel):
     equipment_photo_url: Optional[str] = None
     serial_number_photo_url: Optional[str] = None
     installation_report_url: Optional[str] = None
+    serial_number: Optional[str] = None
     status_on_work_completion: Optional[str] = None
     job_completed_satisfactorily: Optional[bool] = None
     completion_date: Optional[date] = None
@@ -2244,6 +2246,13 @@ class ComplaintOut(ComplaintBase):
     manager_approved_by_name: Optional[str] = None
     equipment_code: Optional[str] = None
     equipment_warranty_status: Optional[str] = None
+    equipment_name: Optional[str] = None
+    equipment_make: Optional[str] = None
+    equipment_model: Optional[str] = None
+    equipment_serial_number: Optional[str] = None
+    equipment_photo_url: Optional[str] = None
+    serial_number_photo_url: Optional[str] = None
+    installation_report_url: Optional[str] = None
     images: List[ComplaintImageOut] = []
     documents: List[ComplaintDocumentOut] = []
     class Config:

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Box, Typography, Paper, Grid, Divider, Chip, Button, IconButton, Dialog, DialogTitle,
-  DialogContent, DialogActions, TextField, CircularProgress, Snackbar, Alert, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Switch, FormControlLabel, Stepper, Step, StepLabel, Select, MenuItem, FormControl, InputLabel
+  DialogContent, DialogActions, TextField, CircularProgress, Snackbar, Alert, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Switch, FormControlLabel, Stepper, Step, StepLabel, Select, MenuItem, FormControl, InputLabel, Checkbox
 } from '@mui/material';
-import { ArrowBack, CheckCircle, Assignment, PhotoCamera, Close, AddShoppingCart, Build, Search, VerifiedUser, Cancel, Replay, Add, Print, Save } from '@mui/icons-material';
+import { ArrowBack, CheckCircle, Assignment, PhotoCamera, Close, AddShoppingCart, Build, Search, VerifiedUser, Cancel, Replay, Add, Print, Save, CameraAlt, PhotoLibrary } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import api, { getFileUrl } from '../services/api';
 import dayjs from 'dayjs';
@@ -58,6 +58,8 @@ export default function ComplaintDetail() {
   
   // Installation Specific States
   const [equipmentPhoto, setEquipmentPhoto] = useState(null);
+  const [serialNumber, setSerialNumber] = useState('');
+  const [noSerialNumber, setNoSerialNumber] = useState(false);
   const [serialNumberPhoto, setSerialNumberPhoto] = useState(null);
   const [installationReport, setInstallationReport] = useState(null);
   const [signedReport, setSignedReport] = useState(null);
@@ -237,7 +239,8 @@ export default function ComplaintDetail() {
         status_on_work_completion: statusOnWorkCompletion,
         job_completed_satisfactorily: jobCompletedSatisfactorily,
         completion_date: completionDate,
-        completion_time: completionTime
+        completion_time: completionTime,
+        pm_checklist_data: pmChecklistData
       });
       setSnackbar({ open: true, message: 'Details saved successfully', severity: 'success' });
       fetchComplaintData();
@@ -321,6 +324,7 @@ export default function ComplaintDetail() {
         payload.equipment_photo_url = equipmentPhotoUrl;
         payload.serial_number_photo_url = serialNumberPhotoUrl;
         payload.installation_report_url = installationReportUrl;
+        payload.serial_number = noSerialNumber ? 'NA' : serialNumber;
       }
 
       await api.post(`/api/complaints/${id}/close`, payload);
@@ -667,6 +671,29 @@ export default function ComplaintDetail() {
                   </Box>
                 </Box>
               )}
+              
+              {(complaint.equipment_photo_url || complaint.serial_number_photo_url || complaint.installation_report_url) && (
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 1 }}>Installation Documents</Typography>
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    {complaint.equipment_photo_url && (
+                      <Button variant="outlined" size="small" onClick={() => window.open(getFileUrl(complaint.equipment_photo_url), '_blank')} startIcon={<PhotoCamera />}>
+                        Equipment Photo
+                      </Button>
+                    )}
+                    {complaint.serial_number_photo_url && (
+                      <Button variant="outlined" size="small" onClick={() => window.open(getFileUrl(complaint.serial_number_photo_url), '_blank')} startIcon={<PhotoCamera />}>
+                        Serial No. Photo
+                      </Button>
+                    )}
+                    {complaint.installation_report_url && (
+                      <Button variant="outlined" size="small" onClick={() => window.open(getFileUrl(complaint.installation_report_url), '_blank')} startIcon={<Assignment />}>
+                        Installation Report
+                      </Button>
+                    )}
+                  </Box>
+                </Box>
+              )}
             </Paper>
           )}
 
@@ -928,35 +955,33 @@ export default function ComplaintDetail() {
             onChange={(e) => setStatusOnWorkCompletion(e.target.value)}
             sx={{ mb: 2 }}
           />
-          <FormControlLabel
-            control={<Switch checked={jobCompletedSatisfactorily} onChange={(e) => setJobCompletedSatisfactorily(e.target.checked)} color="success" />}
-            label="Job Completed Satisfactorily"
-            sx={{ mb: 2, display: 'block' }}
-          />
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid item xs={6}>
-              <TextField
-                margin="dense"
-                label="Completion Date"
-                type="date"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                value={completionDate}
-                onChange={(e) => setCompletionDate(e.target.value)}
-              />
+
+          {!isPM && (
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              <Grid item xs={6}>
+                <TextField
+                  margin="dense"
+                  label="Completion Date"
+                  type="date"
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  value={completionDate}
+                  onChange={(e) => setCompletionDate(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  margin="dense"
+                  label="Completion Time"
+                  type="time"
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  value={completionTime}
+                  onChange={(e) => setCompletionTime(e.target.value)}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="dense"
-                label="Completion Time"
-                type="time"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                value={completionTime}
-                onChange={(e) => setCompletionTime(e.target.value)}
-              />
-            </Grid>
-          </Grid>
+          )}
 
           <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
             <Button variant="outlined" color="primary" startIcon={<Save />} onClick={handleSaveDetails} disabled={actionLoading}>
@@ -994,15 +1019,51 @@ export default function ComplaintDetail() {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box>
                   <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>1. Equipment Photo *</Typography>
-                  <input type="file" accept="image/*" onChange={(e) => setEquipmentPhoto(e.target.files[0])} />
+                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    <Button component="label" variant="outlined" size="small" startIcon={<PhotoCamera />}>
+                      Upload from Camera / Gallery
+                      <input type="file" accept="image/*" hidden onChange={(e) => setEquipmentPhoto(e.target.files[0])} />
+                    </Button>
+                    {equipmentPhoto && <Typography variant="caption" sx={{ ml: 1, color: 'success.main', fontWeight: 'bold' }}>{equipmentPhoto.name}</Typography>}
+                  </Box>
                 </Box>
                 <Box>
-                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>2. Serial Number Photo *</Typography>
-                  <input type="file" accept="image/*" onChange={(e) => setSerialNumberPhoto(e.target.files[0])} />
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>2. Serial Number *</Typography>
+                  <TextField 
+                    size="small" 
+                    fullWidth 
+                    placeholder="Enter Serial Number" 
+                    value={noSerialNumber ? 'NA' : serialNumber} 
+                    onChange={(e) => setSerialNumber(e.target.value)} 
+                    disabled={noSerialNumber} 
+                    sx={{ mb: 1, bgcolor: '#fff' }}
+                  />
+                  <FormControlLabel
+                    control={<Checkbox checked={noSerialNumber} onChange={(e) => setNoSerialNumber(e.target.checked)} size="small" />}
+                    label={<Typography variant="body2">No Serial Number Available (NA)</Typography>}
+                  />
                 </Box>
+                {!noSerialNumber && (
+                  <Box>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>3. Serial Number Photo *</Typography>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                      <Button component="label" variant="outlined" size="small" startIcon={<PhotoCamera />}>
+                        Upload from Camera / Gallery
+                        <input type="file" accept="image/*" hidden onChange={(e) => setSerialNumberPhoto(e.target.files[0])} />
+                      </Button>
+                      {serialNumberPhoto && <Typography variant="caption" sx={{ ml: 1, color: 'success.main', fontWeight: 'bold' }}>{serialNumberPhoto.name}</Typography>}
+                    </Box>
+                  </Box>
+                )}
                 <Box>
-                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>3. Installation Report *</Typography>
-                  <input type="file" accept="*/*" onChange={(e) => setInstallationReport(e.target.files[0])} />
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>{noSerialNumber ? '3' : '4'}. Installation Report *</Typography>
+                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    <Button component="label" variant="outlined" size="small" startIcon={<PhotoCamera />}>
+                      Upload from Camera / File
+                      <input type="file" accept="*/*" hidden onChange={(e) => setInstallationReport(e.target.files[0])} />
+                    </Button>
+                    {installationReport && <Typography variant="caption" sx={{ ml: 1, color: 'success.main', fontWeight: 'bold' }}>{installationReport.name}</Typography>}
+                  </Box>
                 </Box>
               </Box>
             </Box>
@@ -1010,10 +1071,12 @@ export default function ComplaintDetail() {
             <>
               <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Post Repair Photos</Typography>
               <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
-                 <input type="file" multiple accept="image/*" style={{ display: 'none' }} id="resolution-images-input" onChange={handleResolutionImageChange} />
-                <Button variant="outlined" startIcon={<PhotoCamera />} onClick={() => document.getElementById('resolution-images-input').click()} size="small">
-                  Select Post Repair Photos
-                </Button>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                  <Button component="label" variant="outlined" size="small" startIcon={<PhotoCamera />}>
+                    Upload from Camera / Gallery
+                    <input type="file" multiple accept="image/*" hidden onChange={handleResolutionImageChange} />
+                  </Button>
+                </Box>
                 {resolutionImages.length > 0 && (
                   <Box sx={{ mt: 2, textAlign: 'left' }}>
                     {resolutionImages.map((doc, idx) => (
@@ -1025,13 +1088,15 @@ export default function ComplaintDetail() {
 
               <Typography variant="subtitle2" sx={{ mb: 1 }}>{isPM ? 'Upload Signed PM Report *' : 'Upload Signed Engineer Evaluation Report *'}</Typography>
               <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
-                <input type="file" accept="*/*" style={{ display: 'none' }} id="signed-report-input" onChange={(e) => setSignedReport(e.target.files[0])} />
-                <Button variant="outlined" startIcon={<Assignment />} onClick={() => document.getElementById('signed-report-input').click()} size="small">
-                  {signedReport ? 'Change Signed Report' : 'Select Signed Report'}
-                </Button>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                  <Button component="label" variant="outlined" size="small" startIcon={<PhotoCamera />}>
+                    Upload from Camera / File
+                    <input type="file" accept="*/*" hidden onChange={(e) => setSignedReport(e.target.files[0])} />
+                  </Button>
+                </Box>
                 {signedReport && (
-                  <Box sx={{ mt: 2, textAlign: 'left' }}>
-                    <Chip label={signedReport.name} onDelete={() => setSignedReport(null)} sx={{ m: 0.5 }} />
+                  <Box sx={{ mt: 2, textAlign: 'center' }}>
+                    <Chip label={signedReport.name} onDelete={() => setSignedReport(null)} color="success" variant="outlined" sx={{ m: 0.5 }} />
                   </Box>
                 )}
               </Box>
@@ -1064,19 +1129,13 @@ export default function ComplaintDetail() {
             onClick={handleResolve} 
             variant="contained" 
             color="success" 
-            disabled={actionLoading || !resolutionRemarks || !closureReason || (complaint?.complaint_type === 'Installation' ? (!equipmentPhoto || !serialNumberPhoto || !installationReport) : !signedReport)} 
+            disabled={actionLoading || !resolutionRemarks || !closureReason || (complaint?.complaint_type === 'Installation' ? (!equipmentPhoto || (!noSerialNumber && !serialNumberPhoto) || (!noSerialNumber && !serialNumber) || !installationReport) : !signedReport) || (isPM && (!pmChecklistData?.pm_start_date_time || !pmChecklistData?.pm_completed_date || !pmChecklistData?.next_pm_due_on || !pmChecklistData?.status || !pmChecklistData?.accepted_for_use))}
             startIcon={actionLoading ? <CircularProgress size={20} /> : <CheckCircle />}
           >
             Submit for Approval
           </Button>
         </DialogActions>
-        {(complaint?.complaint_type === 'Installation' ? (!equipmentPhoto || !serialNumberPhoto || !installationReport) : !signedReport) && (
-            <Alert severity="warning" sx={{ m: 2, mt: 0 }}>
-              {complaint?.complaint_type === 'Installation' 
-                ? "Equipment Photo, Serial Number Photo, and Installation Report are mandatory."
-                : (isPM ? "The Signed PM Report must be uploaded to close the complaint." : "The Signed Engineer Evaluation Report must be uploaded to close the complaint.")}
-            </Alert>
-        )}
+
       </Dialog>
 
 

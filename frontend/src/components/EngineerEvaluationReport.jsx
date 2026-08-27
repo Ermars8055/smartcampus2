@@ -27,19 +27,24 @@ const EngineerEvaluationReport = forwardRef(({ complaint, materialIssues = [] },
       </style>
 
       {/* Header section */}
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-          EAST POINT HOSPITAL
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 2 }}>
-          Bidarahalli, Virgonagar Post, Bangalore - 560 049
-        </Typography>
+      <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+          <img src="/logo.png" alt="East Point Logo" style={{ height: '60px', objectFit: 'contain', filter: 'grayscale(100%) contrast(500%)' }} />
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+              EAST POINT HOSPITAL
+            </Typography>
+            <Typography variant="body2">
+              Bidarahalli, Virgonagar Post, Bangalore - 560 049
+            </Typography>
+          </Box>
+        </Box>
 
         <Typography variant="h6" align="center" sx={{ fontWeight: 'bold', mb: 1 }}>
           DEPARTMENT OF BIOMEDICAL ENGINEERING
         </Typography>
         <Typography variant="h6" align="center" sx={{ fontWeight: 'bold', textDecoration: 'underline', mb: 1 }}>
-          SERVICE REQUEST FROM / Installation report
+          Service Request Form / Installation Report
         </Typography>
       </Box>
 
@@ -51,13 +56,13 @@ const EngineerEvaluationReport = forwardRef(({ complaint, materialIssues = [] },
               <TableCell sx={{ width: '25%', fontWeight: 'bold' }}>NAME OF EQUIPMENT</TableCell>
               <TableCell sx={{ width: '25%' }}>{complaint.equipment_name || complaint.equipment?.name || '-'}</TableCell>
               <TableCell sx={{ width: '25%', fontWeight: 'bold' }}>Sl.No.</TableCell>
-              <TableCell sx={{ width: '25%' }}>{complaint.equipment?.serial_number || '-'}</TableCell>
+              <TableCell sx={{ width: '25%' }}>{complaint.equipment_serial_number || complaint.equipment?.serial_number || '-'}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell sx={{ fontWeight: 'bold' }}>MAKE</TableCell>
-              <TableCell>{complaint.equipment?.make || '-'}</TableCell>
+              <TableCell>{complaint.equipment_make || complaint.equipment?.make || '-'}</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>MODEL</TableCell>
-              <TableCell>{complaint.equipment?.model || '-'}</TableCell>
+              <TableCell>{complaint.equipment_model || complaint.equipment?.model || '-'}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell sx={{ fontWeight: 'bold' }}>DATE & TIME</TableCell>
@@ -86,7 +91,7 @@ const EngineerEvaluationReport = forwardRef(({ complaint, materialIssues = [] },
       {/* Action Taken Box */}
       <Box className="print-border" sx={{ mb: 2, minHeight: '100px', p: 2 }}>
         <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>PROBLEM OBSERVED AND ACTION TAKEN :</Typography>
-        <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{complaint.resolution_entered || ''}</Typography>
+        <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{complaint.resolution_entered || complaint.nature_of_complaint || ''}</Typography>
       </Box>
 
       {/* Parts Replaced Table */}
@@ -112,9 +117,9 @@ const EngineerEvaluationReport = forwardRef(({ complaint, materialIssues = [] },
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{item.material_name}</TableCell>
-                  <TableCell>-</TableCell>
+                  <TableCell>{item.material_hsn_code || '-'}</TableCell>
                   <TableCell>{item.quantity}</TableCell>
-                  <TableCell>-</TableCell>
+                  <TableCell>{item.rate || '-'}</TableCell>
                 </TableRow>
               ))
             ) : (
@@ -135,7 +140,7 @@ const EngineerEvaluationReport = forwardRef(({ complaint, materialIssues = [] },
 
       {/* Status On Work Completion */}
       <Box className="print-border" sx={{ mb: 2, p: 2, textAlign: 'center', minHeight: '60px' }}>
-        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>STATUS ON WORK COMPLEION</Typography>
+        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>STATUS ON WORK COMPLETION</Typography>
         <Typography variant="body2" sx={{ mt: 1 }}>{complaint.status_on_work_completion || ''}</Typography>
       </Box>
 
@@ -148,12 +153,12 @@ const EngineerEvaluationReport = forwardRef(({ complaint, materialIssues = [] },
             <Typography variant="body2" sx={{ fontWeight: 'bold', mr: 2 }}>JOB COMPLETED SATISFACTORILY : </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', mr: 3 }}>
               <Box sx={{ width: 16, height: 16, border: '1px solid #000', mr: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                 {complaint.job_completed_satisfactorily ? '✓' : ''}
+                 
               </Box> YES
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Box sx={{ width: 16, height: 16, border: '1px solid #000', mr: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                 {!complaint.job_completed_satisfactorily ? '✓' : ''}
+                 
               </Box> NO
             </Box>
             <Box sx={{ flexGrow: 1 }} />

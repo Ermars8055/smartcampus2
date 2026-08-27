@@ -140,7 +140,11 @@ class TenantConfigurationBase(BaseModel):
     cgst_share_percent: float
     sgst_share_percent: float
     po_short_close_notify_roles: Optional[List[str]] = []
-    wo_short_close_notify_roles: Optional[List[str]] = []
+    pm_advance_email_enabled: Optional[bool] = False
+    pm_advance_email_types: Optional[List[str]] = []
+    pm_advance_email_days: Optional[int] = None
+    pm_advance_email_roles: Optional[List[str]] = []
+    pm_advance_email_users: Optional[List[int]] = []
 
 class TenantConfigurationCreate(TenantConfigurationBase):
     pass
@@ -2441,11 +2445,6 @@ class PMScheduleBase(BaseModel):
     oct: bool = False
     nov: bool = False
     dec: bool = False
-    advance_email_enabled: Optional[bool] = False
-    advance_email_type: Optional[str] = None
-    advance_email_days: Optional[int] = None
-    advance_email_roles: Optional[List[str]] = []
-    advance_email_users: Optional[List[int]] = []
 
 class PMScheduleUpdate(PMScheduleBase):
     pass

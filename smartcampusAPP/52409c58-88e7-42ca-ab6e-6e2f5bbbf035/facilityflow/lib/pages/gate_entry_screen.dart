@@ -41,7 +41,7 @@ class _GateEntryScreenState extends State<GateEntryScreen> {
 
   Future<void> _pickImage(String type) async {
     final XFile? image =
-        await _picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+        await _picker.pickImage(source: ImageSource.camera, imageQuality: 50);
     if (image != null) {
       setState(() {
         if (type == 'invoice') _invoiceImage = File(image.path);
@@ -73,8 +73,8 @@ class _GateEntryScreenState extends State<GateEntryScreen> {
     final hasInvoice = _invoiceNumber.isNotEmpty || _invoiceDate != null || _invoiceAmount > 0 || _invoiceImage != null;
     final hasDC = _dcNumber.isNotEmpty || _dcDate != null || _dcImage != null;
 
-    if (!hasInvoice && !hasDC) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Either Invoice or Delivery Challan is required.')));
+    if (_invoiceNumber.isEmpty && _dcNumber.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Either Invoice Number or Delivery Challan Number is compulsory.')));
       return;
     }
 

@@ -96,11 +96,11 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
     }
   }
 
-  String _formatQty(double qty, String uom) {
-    if (uom.toUpperCase() == 'NOS' || qty == qty.toInt()) {
+  String _formatQty(double qty, String uom, bool uomAllowDecimal) {
+    if (!uomAllowDecimal || qty == qty.toInt()) {
       return qty.toInt().toString();
     }
-    return qty.toString();
+    return qty.toStringAsFixed(2);
   }
 
   void _showApprovalDialog() {
@@ -108,7 +108,7 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
     final Map<int, TextEditingController> controllers = {};
     for (int i = 0; i < widget.indent.items.length; i++) {
       controllers[i] = TextEditingController(
-          text: _formatQty(widget.indent.items[i].requestedQuantity, widget.indent.items[i].uomName));
+          text: _formatQty(widget.indent.items[i].requestedQuantity, widget.indent.items[i].uomName, widget.indent.items[i].uomAllowDecimal));
     }
 
     showDialog(
@@ -143,7 +143,7 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                               Row(
                                 children: [
                                   Expanded(
-                                    child: Text('Req: ${_formatQty(item.requestedQuantity, item.uomName)} ${item.uomName}'),
+                                    child: Text('Req: ${_formatQty(item.requestedQuantity, item.uomName, item.uomAllowDecimal)} ${item.uomName}'),
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(
@@ -267,35 +267,59 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                     Card(
                       child: Padding(
                         padding: const EdgeInsets.all(16),
-                        child: GridView.count(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          shrinkWrap: true,
-                          childAspectRatio: 2.5,
-                          physics: const NeverScrollableScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildDetailItem('Requester', widget.indent.requesterName, theme.textTheme),
-                            _buildDetailItem('Institution', widget.indent.institutionName, theme.textTheme),
-                            _buildDetailItem('Department', widget.indent.department, theme.textTheme),
-                            _buildDetailItem('Building', widget.indent.buildingName, theme.textTheme),
-                            _buildDetailItem('Floor', widget.indent.floor, theme.textTheme),
-                            _buildDetailItem('Room', widget.indent.roomName, theme.textTheme),
-                            _buildDetailItem('Indent Date', formattedDate, theme.textTheme),
-                            Column(
+                            Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Status', style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600], fontWeight: FontWeight.bold)),
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: statusColor,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    widget.indent.status,
-                                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                                Expanded(child: _buildDetailItem('Requester', widget.indent.requesterName, theme.textTheme)),
+                                const SizedBox(width: 16),
+                                Expanded(child: _buildDetailItem('Institution', widget.indent.institutionName, theme.textTheme)),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(child: _buildDetailItem('Department', widget.indent.department, theme.textTheme)),
+                                const SizedBox(width: 16),
+                                Expanded(child: _buildDetailItem('Building', widget.indent.buildingName, theme.textTheme)),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(child: _buildDetailItem('Floor', widget.indent.floor, theme.textTheme)),
+                                const SizedBox(width: 16),
+                                Expanded(child: _buildDetailItem('Room', widget.indent.roomName, theme.textTheme)),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(child: _buildDetailItem('Indent Date', formattedDate, theme.textTheme)),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Status', style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600], fontWeight: FontWeight.bold)),
+                                      const SizedBox(height: 4),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: statusColor,
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          widget.indent.status,
+                                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
@@ -386,18 +410,18 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                                 Row(
                                   children: [
                                     _buildQtyColumn(context, 'Req',
-                                        _formatQty(item.requestedQuantity, item.uomName), Colors.blue),
+                                        _formatQty(item.requestedQuantity, item.uomName, item.uomAllowDecimal), Colors.blue),
                                     _buildDivider(),
                                     _buildQtyColumn(context, 'Appr',
-                                        _formatQty(item.approvedQuantity, item.uomName), Colors.amber),
+                                        _formatQty(item.approvedQuantity, item.uomName, item.uomAllowDecimal), Colors.amber),
                                     _buildDivider(),
                                     _buildQtyColumn(context, 'Issued',
-                                        _formatQty(item.issuedQuantity, item.uomName), Colors.purple),
+                                        _formatQty(item.issuedQuantity, item.uomName, item.uomAllowDecimal), Colors.purple),
                                     _buildDivider(),
                                     _buildQtyColumn(
                                         context,
                                         'Recd',
-                                        _formatQty(item.acknowledgedQuantity, item.uomName),
+                                        _formatQty(item.acknowledgedQuantity, item.uomName, item.uomAllowDecimal),
                                         item.acknowledgedQuantity ==
                                                     item.issuedQuantity &&
                                                 item.issuedQuantity > 0

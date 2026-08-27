@@ -36,7 +36,7 @@ export default function Materials() {
   const [printLabelCount, setPrintLabelCount] = useState(12);
   const [labelFormat, setLabelFormat] = useState(32);
   const [form, setForm] = useState({
-    code: '', name: '', alias: '', reference_no: '', category_id: '', subcategory_id: '', uom_id: '', warehouse_id: '', reorder_level: 0,
+    code: '', name: '', alias: '', brand: '', reference_no: '', category_id: '', subcategory_id: '', uom_id: '', warehouse_id: '', reorder_level: 0,
     maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: '',
     material_type: '', is_biomedical: false, requires_installation: false, hsn_code: '', description: '', is_active: true
   });
@@ -209,6 +209,7 @@ export default function Materials() {
       const payload = {
         name: form.name,
         alias: form.alias,
+        brand: form.brand,
         reference_no: form.reference_no,
         category_id: form.category_id,
         subcategory_id: form.subcategory_id || null,
@@ -269,7 +270,7 @@ export default function Materials() {
     setViewOnly(view);
     setErrors({});
     setForm({
-      code: m.code, name: m.name, alias: m.alias || '', reference_no: m.reference_no || '', category_id: m.category_id, subcategory_id: m.subcategory_id || '', uom_id: m.uom_id,
+      code: m.code, name: m.name, alias: m.alias || '', brand: m.brand || '', reference_no: m.reference_no || '', category_id: m.category_id, subcategory_id: m.subcategory_id || '', uom_id: m.uom_id,
       reorder_level: m.reorder_level === 0 ? '' : m.reorder_level,
       maximum_level: m.maximum_level === 0 ? '' : m.maximum_level,
       standard_cost: m.standard_cost === 0 ? '' : m.standard_cost,
@@ -291,7 +292,7 @@ export default function Materials() {
     setViewOnly(false);
     setErrors({});
     setForm({
-      code: '', name: '', alias: '', reference_no: '', category_id: '', subcategory_id: '', uom_id: '',
+      code: '', name: '', alias: '', brand: '', reference_no: '', category_id: '', subcategory_id: '', uom_id: '',
       reorder_level: '', maximum_level: '', standard_cost: '', gst_rate: '',
       storage_type: '', material_type: '', is_biomedical: false, requires_installation: false, hsn_code: '', warehouse_id: '', description: '', is_active: true
     });
@@ -554,7 +555,11 @@ export default function Materials() {
               <Card key={m.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => openEdit(m, true)}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1, alignItems: 'flex-start' }}>
                   <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{m.name}</Typography>
+                    <Tooltip title={m.name.length > 50 ? m.name : ''} placement="top-start">
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>
+                        {m.name.length > 50 ? m.name.substring(0, 50) + '...' : m.name}
+                      </Typography>
+                    </Tooltip>
                     <Typography variant="caption" sx={{ fontWeight: 600, color: '#2563EB' }}>{m.code}</Typography>
                   </Box>
                   <Chip
@@ -705,7 +710,11 @@ export default function Materials() {
                     sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
                   >
                     <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', px: 1 }}>{m.code}</TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem', fontWeight: 500, px: 1 }}>{m.name}</TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem', fontWeight: 500, px: 1 }}>
+                      <Tooltip title={m.name.length > 50 ? m.name : ''} placement="top-start">
+                        <span>{m.name.length > 50 ? m.name.substring(0, 50) + '...' : m.name}</span>
+                      </Tooltip>
+                    </TableCell>
                     <TableCell sx={{ py: 1, px: 1 }}>
                       <Chip label={m.category_name} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />
                     </TableCell>
@@ -830,12 +839,22 @@ export default function Materials() {
             
             <TextField
               fullWidth
+              label="Material Brand"
+              value={form.brand}
+              onChange={e => setForm({ ...form, brand: e.target.value })}
+              disabled={viewOnly}
+              placeholder="Enter brand name"
+              inputProps={{ maxLength: 100 }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Description sx={{ color: '#94A3B8' }} /></InputAdornment> }}
+            />
+            
+            <TextField
+              fullWidth
               label="Material Alias (comma separated)"
               value={form.alias}
               onChange={e => setForm({ ...form, alias: e.target.value })}
               disabled={viewOnly}
               placeholder="Enter alias names"
-              sx={{ gridColumn: { sm: 'span 2' } }}
               InputProps={{ startAdornment: <InputAdornment position="start"><Description sx={{ color: '#94A3B8' }} /></InputAdornment> }}
             />
             <FormControl fullWidth required error={!!errors.material_type}>

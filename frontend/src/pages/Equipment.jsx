@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import {
   Search, Build, QrCode, UploadFile, CheckCircle, Warning, OpenInNew,
-  LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh, Assignment, DeleteOutline, Print, Science, CompareArrows, Add, History
+  LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh, Assignment, DeleteOutline, Print, Science, CompareArrows, Add, History, PhotoCamera
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -39,6 +39,7 @@ export default function Equipment() {
   const [search, setSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedInstitution, setSelectedInstitution] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   // Pagination states
   const [page, setPage] = useState(0);
@@ -61,6 +62,12 @@ export default function Equipment() {
   const [writeOffDate, setWriteOffDate] = useState('');
   const [writeOffReason, setWriteOffReason] = useState('');
   const [writeOffSubmitting, setWriteOffSubmitting] = useState(false);
+
+  // RBER Dialog
+  const [rberDialog, setRberDialog] = useState(null);
+  const [rberDate, setRberDate] = useState('');
+  const [rberReason, setRberReason] = useState('');
+  const [rberSubmitting, setRberSubmitting] = useState(false);
 
   // Relocate Dialog
   const [relocateDialog, setRelocateDialog] = useState(null);
@@ -171,6 +178,11 @@ export default function Equipment() {
         return false;
       }
 
+      // Category filter
+      if (selectedCategory && item.equipment_category !== selectedCategory) {
+        return false;
+      }
+
       // Search
       if (search.trim()) {
         const q = search.toLowerCase();
@@ -212,7 +224,7 @@ export default function Equipment() {
     }
 
     return filtered;
-  }, [equipmentList, activeTab, selectedStatus, selectedInstitution, search, sortConfig]);
+  }, [equipmentList, activeTab, selectedStatus, selectedInstitution, selectedCategory, search, sortConfig]);
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -235,7 +247,7 @@ export default function Equipment() {
   // Reset page to 0 when filters change
   useEffect(() => {
     setPage(0);
-  }, [activeTab, selectedStatus, selectedInstitution, search]);
+  }, [activeTab, selectedStatus, selectedInstitution, selectedCategory, search]);
 
   const paginatedEquipment = useMemo(() => {
     return filteredEquipment.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -513,6 +525,26 @@ export default function Equipment() {
     setWriteOffSubmitting(false);
   };
 
+  const handleRBERSubmit = async () => {
+    if (!rberDate || !rberReason) {
+      showMessage('Date and reason are required', 'Warning', 'warning');
+      return;
+    }
+    setRberSubmitting(true);
+    try {
+      await api.post(`/api/equipment/${rberDialog.id}/rber`, {
+        rber_date: rberDate,
+        reason: rberReason
+      });
+      showMessage('Equipment marked as RBER successfully', 'Success', 'success');
+      setRberDialog(null);
+      loadData();
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to mark as RBER', 'Error', 'error');
+    }
+    setRberSubmitting(false);
+  };
+
   const handleInstallSubmit = async () => {
     if (!installForm.installed_by || !installForm.contact_number || !installForm.location_id || !installForm.installation_date || (!installForm.serial_number && !installDialog.serial_number)) {
       showMessage('Please fill all required fields including Serial Number.', 'Validation Error', 'warning');
@@ -663,10 +695,12 @@ export default function Equipment() {
       serial_number: '',
       make: '',
       model: '',
-      machine_cost: '',
-      machine_type: '',
+      equipment_cost: '',
+      equipment_category: '',
       warranty_available: false,
       warranty_expiry_date: '',
+      amc_cmc_required: false,
+      amc_cmc_start_date: '',
       amc_cmc_status: 'None',
       amc_cmc_end_date: '',
       pm_required: false,
@@ -807,6 +841,8 @@ export default function Equipment() {
               <MenuItem value="Operational">Operational</MenuItem>
               <MenuItem value="Pending Installation">Pending Installation</MenuItem>
               <MenuItem value="Under Repair">Under Repair</MenuItem>
+              <MenuItem value="Under maintenance">Under maintenance</MenuItem>
+              <MenuItem value="Spare Requested">Spare Requested</MenuItem>
               <MenuItem value="Written Off">Written Off</MenuItem>
             </Select>
           </FormControl>
@@ -816,6 +852,15 @@ export default function Equipment() {
               <MenuItem value="">All Institutions</MenuItem>
               {institutions.map(inst => (
                 <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 180 }}>
+            <Select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)} displayEmpty>
+              <MenuItem value="">All Categories</MenuItem>
+              {[...new Set(equipmentList.map(e => e.equipment_category).filter(Boolean))].sort().map(cat => (
+                <MenuItem key={cat} value={cat}>{cat}</MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -887,8 +932,8 @@ export default function Equipment() {
                   <Chip
                     label={item.status}
                     size="small"
-                    color={item.status === 'Operational' ? 'success' : item.status === 'Pending Installation' ? 'info' : 'default'}
-                    sx={{ height: 20, fontSize: '0.65rem' }}
+                    color={item.status === 'Operational' ? 'success' : item.status === 'Under Repair' ? 'error' : item.status === 'Under maintenance' ? 'warning' : item.status === 'Spare Requested' ? 'secondary' : item.status === 'Pending Installation' ? 'info' : 'default'}
+                    sx={{ height: 'auto', minHeight: 20, fontSize: '0.65rem', py: 0.5, '& .MuiChip-label': { display: 'block', whiteSpace: 'normal' } }}
                   />
                 </Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>{item.material_name}</Typography>
@@ -931,7 +976,7 @@ export default function Equipment() {
                       Update Serial
                     </Button>
                   )}
-                  <Button size="small" variant="outlined" color="primary" startIcon={<Edit color="primary" />} onClick={(e) => { 
+                  <Button size="small" variant="outlined" color="primary" disabled={item.status === 'RBER'} startIcon={<Edit color="primary" />} onClick={(e) => { 
                     e.stopPropagation(); 
                     const itemToEdit = { ...item };
                     if (!itemToEdit.linked_reagents || itemToEdit.linked_reagents.length === 0) {
@@ -960,6 +1005,16 @@ export default function Equipment() {
                   {item.installation_status === 'Installed' && (
                     <Button size="small" variant="outlined" color="primary" startIcon={<UploadFile />} onClick={(e) => { e.stopPropagation(); setUploadDocsFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setUploadDocsDialog(item); }}>
                       Upload Docs
+                    </Button>
+                  )}
+                  {item.equipment_photo_url && (
+                    <Button size="small" variant="outlined" color="primary" startIcon={<PhotoCamera />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.equipment_photo_url), '_blank'); }}>
+                      Eq. Photo
+                    </Button>
+                  )}
+                  {item.serial_number_photo_url && (
+                    <Button size="small" variant="outlined" color="secondary" startIcon={<PhotoCamera />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.serial_number_photo_url), '_blank'); }}>
+                      SN Photo
                     </Button>
                   )}
                   {item.installation_report_url && (
@@ -1108,24 +1163,26 @@ export default function Equipment() {
                       <Chip
                         label={item.status}
                         size="small"
-                        color={item.status === 'Operational' ? 'success' : (item.status === 'Pending Installation' || item.installation_status === 'Installation Requested') ? 'info' : 'default'}
-                        sx={{ fontSize: '0.75rem' }}
+                        color={item.status === 'Operational' ? 'success' : item.status === 'Under Repair' ? 'error' : item.status === 'Under maintenance' ? 'warning' : item.status === 'Spare Requested' ? 'secondary' : (item.status === 'Pending Installation' || item.installation_status === 'Installation Requested') ? 'info' : 'default'}
+                        sx={{ fontSize: '0.75rem', height: 'auto', py: 0.5, '& .MuiChip-label': { display: 'block', whiteSpace: 'normal', textAlign: 'center' } }}
                       />
                     </TableCell>
                     <TableCell align="right">
                       <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end', alignItems: 'center' }}>
-                        <Tooltip title="Edit Equipment">
-                          <IconButton size="small" color="primary" onClick={(e) => { 
-                            e.stopPropagation(); 
-                            const itemToEdit = { ...item };
-                            if (!itemToEdit.linked_reagents || itemToEdit.linked_reagents.length === 0) {
-                              itemToEdit.linked_reagents = [{ material_id: '' }];
-                            }
-                            setEditForm(itemToEdit); 
-                            setEditDialog(item); 
-                          }}>
-                            <Edit color="primary" fontSize="small" />
-                          </IconButton>
+                        <Tooltip title={item.status === 'RBER' ? "Cannot edit RBER equipment" : "Edit Equipment"}>
+                          <span>
+                            <IconButton size="small" color="primary" disabled={item.status === 'RBER'} onClick={(e) => { 
+                              e.stopPropagation(); 
+                              const itemToEdit = { ...item };
+                              if (!itemToEdit.linked_reagents || itemToEdit.linked_reagents.length === 0) {
+                                itemToEdit.linked_reagents = [{ material_id: '' }];
+                              }
+                              setEditForm(itemToEdit); 
+                              setEditDialog(item); 
+                            }}>
+                              <Edit color={item.status === 'RBER' ? 'disabled' : 'primary'} fontSize="small" />
+                            </IconButton>
+                          </span>
                         </Tooltip>
                         {(item.installation_status === 'Pending Installation' || item.installation_status === 'Installation Requested') && (
                           <Tooltip title="Complete Installation">
@@ -1155,6 +1212,20 @@ export default function Equipment() {
                             </IconButton>
                           </Tooltip>
                         )}
+                        {item.equipment_photo_url && (
+                          <Tooltip title="View Equipment Photo">
+                            <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.equipment_photo_url), '_blank'); }}>
+                              <PhotoCamera fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {item.serial_number_photo_url && (
+                          <Tooltip title="View Serial Number Photo">
+                            <IconButton size="small" color="secondary" onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.serial_number_photo_url), '_blank'); }}>
+                              <PhotoCamera fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
                         {item.installation_report_url && (
                           <Tooltip title="View Installation Report">
                             <IconButton size="small" color="success" onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.installation_report_url), '_blank'); }}>
@@ -1162,13 +1233,13 @@ export default function Equipment() {
                             </IconButton>
                           </Tooltip>
                         )}
-                        {item.status === 'Operational' && (
-                          <Tooltip title="Print QR Code">
-                            <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); handleOpenQr(item); }}>
+                        <Tooltip title="Print QR Code">
+                          <span>
+                            <IconButton size="small" color="primary" disabled={item.status !== 'Operational'} onClick={(e) => { e.stopPropagation(); handleOpenQr(item); }}>
                               <QrCode fontSize="small" />
                             </IconButton>
-                          </Tooltip>
-                        )}
+                          </span>
+                        </Tooltip>
                         {item.status === 'Operational' && (item.cost_per_test > 0 || item.rental_type === 'Cost per test') && (
                           <Tooltip title="Log Usage">
                             <IconButton size="small" color="secondary" onClick={(e) => { e.stopPropagation(); setConsumptionDialog(item); setConsumptionDate(new Date().toISOString().split('T')[0]); setTestsPerformed(''); setConsumptionRemarks(''); }}>
@@ -1176,16 +1247,16 @@ export default function Equipment() {
                             </IconButton>
                           </Tooltip>
                         )}
-                        {item.status === 'Operational' && (
-                          <Tooltip title="Relocate Equipment">
-                            <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setRelocateDialog(item); setRelocateDate(new Date().toISOString().split('T')[0]); setRelocateLocation(item.location_id || ''); setRelocateRemarks(''); }}>
+                        <Tooltip title="Relocate Equipment">
+                          <span>
+                            <IconButton size="small" color="primary" disabled={item.status !== 'Operational'} onClick={(e) => { e.stopPropagation(); setRelocateDialog(item); setRelocateDate(new Date().toISOString().split('T')[0]); setRelocateLocation(item.location_id || ''); setRelocateRemarks(''); }}>
                               <CompareArrows fontSize="small" />
                             </IconButton>
-                          </Tooltip>
-                        )}
-                        {item.status !== 'Written Off' && (
-                          <Tooltip title="Write-off Equipment">
-                            <IconButton size="small" color="error" onClick={(e) => {
+                          </span>
+                        </Tooltip>
+                        <Tooltip title="Write-off Equipment">
+                          <span>
+                            <IconButton size="small" color="error" disabled={item.status === 'Written Off'} onClick={(e) => {
                               e.stopPropagation();
                               navigate('/write-offs', {
                                 state: {
@@ -1201,8 +1272,20 @@ export default function Equipment() {
                             }}>
                               <DeleteOutline fontSize="small" />
                             </IconButton>
-                          </Tooltip>
-                        )}
+                          </span>
+                        </Tooltip>
+                        <Tooltip title="Mark as RBER">
+                          <span>
+                            <IconButton size="small" color="warning" disabled={item.status === 'Written Off' || item.status === 'RBER'} onClick={(e) => {
+                              e.stopPropagation();
+                              setRberDialog(item);
+                              setRberDate(new Date().toISOString().split('T')[0]);
+                              setRberReason('');
+                            }}>
+                              <Warning fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -1468,6 +1551,41 @@ export default function Equipment() {
         </DialogActions>
       </Dialog>
 
+      {/* RBER Dialog */}
+      <Dialog open={!!rberDialog} onClose={() => setRberDialog(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, color: '#ED6C02' }}>Mark as RBER</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Alert severity="warning">
+              This action will mark the equipment <strong>{rberDialog?.equipment_code}</strong> as Ruined Beyond Economical Repair (RBER).
+            </Alert>
+            <DatePicker
+              label="RBER Date"
+              format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+              value={rberDate ? dayjs(rberDate) : null}
+              onChange={(newValue) => setRberDate(newValue ? newValue.format('YYYY-MM-DD') : '')}
+              slotProps={{ textField: { size: 'small', fullWidth: true } }}
+            />
+            <TextField
+              size="small"
+              label="Reason for RBER"
+              multiline rows={3}
+              value={rberReason}
+              onChange={e => setRberReason(e.target.value)}
+              fullWidth
+              required
+              placeholder="Provide detailed reason (e.g. beyond economical repair)"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setRberDialog(null)} color="inherit">Cancel</Button>
+          <Button onClick={handleRBERSubmit} variant="contained" color="warning" disabled={rberSubmitting}>
+            {rberSubmitting ? 'Processing...' : 'Confirm RBER'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Reagent Consumption Dialog */}
       <Dialog open={!!consumptionDialog} onClose={() => setConsumptionDialog(null)} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, color: '#2563EB' }}>Log Usage</DialogTitle>
@@ -1537,8 +1655,8 @@ export default function Equipment() {
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>Status</TableCell><TableCell>{viewDialog.status}</TableCell></TableRow>
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>Location</TableCell><TableCell>{viewDialog.location_name || '-'}</TableCell></TableRow>
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>Make / Model</TableCell><TableCell>{viewDialog.make || '-'} / {viewDialog.model || '-'}</TableCell></TableRow>
-                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Machine Type</TableCell><TableCell>{viewDialog.machine_type || '-'}</TableCell></TableRow>
-                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Machine Cost</TableCell><TableCell>{viewDialog.machine_cost ? `₹${viewDialog.machine_cost}` : '-'}</TableCell></TableRow>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Equipment Category</TableCell><TableCell>{viewDialog.equipment_category || '-'}</TableCell></TableRow>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Equipment Cost</TableCell><TableCell>{viewDialog.equipment_cost ? `₹${viewDialog.equipment_cost}` : '-'}</TableCell></TableRow>
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>Year of Purchase</TableCell><TableCell>{viewDialog.year_of_purchase || '-'}</TableCell></TableRow>
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>PO Number</TableCell><TableCell>{viewDialog.po_number || '-'}</TableCell></TableRow>
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>GRN Number</TableCell><TableCell>{viewDialog.grn_number || '-'}</TableCell></TableRow>
@@ -1555,9 +1673,11 @@ export default function Equipment() {
                     {viewDialog.warranty_available && (
                       <TableRow><TableCell sx={{ fontWeight: 600 }}>Warranty Expiry</TableCell><TableCell>{viewDialog.warranty_expiry_date ? formatDate(viewDialog.warranty_expiry_date) : '-'}</TableCell></TableRow>
                     )}
-                    <TableRow><TableCell sx={{ fontWeight: 600 }}>AMC/CMC Status</TableCell><TableCell>{viewDialog.amc_cmc_status || 'None'}</TableCell></TableRow>
-                    {viewDialog.amc_cmc_status && viewDialog.amc_cmc_status !== 'None' && (
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>AMC/CMC Required</TableCell><TableCell>{viewDialog.amc_cmc_required ? 'Yes' : 'No'}</TableCell></TableRow>
+                    {viewDialog.amc_cmc_required && (
                       <>
+                        <TableRow><TableCell sx={{ fontWeight: 600 }}>AMC/CMC Status</TableCell><TableCell>{viewDialog.amc_cmc_status || 'None'}</TableCell></TableRow>
+                        <TableRow><TableCell sx={{ fontWeight: 600 }}>AMC/CMC Start Date</TableCell><TableCell>{viewDialog.amc_cmc_start_date ? formatDate(viewDialog.amc_cmc_start_date) : '-'}</TableCell></TableRow>
                         <TableRow><TableCell sx={{ fontWeight: 600 }}>AMC/CMC End Date</TableCell><TableCell>{viewDialog.amc_cmc_end_date ? formatDate(viewDialog.amc_cmc_end_date) : '-'}</TableCell></TableRow>
                         <TableRow><TableCell sx={{ fontWeight: 600 }}>AMC PO Number</TableCell><TableCell>{viewDialog.amc_po_number || '-'}</TableCell></TableRow>
                         <TableRow><TableCell sx={{ fontWeight: 600 }}>AMC Cost</TableCell><TableCell>{viewDialog.amc_cost ? `₹${viewDialog.amc_cost}` : '-'}</TableCell></TableRow>
@@ -1765,10 +1885,10 @@ export default function Equipment() {
                 <TextField fullWidth size="small" label="Model" value={addForm.model || ''} onChange={e => setAddForm({ ...addForm, model: e.target.value })} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth size="small" label="Machine Type" value={addForm.machine_type || ''} onChange={e => setAddForm({ ...addForm, machine_type: e.target.value })} />
+                <TextField fullWidth size="small" label="Equipment Category" value={addForm.equipment_category || ''} onChange={e => setAddForm({ ...addForm, equipment_category: e.target.value })} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth size="small" label="Machine Cost" type="number" inputProps={{ min: "0", step: "0.01" }} value={addForm.machine_cost || ''} onChange={e => setAddForm({ ...addForm, machine_cost: e.target.value === '' ? '' : parseFloat(e.target.value) })} />
+                <TextField fullWidth size="small" label="Equipment Cost" type="number" inputProps={{ min: "0", step: "0.01" }} value={addForm.equipment_cost || ''} onChange={e => setAddForm({ ...addForm, equipment_cost: e.target.value === '' ? '' : parseFloat(e.target.value) })} />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="Year of Purchase" type="number" placeholder="e.g. 2026" inputProps={{ min: "1900", max: new Date().getFullYear(), step: "1" }} value={addForm.year_of_purchase || ''} onChange={e => { if (e.target.value.length <= 4) setAddForm({ ...addForm, year_of_purchase: e.target.value === '' ? '' : parseInt(e.target.value) }); }} error={addForm.year_of_purchase > new Date().getFullYear()} helperText={addForm.year_of_purchase > new Date().getFullYear() ? "Cannot be a future year" : ""} />
@@ -1857,9 +1977,15 @@ export default function Equipment() {
               </Grid>
 
               <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={<Switch size="small" checked={!!addForm.amc_cmc_required} onChange={e => setAddForm({ ...addForm, amc_cmc_required: e.target.checked })} />}
+                  label="AMC/CMC Required"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small">
                   <InputLabel>AMC/CMC Status</InputLabel>
-                  <Select value={addForm.amc_cmc_status || 'None'} label="AMC/CMC Status" onChange={e => setAddForm({ ...addForm, amc_cmc_status: e.target.value })}>
+                  <Select value={addForm.amc_cmc_status || 'None'} label="AMC/CMC Status" onChange={e => setAddForm({ ...addForm, amc_cmc_status: e.target.value })} disabled={!addForm.amc_cmc_required}>
                     <MenuItem value="None">None</MenuItem>
                     <MenuItem value="AMC">AMC</MenuItem>
                     <MenuItem value="CMC">CMC</MenuItem>
@@ -1867,7 +1993,16 @@ export default function Equipment() {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <DatePicker label="AMC/CMC End Date" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} value={addForm.amc_cmc_end_date ? dayjs(addForm.amc_cmc_end_date) : null} onChange={(newValue) => setAddForm({ ...addForm, amc_cmc_end_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={addForm.amc_cmc_status === 'None'} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+                <DatePicker label="AMC/CMC Start Date" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} value={addForm.amc_cmc_start_date ? dayjs(addForm.amc_cmc_start_date) : null} onChange={(newValue) => setAddForm({ ...addForm, amc_cmc_start_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={!addForm.amc_cmc_required} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <DatePicker label="AMC/CMC End Date" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} value={addForm.amc_cmc_end_date ? dayjs(addForm.amc_cmc_end_date) : null} onChange={(newValue) => setAddForm({ ...addForm, amc_cmc_end_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={!addForm.amc_cmc_required} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="AMC PO Number" value={addForm.amc_po_number || ''} onChange={e => setAddForm({ ...addForm, amc_po_number: e.target.value })} disabled={!addForm.amc_cmc_required} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="AMC Cost" type="number" inputProps={{ min: "0", step: "0.01" }} value={addForm.amc_cost || ''} onChange={e => setAddForm({ ...addForm, amc_cost: e.target.value === '' ? null : parseFloat(e.target.value) })} disabled={!addForm.amc_cmc_required} />
               </Grid>
 
               <Grid item xs={12} sm={6}>
@@ -2009,10 +2144,10 @@ export default function Equipment() {
                 <TextField fullWidth size="small" label="Model" value={editForm.model || ''} onChange={e => setEditForm({ ...editForm, model: e.target.value })} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth size="small" label="Machine Type" value={editForm.machine_type || ''} onChange={e => setEditForm({ ...editForm, machine_type: e.target.value })} />
+                <TextField fullWidth size="small" label="Equipment Category" value={editForm.equipment_category || ''} onChange={e => setEditForm({ ...editForm, equipment_category: e.target.value })} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth size="small" label="Machine Cost" type="number" inputProps={{ min: "0", step: "0.01" }} value={editForm.machine_cost || ''} onChange={e => setEditForm({ ...editForm, machine_cost: e.target.value === '' ? null : parseFloat(e.target.value) })} />
+                <TextField fullWidth size="small" label="Equipment Cost" type="number" inputProps={{ min: "0", step: "0.01" }} value={editForm.equipment_cost || ''} onChange={e => setEditForm({ ...editForm, equipment_cost: e.target.value === '' ? null : parseFloat(e.target.value) })} />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="Year of Purchase" type="number" placeholder="e.g. 2026" inputProps={{ min: "1900", max: new Date().getFullYear(), step: "1" }} value={editForm.year_of_purchase || ''} onChange={e => { if (e.target.value.length <= 4) setEditForm({ ...editForm, year_of_purchase: e.target.value === '' ? null : parseInt(e.target.value) }); }} error={editForm.year_of_purchase > new Date().getFullYear()} helperText={editForm.year_of_purchase > new Date().getFullYear() ? "Cannot be a future year" : ""} />
@@ -2096,9 +2231,15 @@ export default function Equipment() {
               </Grid>
 
               <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={<Switch size="small" checked={!!editForm.amc_cmc_required} onChange={e => setEditForm({ ...editForm, amc_cmc_required: e.target.checked })} />}
+                  label="AMC/CMC Required"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small">
                   <InputLabel>AMC/CMC Status</InputLabel>
-                  <Select value={editForm.amc_cmc_status || 'None'} label="AMC/CMC Status" onChange={e => setEditForm({ ...editForm, amc_cmc_status: e.target.value })}>
+                  <Select value={editForm.amc_cmc_status || 'None'} label="AMC/CMC Status" onChange={e => setEditForm({ ...editForm, amc_cmc_status: e.target.value })} disabled={!editForm.amc_cmc_required}>
                     <MenuItem value="None">None</MenuItem>
                     <MenuItem value="Under AMC">Under AMC</MenuItem>
                     <MenuItem value="Under CMC">Under CMC</MenuItem>
@@ -2106,13 +2247,16 @@ export default function Equipment() {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <DatePicker label="AMC/CMC End Date" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} value={editForm.amc_cmc_end_date ? dayjs(editForm.amc_cmc_end_date) : null} onChange={(newValue) => setEditForm({ ...editForm, amc_cmc_end_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={!editForm.amc_cmc_status || editForm.amc_cmc_status === 'None'} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+                <DatePicker label="AMC/CMC Start Date" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} value={editForm.amc_cmc_start_date ? dayjs(editForm.amc_cmc_start_date) : null} onChange={(newValue) => setEditForm({ ...editForm, amc_cmc_start_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={!editForm.amc_cmc_required} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth size="small" label="AMC PO Number" value={editForm.amc_po_number || ''} onChange={e => setEditForm({ ...editForm, amc_po_number: e.target.value })} disabled={!editForm.amc_cmc_status || editForm.amc_cmc_status === 'None'} />
+                <DatePicker label="AMC/CMC End Date" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} value={editForm.amc_cmc_end_date ? dayjs(editForm.amc_cmc_end_date) : null} onChange={(newValue) => setEditForm({ ...editForm, amc_cmc_end_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={!editForm.amc_cmc_required} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth size="small" label="AMC Cost" type="number" inputProps={{ min: "0", step: "0.01" }} value={editForm.amc_cost || ''} onChange={e => setEditForm({ ...editForm, amc_cost: e.target.value === '' ? null : parseFloat(e.target.value) })} disabled={!editForm.amc_cmc_status || editForm.amc_cmc_status === 'None'} />
+                <TextField fullWidth size="small" label="AMC PO Number" value={editForm.amc_po_number || ''} onChange={e => setEditForm({ ...editForm, amc_po_number: e.target.value })} disabled={!editForm.amc_cmc_required} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="AMC Cost" type="number" inputProps={{ min: "0", step: "0.01" }} value={editForm.amc_cost || ''} onChange={e => setEditForm({ ...editForm, amc_cost: e.target.value === '' ? null : parseFloat(e.target.value) })} disabled={!editForm.amc_cmc_required} />
               </Grid>
 
               <Grid item xs={12} sm={6}>

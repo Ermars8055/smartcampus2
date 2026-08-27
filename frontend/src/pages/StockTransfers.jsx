@@ -332,23 +332,29 @@ export default function StockTransfers() {
                       <Chip label={trf.status} size="small" color={trf.status === 'Completed' ? 'success' : (trf.status === 'Partially Received' ? 'warning' : (trf.status === 'Initiated' ? 'primary' : 'default'))} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                     </TableCell>
                     <TableCell align="right" sx={{ px: 2, whiteSpace: 'nowrap' }}>
-                      <IconButton
-                        size="small"
-                        disabled={trf.status === 'Completed'}
-                        onClick={(e) => { e.stopPropagation(); openViewTransferModal(trf); }}
-                        sx={{ color: trf.status === 'Completed' ? 'action.disabled' : '#10B981', mr: 1 }}
-                      >
-                        <CheckCircle fontSize="small" />
-                      </IconButton>
-                      <Tooltip title="Complete Transfer">
-                        <IconButton
-                          size="small"
-                          disabled={trf.status === 'Completed'}
-                          onClick={(e) => { e.stopPropagation(); openViewTransferModal(trf); }}
-                          sx={{ color: trf.status === 'Completed' ? 'action.disabled' : '#EF4444' }}
-                        >
-                          <Lock fontSize="small" />
-                        </IconButton>
+                      <Tooltip title="Receive Transfer" arrow placement="top">
+                        <span>
+                          <IconButton
+                            size="small"
+                            disabled={trf.status === 'Completed'}
+                            onClick={(e) => { e.stopPropagation(); openViewTransferModal(trf); }}
+                            sx={{ color: trf.status === 'Completed' ? 'action.disabled' : '#10B981', mr: 1 }}
+                          >
+                            <CheckCircle fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                      <Tooltip title="Complete Transfer" arrow placement="top">
+                        <span>
+                          <IconButton
+                            size="small"
+                            disabled={trf.status === 'Completed'}
+                            onClick={(e) => { e.stopPropagation(); openViewTransferModal(trf); }}
+                            sx={{ color: trf.status === 'Completed' ? 'action.disabled' : '#EF4444' }}
+                          >
+                            <Lock fontSize="small" />
+                          </IconButton>
+                        </span>
                       </Tooltip>
                     </TableCell>
                   </TableRow>

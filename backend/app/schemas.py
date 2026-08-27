@@ -140,7 +140,11 @@ class TenantConfigurationBase(BaseModel):
     cgst_share_percent: float
     sgst_share_percent: float
     po_short_close_notify_roles: Optional[List[str]] = []
-    wo_short_close_notify_roles: Optional[List[str]] = []
+    pm_advance_email_enabled: Optional[bool] = False
+    pm_advance_email_types: Optional[List[str]] = []
+    pm_advance_email_days: Optional[int] = None
+    pm_advance_email_roles: Optional[List[str]] = []
+    pm_advance_email_users: Optional[List[int]] = []
 
 class TenantConfigurationCreate(TenantConfigurationBase):
     pass
@@ -223,6 +227,7 @@ class MaterialBase(BaseModel):
     category_id: int
     subcategory_id: Optional[int] = None
     uom_id: int
+    brand: Optional[str] = Field(None, max_length=100)
     material_type: str = "Consumable"
     is_biomedical: bool = False
     requires_installation: bool = False
@@ -255,6 +260,7 @@ class MaterialUpdate(BaseModel):
     category_id: Optional[int] = None
     subcategory_id: Optional[int] = None
     uom_id: Optional[int] = None
+    brand: Optional[str] = Field(None, max_length=100)
     material_type: Optional[str] = None
     is_biomedical: Optional[bool] = None
     requires_installation: Optional[bool] = None
@@ -1285,6 +1291,7 @@ class IssueItemOut(IssueItemBase):
     id: int
     material_name: Optional[str] = None
     material_code: Optional[str] = None
+    material_hsn_code: Optional[str] = None
     uom_name: Optional[str] = None
     warehouse_id: Optional[int] = None
     warehouse_name: Optional[str] = None
@@ -2165,6 +2172,12 @@ class ComplaintUpdate(BaseModel):
     individual_detailed: Optional[str] = None
     name_and_trade: Optional[str] = None
     image_urls: List[str] = []
+    resolution_entered: Optional[str] = None
+    closure_reason: Optional[str] = None
+    status_on_work_completion: Optional[str] = None
+    job_completed_satisfactorily: Optional[bool] = None
+    completion_date: Optional[date] = None
+    completion_time: Optional[str] = None
 
 # New workflow-specific schemas
 class ComplaintAssign(BaseModel):
@@ -2191,6 +2204,12 @@ class ComplaintCloseRequest(BaseModel):
     equipment_photo_url: Optional[str] = None
     serial_number_photo_url: Optional[str] = None
     installation_report_url: Optional[str] = None
+    serial_number: Optional[str] = None
+    status_on_work_completion: Optional[str] = None
+    job_completed_satisfactorily: Optional[bool] = None
+    completion_date: Optional[date] = None
+    completion_time: Optional[str] = None
+    pm_checklist_data: Optional[Dict[str, Any]] = None
 
 class ComplaintApproveRequest(BaseModel):
     approval_type: str # 'admin' or 'manager'
@@ -2206,6 +2225,7 @@ class ComplaintOut(ComplaintBase):
     material_required: bool = False
     verified_at: Optional[datetime] = None
     rejection_remarks: Optional[str] = Field(None, max_length=255)
+    pm_checklist_data: Optional[Dict[str, Any]] = None
     feedback: Optional[str] = None
     building_name: Optional[str] = None
     room_name: Optional[str] = None
@@ -2226,6 +2246,13 @@ class ComplaintOut(ComplaintBase):
     manager_approved_by_name: Optional[str] = None
     equipment_code: Optional[str] = None
     equipment_warranty_status: Optional[str] = None
+    equipment_name: Optional[str] = None
+    equipment_make: Optional[str] = None
+    equipment_model: Optional[str] = None
+    equipment_serial_number: Optional[str] = None
+    equipment_photo_url: Optional[str] = None
+    serial_number_photo_url: Optional[str] = None
+    installation_report_url: Optional[str] = None
     images: List[ComplaintImageOut] = []
     documents: List[ComplaintDocumentOut] = []
     class Config:
@@ -2242,10 +2269,12 @@ class EquipmentUpdate(BaseModel):
     location_id: Optional[int] = None
     make: Optional[str] = None
     model: Optional[str] = None
-    machine_cost: Optional[float] = None
-    machine_type: Optional[str] = None
+    equipment_cost: Optional[float] = None
+    equipment_category: Optional[str] = None
     warranty_available: Optional[bool] = None
     warranty_expiry_date: Optional[date] = None
+    amc_cmc_required: Optional[bool] = None
+    amc_cmc_start_date: Optional[date] = None
     amc_cmc_status: Optional[str] = None
     amc_cmc_end_date: Optional[date] = None
     amc_po_number: Optional[str] = None
@@ -2283,10 +2312,12 @@ class EquipmentItemCreate(BaseModel):
     serial_number: Optional[str] = None
     make: Optional[str] = None
     model: Optional[str] = None
-    machine_cost: Optional[float] = None
-    machine_type: Optional[str] = None
+    equipment_cost: Optional[float] = None
+    equipment_category: Optional[str] = None
     warranty_available: bool = False
     warranty_expiry_date: Optional[date] = None
+    amc_cmc_required: bool = False
+    amc_cmc_start_date: Optional[date] = None
     amc_cmc_status: Optional[str] = None
     amc_cmc_end_date: Optional[date] = None
     amc_cost: Optional[float] = None
@@ -2332,17 +2363,20 @@ class EquipmentItemOut(BaseModel):
     warehouse_id: Optional[int] = None
     project_id: Optional[int] = None
     status: str
+    rber_reason: Optional[str] = None
     po_id: Optional[int] = None
     institution_id: Optional[int] = None
     location_id: Optional[int] = None
     make: Optional[str] = None
     model: Optional[str] = None
-    machine_cost: Optional[float] = None
-    machine_type: Optional[str] = None
+    equipment_cost: Optional[float] = None
+    equipment_category: Optional[str] = None
     serial_number_photo_url: Optional[str] = None
     equipment_photo_url: Optional[str] = None
     warranty_available: bool = False
     warranty_expiry_date: Optional[date] = None
+    amc_cmc_required: bool = False
+    amc_cmc_start_date: Optional[date] = None
     amc_cmc_end_date: Optional[date] = None
     amc_po_number: Optional[str] = None
     amc_cost: Optional[float] = None

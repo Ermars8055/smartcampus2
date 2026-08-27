@@ -17,13 +17,18 @@ class IndentsListScreen extends StatefulWidget {
 class _IndentsListScreenState extends State<IndentsListScreen> {
   String _searchQuery = '';
   String _selectedStatus = 'All';
+  String _selectedInstitution = 'All';
+  String _selectedDepartment = 'All';
+  String _selectedBuilding = 'All';
 
   final List<String> _statusOptions = [
     'All',
+    'Draft',
     'Submitted',
     'Approved',
-    'Rejected',
-    'Partially Issued'
+    'Issued',
+    'Partially Issued',
+    'Rejected'
   ];
 
   Color _getStatusColor(String status) {
@@ -31,9 +36,11 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
       case 'Draft':
         return const Color(0xFF64748B);
       case 'Submitted':
-        return const Color(0xFFD97706);
+        return const Color(0xFF3B82F6); // Blue
       case 'Approved':
-        return const Color(0xFF059669);
+        return const Color(0xFF059669); // Green
+      case 'Issued':
+        return const Color(0xFF8B5CF6); // Purple
       case 'Rejected':
         return const Color(0xFFDC2626);
       case 'Partially Issued':
@@ -52,6 +59,10 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
     final appState = AppState.of(context, listen: true);
     final theme = Theme.of(context);
 
+    final uniqueInstitutions = ['All', ...appState.indents.map((e) => e.institutionName).where((e) => e.isNotEmpty).toSet()];
+    final uniqueDepartments = ['All', ...appState.indents.map((e) => e.department).where((e) => e.isNotEmpty).toSet()];
+    final uniqueBuildings = ['All', ...appState.indents.map((e) => e.buildingName).where((e) => e.isNotEmpty).toSet()];
+
     // Filter logic
     final filteredIndents = appState.indents.where((indent) {
       final matchesSearch = _searchQuery.isEmpty ||
@@ -61,7 +72,10 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
           indent.department.toLowerCase().contains(_searchQuery.toLowerCase());
       final matchesStatus =
           _selectedStatus == 'All' || indent.status == _selectedStatus;
-      return matchesSearch && matchesStatus;
+      final matchesInst = _selectedInstitution == 'All' || indent.institutionName == _selectedInstitution;
+      final matchesDept = _selectedDepartment == 'All' || indent.department == _selectedDepartment;
+      final matchesBldg = _selectedBuilding == 'All' || indent.buildingName == _selectedBuilding;
+      return matchesSearch && matchesStatus && matchesInst && matchesDept && matchesBldg;
     }).toList();
 
     return Scaffold(
@@ -109,6 +123,77 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                 },
               ),
             ),
+            // Dropdown Filters
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        value: uniqueInstitutions.contains(_selectedInstitution) ? _selectedInstitution : 'All',
+                        hint: const Text('Institution'),
+                        items: uniqueInstitutions.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            _selectedInstitution = newValue!;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        value: uniqueDepartments.contains(_selectedDepartment) ? _selectedDepartment : 'All',
+                        hint: const Text('Department'),
+                        items: uniqueDepartments.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            _selectedDepartment = newValue!;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        value: uniqueBuildings.contains(_selectedBuilding) ? _selectedBuilding : 'All',
+                        hint: const Text('Building'),
+                        items: uniqueBuildings.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            _selectedBuilding = newValue!;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
             // Filter Chips
             SizedBox(
               height: 40,
@@ -165,6 +250,7 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                           'dd MMM yyyy, hh:mm a',
                         ).format(indent.date);
                         final statusColor = _getStatusColor(indent.status);
+                        final displayStatus = indent.status == 'Submitted' ? 'Pending L${indent.currentApprovalLevel} Approval' : indent.status;
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           child: InkWell(
@@ -211,7 +297,7 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                                           ),
                                         ),
                                         child: Text(
-                                          indent.status,
+                                          displayStatus,
                                           style: TextStyle(
                                             color: statusColor,
                                             fontSize: 12,

@@ -119,7 +119,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
     try {
       final api = ApiService();
       final roomsRes = await api.getRooms(deptName);
-      final fetchedRooms = roomsRes.data ?? [];
+      var fetchedRooms = roomsRes.data ?? [];
 
       final uniqueBuildings = <String, dynamic>{};
       final uniqueFloors = <String, dynamic>{};
@@ -150,12 +150,35 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
         }
       }
 
-      for (var b in _allBuildings) {
-        if (b['department_name'] == deptName) {
-          uniqueBuildings[b['id'].toString()] = {
-            'id': b['id'],
-            'name': b['name']
-          };
+      if (uniqueBuildings.isEmpty) {
+        // Fallback: If no buildings are mapped to this department, show all buildings for the selected institution
+        for (var b in _allBuildings) {
+          if (b['institution_id'].toString() == _selectedInstitutionId) {
+            uniqueBuildings[b['id'].toString()] = {
+              'id': b['id'],
+              'name': b['name']
+            };
+          }
+        }
+      }
+
+      if (uniqueFloors.isEmpty) {
+        // Fallback: If no floors are mapped to this department, fetch all rooms and extract floors
+        try {
+          final allRoomsRes = await api.getRooms(null);
+          final allRooms = allRoomsRes.data ?? [];
+          fetchedRooms = allRooms; // Update fetchedRooms so Room dropdown works
+          for (var room in allRooms) {
+            if (room['floor_id'] != null) {
+              uniqueFloors[room['floor_id'].toString()] = {
+                'id': room['floor_id'],
+                'name': room['floor_name'],
+                'building_id': room['building_id']
+              };
+            }
+          }
+        } catch (e) {
+          // ignore
         }
       }
 
@@ -202,7 +225,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     try {
-      final XFile? image = await _picker.pickImage(source: source);
+      final XFile? image = await _picker.pickImage(source: source, imageQuality: 50);
       if (image != null) {
         setState(() {
           _attachedImages.add(File(image.path));

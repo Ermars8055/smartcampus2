@@ -84,6 +84,7 @@ export default function ChatBot() {
     >
       <div 
         ref={nodeRef} 
+        className="chatbot-widget-container"
         style={{ 
           position: 'fixed', 
           bottom: 24, 

@@ -52,13 +52,24 @@ def update_tenant_configuration(
         config.sgst_share_percent = config_in.sgst_share_percent
         if hasattr(config_in, 'po_short_close_notify_roles') and config_in.po_short_close_notify_roles is not None:
             config.po_short_close_notify_roles = config_in.po_short_close_notify_roles
+        
+        config.pm_advance_email_enabled = config_in.pm_advance_email_enabled
+        config.pm_advance_email_types = config_in.pm_advance_email_types
+        config.pm_advance_email_days = config_in.pm_advance_email_days
+        config.pm_advance_email_roles = config_in.pm_advance_email_roles
+        config.pm_advance_email_users = config_in.pm_advance_email_users
     else:
         config = TenantConfiguration(
             tenant_id=tenant_id,
             base_state=config_in.base_state,
             cgst_share_percent=config_in.cgst_share_percent,
             sgst_share_percent=config_in.sgst_share_percent,
-            po_short_close_notify_roles=config_in.po_short_close_notify_roles if hasattr(config_in, 'po_short_close_notify_roles') else []
+            po_short_close_notify_roles=config_in.po_short_close_notify_roles if hasattr(config_in, 'po_short_close_notify_roles') else [],
+            pm_advance_email_enabled=config_in.pm_advance_email_enabled,
+            pm_advance_email_types=config_in.pm_advance_email_types,
+            pm_advance_email_days=config_in.pm_advance_email_days,
+            pm_advance_email_roles=config_in.pm_advance_email_roles,
+            pm_advance_email_users=config_in.pm_advance_email_users
         )
         db.add(config)
         

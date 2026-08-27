@@ -17,6 +17,7 @@ class Indent {
     this.buildingName = '',
     this.floor = '',
     this.roomName = '',
+    this.currentApprovalLevel = 1,
   });
 
   factory Indent.fromJson(Map<String, dynamic> json) {
@@ -32,13 +33,14 @@ class Indent {
               .toList() ??
           [],
       date: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+          ? DateTime.parse(json['created_at'] as String).toLocal()
           : DateTime.now(),
       requesterName: json['requester_name'] as String? ?? '',
       institutionName: json['institution_name'] as String? ?? '',
       buildingName: json['building_name'] as String? ?? '',
       floor: json['floor'] as String? ?? '',
       roomName: json['room_name'] as String? ?? '',
+      currentApprovalLevel: json['current_approval_level'] as int? ?? 1,
     );
   }
 
@@ -56,6 +58,7 @@ class Indent {
   final String buildingName;
   final String floor;
   final String roomName;
+  final int currentApprovalLevel;
 
   Map<String, dynamic> toJson() {
     return {

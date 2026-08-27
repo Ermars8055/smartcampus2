@@ -6,7 +6,7 @@ import {
   DialogContent, DialogActions, Grid, Select, FormControl, TextField,
   InputLabel, IconButton, InputAdornment, MenuItem, Paper,
   Autocomplete, ListSubheader, createFilterOptions,
-  RadioGroup, FormControlLabel, Radio, Tabs, Tab
+  RadioGroup, FormControlLabel, Radio, Tabs, Tab, Tooltip
 } from '@mui/material';
 import { Close, TaskAlt, Print, LocalShipping, Add, Comment, Person, Numbers, AccountTree, Delete, Search } from '@mui/icons-material';
 import api from '../services/api';
@@ -461,7 +461,7 @@ export default function GatePasses() {
         <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
           <TextField
             size="small"
-            placeholder="Search GP No. or Vendor..."
+            placeholder="Search GP No. or To Name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
@@ -544,7 +544,7 @@ export default function GatePasses() {
                   </TableCell>
                   <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>
                     <TableSortLabel active={orderBy === 'vendor_name'} direction={orderBy === 'vendor_name' ? order : 'asc'} onClick={() => handleSortRequest('vendor_name')}>
-                      VENDOR
+                      TO NAME
                     </TableSortLabel>
                   </TableCell>
                   <TableCell align="center" sx={{ fontWeight: 700, color: '#64748B' }}>
@@ -589,18 +589,23 @@ export default function GatePasses() {
                       )}
                     </TableCell>
                     <TableCell align="right" onClick={e => e.stopPropagation()}>
-                      <IconButton size="small" color="primary" onClick={() => printGatePass(gp)}>
-                        <Print fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        color={['Issued', 'Pending Repair', 'Yet to Receive'].includes(gp.status) ? "success" : "default"}
-                        onClick={() => completeGatePass(gp.id, gp.gate_pass_type)}
-                        disabled={!['Issued', 'Pending Repair', 'Yet to Receive'].includes(gp.status)}
-                        title="Mark as Received"
-                      >
-                        <TaskAlt fontSize="small" />
-                      </IconButton>
+                      <Tooltip title="Print Gate Pass" arrow placement="top">
+                        <IconButton size="small" color="primary" onClick={() => printGatePass(gp)}>
+                          <Print fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Mark As Received" arrow placement="top">
+                        <span>
+                          <IconButton
+                            size="small"
+                            color={['Issued', 'Pending Repair', 'Yet to Receive'].includes(gp.status) ? "success" : "default"}
+                            onClick={() => completeGatePass(gp.id, gp.gate_pass_type)}
+                            disabled={!['Issued', 'Pending Repair', 'Yet to Receive'].includes(gp.status)}
+                          >
+                            <TaskAlt fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -751,7 +756,7 @@ export default function GatePasses() {
 
             <Grid item xs={12} sm={6}>
               <TextField
-                fullWidth size="small" label="Vendor Name"
+                fullWidth size="small" label="To Name"
                 error={!!errors.vendor}
                 helperText={errors.vendor}
                 value={gpModal.vendor_custom_name}
@@ -763,7 +768,7 @@ export default function GatePasses() {
 
             <Grid item xs={12}>
               <TextField
-                fullWidth size="small" label="Vendor Address"
+                fullWidth size="small" label="To Address"
                 value={gpModal.vendor_custom_address}
                 onChange={e => setGpModal({ ...gpModal, vendor_custom_address: e.target.value })}
                 InputProps={{ readOnly: !!gpModal.vendor_id }}

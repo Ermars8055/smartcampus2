@@ -109,6 +109,9 @@ class ApiService {
   // --- Gate Entry endpoints ---
   Future<Response> uploadInvoice(File file) async {
     String fileName = file.path.split('/').last;
+    if (!fileName.contains('.')) {
+      fileName = '$fileName.jpg';
+    }
     FormData formData = FormData.fromMap({
       "file": await MultipartFile.fromFile(file.path, filename: fileName),
     });
@@ -117,6 +120,9 @@ class ApiService {
 
   Future<Response> uploadComplaintImage(File file) async {
     String fileName = file.path.split('/').last;
+    if (!fileName.contains('.')) {
+      fileName = '$fileName.jpg';
+    }
     FormData formData = FormData.fromMap({
       "file": await MultipartFile.fromFile(file.path, filename: fileName),
     });

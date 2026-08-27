@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:facilityflow/pages/complaints_list_screen.dart';
-import 'package:facilityflow/pages/rwo_list_screen.dart';
 
 class MaintenanceHomeScreen extends StatelessWidget {
   const MaintenanceHomeScreen({super.key});
@@ -42,25 +41,6 @@ class MaintenanceHomeScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => const ComplaintsListScreen(),
-                    ),
-                  );
-                },
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Repair Work Orders Card
-              _buildModuleCard(
-                context,
-                title: 'Repair Work Orders',
-                description: 'Manage equipment repair tasks and status',
-                icon: Icons.build_circle,
-                color: const Color(0xFFD97706),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const RwoListScreen(),
                     ),
                   );
                 },

@@ -113,6 +113,9 @@ def create_equipment(item_in: EquipmentItemCreate, db: Session=Depends(get_db), 
     if existing:
         raise HTTPException(status_code=400, detail='Equipment Code already exists in this tenant.')
     new_item = EquipmentItem(tenant_id=tenant_id, site_id=site_id, **item_in.dict())
+    if new_item.requires_installation:
+        new_item.installation_status = 'Pending Installation'
+        new_item.status = 'Pending Installation'
     db.add(new_item)
     db.commit()
     db.refresh(new_item)
@@ -293,6 +296,19 @@ def update_equipment_item(id: int, payload: EquipmentUpdate, db: Session=Depends
     update_data = payload.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(item, key, value)
+        
+    if 'requires_installation' in update_data:
+        if item.requires_installation:
+            if item.installation_status in ['Not Required', None]:
+                item.installation_status = 'Pending Installation'
+            if item.installation_status != 'Installed':
+                item.status = 'Pending Installation'
+        else:
+            if item.installation_status in ['Pending Installation', 'Installation Requested']:
+                item.installation_status = 'Not Required'
+            if item.status == 'Pending Installation':
+                item.status = 'Operational'
+
     item.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(item)

@@ -288,8 +288,8 @@ export default function CreditNoteForm() {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Original Invoice Reference</InputLabel>
-                  <Select value={form.invoice_id} label="Original Invoice Reference" onChange={e => handleInvoiceChange(e.target.value)}>
+                  <InputLabel shrink>Original Invoice Reference</InputLabel>
+                  <Select displayEmpty value={form.invoice_id} label="Original Invoice Reference" onChange={e => handleInvoiceChange(e.target.value)}>
                     <MenuItem value="">None</MenuItem>
                     {invoices.map(i => <MenuItem key={i.id} value={i.id}>{i.invoice_number}</MenuItem>)}
                   </Select>

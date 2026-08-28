@@ -438,8 +438,8 @@ export default function IssueSummaryReport() {
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <FormControl size="small" fullWidth sx={{ minWidth: 150 }}>
-              <InputLabel>Store</InputLabel>
-              <Select value={filters.warehouseId} label="Store" onChange={e => setFilters({ ...filters, warehouseId: e.target.value })}>
+              <InputLabel shrink>Store</InputLabel>
+              <Select displayEmpty value={filters.warehouseId} label="Store" onChange={e => setFilters({ ...filters, warehouseId: e.target.value })}>
                 <MenuItem value="">All Stores</MenuItem>
                 {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
               </Select>
@@ -447,8 +447,8 @@ export default function IssueSummaryReport() {
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <FormControl size="small" fullWidth sx={{ minWidth: 150 }}>
-              <InputLabel>Material Category</InputLabel>
-              <Select value={filters.categoryId} label="Material Category" onChange={e => setFilters({ ...filters, categoryId: e.target.value })}>
+              <InputLabel shrink>Material Category</InputLabel>
+              <Select displayEmpty value={filters.categoryId} label="Material Category" onChange={e => setFilters({ ...filters, categoryId: e.target.value })}>
                 <MenuItem value="">All Categories</MenuItem>
                 {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
               </Select>
@@ -456,8 +456,8 @@ export default function IssueSummaryReport() {
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={2}>
             <FormControl size="small" fullWidth sx={{ minWidth: 150 }}>
-              <InputLabel>Institution</InputLabel>
-              <Select value={filters.institutionId} label="Institution" onChange={e => setFilters({ ...filters, institutionId: e.target.value, departments: [] })}>
+              <InputLabel shrink>Institution</InputLabel>
+              <Select displayEmpty value={filters.institutionId} label="Institution" onChange={e => setFilters({ ...filters, institutionId: e.target.value, departments: [] })}>
                 <MenuItem value="">All Institutions</MenuItem>
                 {institutions.map(inst => <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>)}
               </Select>

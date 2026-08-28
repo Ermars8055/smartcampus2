@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict bRqgE6beImfTYFMgJvWImDA8lihhBqMlaAprp6OTLTdAmPTGowvKF9KgWj7cbfg
+\restrict dqEhap6OuXp5avUrZB7F66pZR02ZNXFzYtkR62kRSiMLAcMUf7YcuIPjocMT2xK
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
--- Dumped by pg_dump version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
+-- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -29,8 +29,10 @@ SET row_security = off;
 ALTER SCHEMA public OWNER TO postgres;
 
 --
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
 --
 
+COMMENT ON SCHEMA public IS '';
 
 
 SET default_tablespace = '';
@@ -4908,6 +4910,15 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 119	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00036	You have been assigned to complaint CMP-00036. Nature of complaint: AC problem	ComplaintAssigned	472	\N	f	f	2026-08-27 15:42:07.29086	\N	34
 120	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00035) have been issued. Please review and acknowledge receipt.	IndentIssued	250	\N	f	f	2026-08-27 15:46:20.45206	\N	3
 121	2	2	Contract Approved	Success	Contract CNT-00016 Approved	The contract (CNT-00016) has been approved by EastPoint Admin.	ContractApproved	16	\N	f	f	2026-08-27 17:10:28.46131	\N	3
+122	2	2	Indent Approved	Success	Indent IND-00037 Approved	The indent (IND-00037) has been approved by EastPoint Admin.	IndentApproved	252	\N	f	f	2026-08-28 12:00:21.374903	\N	9
+123	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00037) have been issued. Please review and acknowledge receipt.	IndentIssued	252	\N	f	f	2026-08-28 12:03:40.420996	\N	9
+124	2	2	Indent Approved	Success	Indent IND-00038 Approved	The indent (IND-00038) has been approved by EastPoint Admin.	IndentApproved	253	\N	f	f	2026-08-28 12:29:18.781509	\N	17
+125	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00038) have been issued. Please review and acknowledge receipt.	IndentIssued	253	\N	f	f	2026-08-28 12:37:52.398852	\N	17
+126	2	2	Contract Approved	Success	Contract CNT-00017 Approved	The contract (CNT-00017) has been approved by EastPoint Admin.	ContractApproved	17	\N	f	f	2026-08-28 12:45:57.089483	\N	3
+127	2	2	Indent Approved	Success	Indent IND-00040 Approved	The indent (IND-00040) has been approved by EastPoint Admin.	IndentApproved	255	\N	f	f	2026-08-28 16:05:55.889107	\N	3
+128	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00039	You have been assigned to complaint CMP-00039. Nature of complaint: Request for Equipment Installation: EPCMS-102-ESA-001	ComplaintAssigned	475	\N	f	f	2026-08-28 18:33:36.881016	\N	34
+129	2	2	Indent Approved	Success	Indent IND-00041 Approved	The indent (IND-00041) has been approved by EastPoint Admin.	IndentApproved	256	\N	f	f	2026-08-28 18:35:02.873519	\N	3
+130	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00041) have been issued. Please review and acknowledge receipt.	IndentIssued	256	\N	f	f	2026-08-28 18:35:32.215106	\N	3
 \.
 
 
@@ -4927,19 +4938,15 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 17	2	2	PURCHASE_REQUEST	2	CEO	0	\N	\N	t
 18	2	2	PURCHASE_ORDER	2	CEO	0	\N	\N	t
 19	2	2	PURCHASE_REQUEST	1	Store Manager	0	\N	\N	t
-45	2	2	INDENT	1	Department Head	0	\N	\N	f
-44	2	2	INDENT	1	CEO	0	\N	19	t
-46	2	2	INDENT	1	Institution Head	0	\N	\N	f
+22	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
+24	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
+45	2	2	INDENT	1	Department Head	0	\N	\N	t
+44	2	2	INDENT	1	Institution Head	0	\N	19	t
+46	2	2	INDENT	1	Institution Head	0	\N	\N	t
 95	2	2	VENDOR	2	Admin	0	\N	\N	f
 103	2	2	VENDOR	2	Admin	0	\N	\N	f
 111	2	2	VENDOR	2	Admin	0	\N	\N	f
-22	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-24	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
-25	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
-26	2	2	INDENT	1	Admin	0	\N	\N	f
-27	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 28	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-29	2	2	INDENT	2	Admin	0	\N	\N	f
 30	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 10	2	2	INDENT	1	Admin	0	\N	\N	f
 11	2	2	INDENT	2	Admin	0	\N	\N	f
@@ -4956,14 +4963,18 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 107	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 108	2	2	INDENT	2	Admin	0	\N	\N	f
 109	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
-13	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
-14	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
-15	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
-20	2	2	INDENT	1	Admin	0	\N	\N	t
-21	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
-23	2	2	INDENT	2	Admin	0	\N	\N	t
+13	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
+14	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
+15	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+20	2	2	INDENT	1	Admin	0	\N	\N	f
+21	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
+23	2	2	INDENT	2	Admin	0	\N	\N	f
+25	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
+26	2	2	INDENT	1	Admin	0	\N	\N	t
+27	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
+29	2	2	INDENT	2	Admin	0	\N	\N	t
 105	2	2	CONTRACT	1	Admin	0	\N	\N	t
-87	2	2	PURCHASE_ORDER	1	Technician	5000	123456789	\N	f
+74	2	2	INDENT	1	Admin	0	\N	\N	f
 54	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 56	2	2	INDENT	2	Admin	0	\N	\N	f
 59	2	2	INDENT	1	Admin	0	\N	\N	f
@@ -4980,21 +4991,16 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 71	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 72	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 73	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-74	2	2	INDENT	1	Admin	0	\N	\N	f
 75	2	2	INDENT	2	Admin	0	\N	\N	f
 76	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 77	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+87	2	2	PURCHASE_ORDER	1	Technician	5000	123456789	\N	f
 85	2	2	INDENT	2	Admin	0	\N	\N	f
 88	2	2	INDENT	1	Admin	0	\N	\N	f
 90	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 91	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 92	2	2	INDENT	2	Admin	0	\N	\N	f
 93	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
-94	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
-110	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
-40	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-41	2	2	INDENT	2	Admin	0	\N	\N	f
-42	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 51	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 52	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 89	2	2	CONTRACT	1	Admin	0	\N	\N	f
@@ -5014,6 +5020,11 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 81	2	2	CONTRACT	1	Admin	0	\N	\N	f
 86	2	2	VENDOR	2	Admin	0	\N	\N	f
 39	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
+94	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+110	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+40	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
+41	2	2	INDENT	2	Admin	0	\N	\N	f
+42	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 43	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 47	2	2	INDENT	1	Admin	0	\N	\N	f
 48	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
@@ -6533,14 +6544,16 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 449	2	2	CMP-00019	2026-08-17	11:55	Civil Engineering	\N	\N		Install machine 01	Install machine 01		In Progress	34	\N	3	\N	f	2026-08-17 11:55:38.243275	2026-08-18 12:09:02.993781	\N	f	\N	\N	\N		\N	\N	\N	\N	Installation	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 455	2	2	CMP-00022	2026-08-18	12:41	Child Health Nursing (Pediatric Nursing)	\N	\N		not working properly	not working	vik	Registered	\N	\N	3	\N	f	2026-08-18 12:41:49.953614	2026-08-18 12:41:49.953655	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 458	2	2	TEST-CMP-1787064167-0	2026-08-18	20:12	Testing	\N	\N	\N	Automated test - Material Not Req	\N	\N	Closed	8	\N	8	\N	f	2026-08-18 20:12:47.041115	2026-08-18 20:12:47.20242	\N	f	\N	\N	\N	Looks like an automated test.	\N	\N	\N	\N	Breakdown	f	8	2026-08-18 14:42:47.185469	8	2026-08-18 14:42:47.202072	Fixed it via script	Automated closure	\N	\N	\N	\N	\N
-459	2	2	CMP-00023	2026-08-19	16:43	Computer Application	\N	\N		install the product	need installation	messi	Under Inspection	34	\N	3	\N	f	2026-08-19 16:43:50.854239	2026-08-19 16:44:13.799306	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Installation	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 461	2	2	CMP-00025	2026-08-19	16:47	Computer Science & Engineering	\N	\N		Fan is not working	Fan is not working		Registered	\N	\N	3	\N	f	2026-08-19 16:47:41.27962	2026-08-19 16:47:41.279665	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 469	2	2	CMP-00033	2026-08-27	13:03	Child Health Nursing	\N	\N		need installation	installation\n		Closed	35	\N	3	\N	f	2026-08-27 13:03:47.494949	2026-08-27 13:07:24.691489	\N	f	\N	\N	\N		\N	\N	\N	\N	Installation	f	3	2026-08-27 07:37:23.627213	3	2026-08-27 07:37:24.689061	fied	installed		t	2026-08-27	13:06	{}
 464	2	2	CMP-00028	2026-08-19	16:53	Medical Surgical Nursing	\N	\N		need training	how to use it	usain	Closed	35	\N	3	\N	f	2026-08-19 16:53:58.079011	2026-08-19 17:03:11.806033	\N	f	\N	\N	\N	trained	\N	\N	\N	\N	User Training	f	3	2026-08-19 11:33:10.929709	3	2026-08-19 11:33:11.804801	done	trained	\N	\N	\N	\N	\N
 471	2	2	CMP-00035	2026-08-27	15:21	Electrotherapy Lab	\N	\N		need installation	installation		Closed	35	\N	3	\N	f	2026-08-27 15:21:09.848089	2026-08-27 15:25:49.800118	\N	f	\N	\N	\N		\N	12	\N	1615	Installation	f	3	2026-08-27 09:55:48.922981	3	2026-08-27 09:55:49.797378	done	installed		t	2026-08-27	15:24	{}
 466	2	2	CMP-00030	2026-08-19	17:32	Electrotherapy Lab	\N	\N		need training	need training	messi	Closed	35	\N	3	\N	f	2026-08-19 17:32:37.906319	2026-08-19 17:33:27.708296	\N	f	\N	\N	\N	done	\N	\N	\N	\N	User Training	f	3	2026-08-19 12:03:27.081112	3	2026-08-19 12:03:27.707708	yes	trained	\N	\N	\N	\N	\N
+473	2	2	CMP-00037	2026-08-28	05:36	208	\N	\N	\N	Request for Equipment Installation: EPSN-208-CHAI-00001	\N	\N	Registered	\N	\N	3	\N	f	2026-08-28 11:06:58.598869	2026-08-28 11:06:58.598911	\N	f	\N	\N	\N	\N	\N	\N	\N	1616	Installation	f	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N
+459	2	2	CMP-00023	2026-08-19	16:43	Computer Application	\N	\N		install the product	need installation	messi	Material Pending	34	\N	3	\N	f	2026-08-19 16:43:50.854239	2026-08-28 15:21:13.852014	\N	t	\N	\N	\N		\N	\N	\N	\N	Installation	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 467	2	2	CMP-00031	2026-08-19	17:33	Mental Health Nursing	\N	\N		not working	not working	suraj	Closed	35	\N	3	\N	f	2026-08-19 17:33:59.011076	2026-08-19 17:34:51.469115	\N	f	\N	\N	\N	done	\N	\N	\N	\N	Machine Not Working	f	3	2026-08-19 12:04:51.006803	3	2026-08-19 12:04:51.468779	done	fixed	\N	\N	\N	\N	\N
 468	2	2	CMP-00032	2026-08-26	15:19	HEALTH 	8	\N		pc not working	pc not working	Pradnesh A	Closed	34	\N	3	\N	f	2026-08-26 15:19:11.721592	2026-08-26 15:38:54.435465	\N	f	\N	\N	\N		\N	\N	\N	1607	General Complaint	f	3	2026-08-26 10:08:49.606651	3	2026-08-26 10:08:54.434811	\nResolution Entered (Action Taken) \n	Closure Reason \n	\N	\N	\N	\N	\N
+475	2	2	CMP-00039	2026-08-28	13:02	102	\N	\N	\N	Request for Equipment Installation: EPCMS-102-ESA-001	\N	\N	Closed	34	\N	3	\N	f	2026-08-28 18:32:09.667193	2026-08-28 18:38:21.478368	\N	t	\N	\N	\N		\N	\N	\N	805	Installation	f	3	2026-08-28 13:08:20.504843	3	2026-08-28 13:08:21.475858	Resolution Entered \n	Closure Reason \n	work completed	t	2026-08-28	18:35	{}
 460	2	2	CMP-00024	2026-08-19	16:47	HEALTH 	7	237		Machine is not working	Machine is not working		Closed	35	\N	3	\N	f	2026-08-19 16:47:03.774388	2026-08-19 17:02:48.628912	\N	f	\N	\N	\N	test	\N	\N	\N	1607	Machine Not Working	f	3	2026-08-19 11:32:47.035294	3	2026-08-19 11:32:48.626632	test	test	\N	\N	\N	\N	\N
 462	2	2	CMP-00026	2026-08-19	16:48	HEALTH 	\N	\N		Installation required	Installation required		Material Pending	35	\N	3	\N	f	2026-08-19 16:48:25.180005	2026-08-19 17:04:24.782105	\N	t	\N	\N	\N		\N	\N	\N	1607	Installation	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 465	2	2	CMP-00029	2026-08-19	17:04	MICU/EICU	\N	\N		not working	not working properly	rio	Closed	34	\N	3	\N	f	2026-08-19 17:04:18.049899	2026-08-19 17:10:04.960124	\N	t	\N	\N	\N	not working	\N	\N	\N	1608	Machine Not Working	f	3	2026-08-19 11:40:04.214735	3	2026-08-19 11:40:04.958474	yes	work done	\N	\N	\N	\N	\N
@@ -6548,6 +6561,7 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 442	2	2	PM-202608-EPCMS-POST OT -SYP-061	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	In Progress	34	\N	3	\N	f	2026-08-11 18:37:11.684778	2026-08-26 17:16:20.524298	\N	f	\N	\N	\N		\N	\N	\N	1506	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 470	2	2	CMP-00034	2026-08-27	14:56	Medical-Surgical Nursing	\N	\N		need installation	need installation\n		Material Pending	34	\N	3	\N	f	2026-08-27 14:56:42.343441	2026-08-27 15:13:35.469717	\N	t	\N	\N	\N		\N	\N	\N	\N	Installation	f	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N
 472	2	2	CMP-00036	2026-08-27	15:41	HEALTH 	7	237		AC problem	macine problem 	Pradnesh A	Material Pending	34	\N	3	\N	f	2026-08-27 15:41:43.135145	2026-08-27 15:42:35.763186	\N	t	\N	\N	\N		\N	\N	\N	1609	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N
+474	2	2	CMP-00038	2026-08-28	16:16	Chemistry	12	\N		v	 v	tesst	Registered	\N	\N	17	\N	f	2026-08-28 16:16:23.02756	2026-08-28 16:16:23.027591	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Installation	f	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N
 \.
 
 
@@ -6582,6 +6596,8 @@ COPY public.contract_approvals (id, contract_id, approval_flow_id, approver_id, 
 24	12	84	3	\N	2026-08-27 14:47:02.286369
 25	16	105	3	\N	2026-08-27 17:10:24.463785
 26	16	84	3	\N	2026-08-27 17:10:28.466893
+27	17	105	3	\N	2026-08-28 12:45:52.852805
+28	17	84	3	\N	2026-08-28 12:45:57.094552
 \.
 
 
@@ -6606,6 +6622,7 @@ COPY public.contract_items (id, contract_id, material_id, equipment_id, uom, rat
 14	14	\N	1612		0	18	\N	\N	0	\N			0	f
 15	15	2565	\N	NOS	1234	12	\N	1	0	1			0	f
 16	16	\N	1614		3500	18	\N	\N	0	\N			0	f
+17	17	3507	\N	NOS	400	12	\N	\N	0	\N			0	f
 \.
 
 
@@ -6630,6 +6647,7 @@ COPY public.contracts (id, tenant_id, site_id, contract_number, contract_type, v
 16	2	2	CNT-00016	CMC	71	3	308	2026-08-19	2027-08-18	150000				t	t	Approved	3	3	2026-08-27 11:40:28.45723	f	2026-08-27 15:24:40.795135	2026-08-27 17:10:28.464593		2
 12	2	2	CNT-00012	AMC	76	12	329	2026-08-24	2026-10-31	50000				f	f	Approved	3	3	2026-08-27 09:17:02.282836	f	2026-08-27 14:45:22.638761	2026-08-27 14:47:02.285591		2
 13	2	2	CNT-00013	RC	63	11	266	2026-08-27	2026-08-31	\N				f	f	Draft	3	\N	\N	f	2026-08-27 14:50:03.665159	2026-08-27 14:50:03.665172		1
+17	2	2	CNT-00017	RC	68	9	313	2026-08-31	2026-09-30	\N				f	f	Approved	3	3	2026-08-28 07:15:57.08582	f	2026-08-28 12:45:23.806003	2026-08-28 12:45:57.092503		2
 \.
 
 
@@ -8356,7 +8374,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2719	2	2	2420	62	93	2026-06-11 21:58:45.849117
 2720	2	2	2421	62	357	2026-06-11 21:58:45.84912
 2721	2	2	2422	62	26	2026-06-11 21:58:45.849123
-2722	2	2	2423	62	11	2026-06-11 21:58:45.849126
 2723	2	2	2424	62	115	2026-06-11 21:58:45.849129
 2724	2	2	2425	62	23	2026-06-11 21:58:45.849131
 2726	2	2	2427	62	86	2026-06-11 21:58:45.849137
@@ -8461,6 +8478,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2829	2	2	2539	62	18	2026-06-11 21:58:45.849431
 2830	2	2	2540	62	91	2026-06-11 21:58:45.849434
 2767	2	2	2471	62	484	2026-08-26 17:54:44.357661
+2722	2	2	2423	62	6	2026-08-28 12:37:52.401489
 2831	2	2	2541	62	50	2026-06-11 21:58:45.849437
 2832	2	2	2542	62	38	2026-06-11 21:58:45.84944
 2833	2	2	2543	62	61	2026-06-11 21:58:45.849443
@@ -9539,7 +9557,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 4171	2	2	4639	62	670	2026-08-06 13:36:11.19188
 4172	2	2	4640	62	246	2026-08-06 13:36:11.191883
 4173	2	2	4641	62	797	2026-08-06 13:36:11.191886
-2854	2	2	2564	62	35	2026-08-27 15:44:28.098007
+2854	2	2	2564	62	36	2026-08-28 12:24:47.293308
 4174	2	2	4642	62	688	2026-08-06 13:36:11.191889
 4175	2	2	4643	62	552	2026-08-06 13:36:11.191892
 4176	2	2	4644	62	111	2026-08-06 13:36:11.191894
@@ -9773,8 +9791,8 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 4403	2	2	3910	62	1	2026-08-17 12:13:02.014073
 2775	2	2	2481	62	27	2026-08-18 11:13:00.275373
 3660	2	2	3474	62	59	2026-08-19 17:07:51.183648
-2734	2	2	2435	62	194	2026-08-26 15:31:43.298643
 4404	2	2	4877	62	9	2026-08-27 15:46:20.452707
+2734	2	2	2435	62	182	2026-08-28 18:35:32.216105
 \.
 
 
@@ -10456,7 +10474,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 99	2	2	PURCHASE_ORDER_2	EPH/PO	2
 101	2	2	PURCHASE_ORDER_4	EPCP/PO	2
 103	2	2	PURCHASE_ORDER_10	EPCPT/PO	4
-102	2	2	PURCHASE_ORDER_9	NRCN/PO	3
 126	2	2	MATERIAL_71	LAB	267
 105	2	2	PURCHASE_ORDER_5	EPCHE/PO	1
 104	2	2	PURCHASE_ORDER_8	EPSN/PO	2
@@ -10472,7 +10489,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 133	2	2	MATERIAL_68	HOS	399
 135	2	2	MATERIAL_73	PLB	99
 134	2	2	MATERIAL_66	ELE	89
-71	2	2	GATE_ENTRY	GE	14
 115	2	2	PURCHASE_ORDER_7	EPCN/PO	1
 77	2	2	GATEPASS	GP	5
 73	2	2	TRANSFER	TRF	4
@@ -10496,17 +10512,19 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 146	2	2	CATEGORY		16
 130	2	2	MATERIAL_70	ITI	40
 138	2	2	EQP_110	EQP_110	3
-94	2	2	PURCHASE_ORDER_11	EPAHS/PO	6
+71	2	2	GATE_ENTRY	GE	15
 120	2	2	MATERIAL_80	CHE	267
-78	2	2	COMPLAINT	CMP	36
-151	2	2	EQP_208	EQP_208	1
 70	2	2	QUOTATION_REQUEST	QR	43
-66	2	2	INDENT	IND	36
-68	2	2	PURCHASE_REQUEST	PR	18
+75	2	2	GRN	GRN	20
+78	2	2	COMPLAINT	CMP	39
+68	2	2	PURCHASE_REQUEST	PR	19
 69	2	2	PURCHASE_ORDER	PO	39
-75	2	2	GRN	GRN	19
-67	2	2	ISSUE	ISS	24
-96	2	2	CONTRACT	CNT	16
+66	2	2	INDENT	IND	41
+96	2	2	CONTRACT	CNT	17
+94	2	2	PURCHASE_ORDER_11	EPAHS/PO	8
+102	2	2	PURCHASE_ORDER_9	NRCN/PO	4
+67	2	2	ISSUE	ISS	27
+151	2	2	EQP_208	EQP_208	2
 \.
 
 
@@ -10531,6 +10549,10 @@ COPY public.equipment_history (id, equipment_id, event_type, event_date, descrip
 14	1608	Marked as RBER	2026-08-26 00:00:00	Beyond the worth of equipment 	\N	3
 15	1616	Manual Registration	2026-08-27 13:00:36.332362	Equipment added manually	\N	3
 16	1615	Installation	2026-08-27 15:25:49.801188	Installation completed via Complaint Ticket CMP-00035	\N	3
+17	1617	Manual Registration	2026-08-28 11:08:36.038861	Equipment added manually	\N	3
+18	805	Installation	2026-08-28 18:38:21.479547	Installation completed via Complaint Ticket CMP-00039	\N	3
+19	805	Document Upload	2026-08-28 18:59:28.705832	Installation documents uploaded	\N	3
+20	805	Document Upload	2026-08-28 18:59:52.030313	Installation documents uploaded	\N	3
 \.
 
 
@@ -10540,7 +10562,9 @@ COPY public.equipment_history (id, equipment_id, event_type, event_date, descrip
 
 COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id, grn_id, grn_item_id, serial_number, serial_number_status, is_biomedical, requires_installation, installation_status, installation_date, installation_report_url, installation_remarks, warehouse_id, project_id, status, created_at, updated_at, warranty_available, warranty_expiry_date, amc_cmc_status, amc_cmc_end_date, amc_po_number, last_pm_date, next_pm_due_date, last_calibration_date, next_calibration_due_date, rental_agreement_number, rental_start_date, rental_end_date, rental_vendor_id, location_id, contact_number, institution_id, po_id, make, model, equipment_cost, equipment_category, serial_number_photo_url, equipment_photo_url, installed_by, amc_cost, pm_required, calibration_required, battery_details, procurement_type, rental_type, rental_cost, billing_frequency, cost_per_test, linked_reagents, agreement_status, renewal_date, expected_return_date, rental_status, warranty_end_date, rental_agreement_document, year_of_purchase, po_number, po_date, rber_reason, amc_cmc_required, amc_cmc_start_date) FROM stdin;
 1507	2	2	EPCMS-POST OT -PM-116	3899	\N	\N	301410M1380490002	Captured	t	f	Not Required	\N	\N	\N	62	\N	Under maintenance	2026-08-05 19:04:45.381725	2026-08-27 12:07:08.960642	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-1616	2	2	EPSN-208-CHAI-00001	4877	\N	\N	38579C	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-27 13:00:36.277739	2026-08-27 10:19:45.948861	t	2030-08-27	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	85	\N	8	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+1617	2	2	EPPUC - Jnanaprabha Campus-208-00X1-00002	2564	\N	\N	C67G98VV	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-28 11:08:35.929352	2026-08-28 05:39:29.716231	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	85	\N	12	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+1616	2	2	EPSN-208-CHAI-00001	4877	\N	\N	38579C	Captured	f	t	Installation Requested	\N	\N	\N	62	\N	Pending Installation	2026-08-27 13:00:36.277739	2026-08-28 11:06:58.560191	t	2030-08-27	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	85	\N	8	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+805	2	2	EPCMS-102-ESA-001	3896	\N	\N	1234321	Pending Update	t	t	Installed	2026-08-28 13:08:21.476649	/api/uploads/installation_reports/2/20260828_132952_af5ac43f.png	\N	62	\N	Operational	2026-08-05 19:04:39.217136	2026-08-28 13:29:52.028678	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	\N	\N	\N	\N	/api/uploads/complaints/2/20260828_130757_1c137f7a.png	/api/uploads/complaints/2/20260828_130757_90fe99d9.png	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1615	2	2	NRCN-109-00X1-00002	2564	\N	\N	1234L	Pending Update	f	f	Installed	2026-08-27 09:55:49.798232	/api/uploads/complaints/2/20260827_095543_0c00352e.jpg	\N	62	\N	Operational	2026-08-19 17:42:55.780212	2026-08-27 15:25:49.799168	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	79	\N	9	\N	\N	\N	\N	\N	/api/uploads/complaints/2/20260827_095543_2d524a8c.jpg	/api/uploads/complaints/2/20260827_095543_c400a8c7.jpg	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1609	2	2	EPAHS-ER-ASDC-00002	4022	\N	\N	NA	Captured	f	t	Not Required	\N	\N	\N	62	\N	Spare Requested	2026-08-17 13:08:06.237234	2026-08-27 15:42:57.677851	t	2027-08-17	AMC	2028-08-17	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	11	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	t	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N
 1469	2	2	EPCMS-PHYSIO-SIMU-001	4052	\N	\N	PSD-1824	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.211283	2026-08-11 18:37:11.375202	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	BMS	PHYSIOSTM 1	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -10971,7 +10995,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1607	2	2	EPCET-BME-3OTG-00001	3993	\N	\N	2002003	Captured	f	t	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 12:44:55.931347	2026-08-26 15:23:26.318092	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	97	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 837	2	2	EPCMS-213-BPA-016	3903	\N	\N	BPM 202105 3102878	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.491005	2026-08-05 19:04:39.491014	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	MI EVIDA	MI HEART 101	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 838	2	2	EPCMS-213-VBOX-007	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.491018	2026-08-05 19:04:39.491021	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-805	2	2	EPCMS-102-ESA-001	3896	\N	\N	\N	Pending Update	t	t	Pending Installation	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.217136	2026-08-27 12:07:46.705058	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 839	2	2	EPCMS-214-ECG-003	3902	\N	\N	DETE3A26885	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.495765	2026-08-05 19:04:39.495774	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	90	\N	\N	\N	BPL	CARIDO HEART 6208	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 840	2	2	EPCMS-216-BPA-017	3895	\N	\N	RH014060	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.502132	2026-08-05 19:04:39.50214	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 841	2	2	EPCMS-216-ECG-004	3902	\N	\N	106759-M13804740003	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.502144	2026-08-05 19:04:39.502147	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	EDAN	SE1200	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -11449,6 +11472,7 @@ COPY public.gate_entries (id, tenant_id, site_id, entry_number, vehicle_number, 
 208	2	2	GE-00013	KA 02 EX 1234	\N	\N	\N	\N	\N	2026-08-17 12:12:05.350568	Ram	\N	Ram	Standard	\N			Completed	3	f	2026-08-17 12:12:05.351843		\N	0	1700	2500	800	/api/uploads/invoices/2/20260817_064203_39a6471d.png	/api/uploads/invoices/2/20260817_064120_6c6f0417.png	DC5463	2026-08-16	\N
 209	2	2	GE-00014	TN 08 V 2508	\N	\N	\N	\N	\N	2026-08-18 11:56:36.527989	giri	\N	giri	Standard	\N	/api/uploads/invoices/2/20260818_062605_6be797fa.png		Completed	3	f	2026-08-18 11:56:36.529581	A89B7655	2026-08-10	20000	\N	\N	\N		/api/uploads/invoices/2/20260818_062532_d6fd3d5a.png	12657	2026-08-10	\N
 202	2	2	GE-00007		\N	\N	\N	\N	\N	2026-08-05 20:33:59.079737	General	\N	General	Standard	\N			Completed	3	f	2026-08-05 20:33:59.08112		\N	0	\N	\N	\N		/api/uploads/invoices/2/20260805_150345_8ce00da4.pdf	33333	2026-08-04	\N
+210	2	2	GE-00015	KA 09 A 6574	\N	\N	\N	\N	\N	2026-08-28 12:15:02.00723	raina	\N	raina	Standard	\N	/api/uploads/invoices/2/20260828_064441_059cb5bd.pdf		Completed	8	f	2026-08-28 12:15:02.008284	Q26F67898	2026-08-27	10900	\N	\N	\N		/api/uploads/invoices/2/20260828_064409_eeeb545b.png	124587	2026-08-27	\N
 \.
 
 
@@ -11552,6 +11576,7 @@ COPY public.grn (id, tenant_id, site_id, grn_number, po_id, gate_entry_id, wareh
 220	2	2	GRN-00017	\N	209	62	3	76	Direct Invoice	A89B7655	2026-08-10	20000	/api/uploads/invoices/2/20260818_062605_6be797fa.png	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-18 14:55:09.045809	2026-08-18 09:25:09.124023	\N	\N	12657	2026-08-10	/api/uploads/invoices/2/20260818_062532_d6fd3d5a.png
 221	2	2	GRN-00018	\N	\N	62	3	69	Direct Invoice	121212	2026-08-26	1200		\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-27 15:44:28.070195	2026-08-27 10:14:28.097061	\N	\N		\N	
 222	2	2	GRN-00019	\N	202	62	3	69	Direct Invoice	123123	\N	0		\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-27 15:45:52.983411	2026-08-27 10:15:53.009989	\N	\N	33333	2026-08-04	/api/uploads/invoices/2/20260805_150345_8ce00da4.pdf
+223	2	2	GRN-00020	\N	210	62	3	69	Direct Invoice	Q26F67898	2026-08-27	10900	/api/uploads/invoices/2/20260828_064441_059cb5bd.pdf	\N	10900	0	0	0	0	\N	Pending	Completed	\N	10	f	2026-08-28 12:24:47.230144	2026-08-28 06:54:47.285683	\N	\N	124587	2026-08-27	/api/uploads/invoices/2/20260828_064409_eeeb545b.png
 \.
 
 
@@ -11623,6 +11648,7 @@ COPY public.grn_items (id, grn_id, material_id, po_item_id, ordered_quantity, re
 523	220	2435	\N	0	100	80	20	0	\N	0	0	0	0	0	0	0	0	\N
 524	221	2564	\N	0	11	11	0	0	\N	0	0	0	0	0	0	0	0	\N
 525	222	4877	\N	0	10	10	0	0	\N	0	0	0	0	0	0	0	0	\N
+526	223	2564	\N	0	1	1	0	10900	\N	0	0	0	0	0	0	10900	0	\N
 \.
 
 
@@ -11690,6 +11716,7 @@ COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, appr
 57	231	16	3	2026-06-22 11:47:58.2335	{"510": {"quantity": 1.0, "remarks": null}}	\N
 58	231	41	3	2026-06-22 11:47:58.233542	{"510": {"quantity": 1.0, "remarks": null}}	\N
 59	225	46	3	2026-06-30 18:14:14.883876	{"499": {"quantity": 3.0, "remarks": null}, "500": {"quantity": 2.0, "remarks": null}}	\N
+138	256	44	3	2026-08-28 18:34:57.606758	{"540": {"quantity": 2.0, "remarks": null}}	\N
 60	225	47	3	2026-06-30 18:14:14.883891	{"499": {"quantity": 3.0, "remarks": null}, "500": {"quantity": 2.0, "remarks": null}}	\N
 61	225	16	3	2026-06-30 18:15:16.322332	{"499": {"quantity": 3.0, "remarks": null}, "500": {"quantity": 2.0, "remarks": null}}	\N
 62	225	50	3	2026-06-30 18:15:16.322377	{"499": {"quantity": 3.0, "remarks": null}, "500": {"quantity": 2.0, "remarks": null}}	\N
@@ -11755,6 +11782,23 @@ COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, appr
 122	250	96	3	2026-08-27 15:14:08.908707	{"534": {"quantity": 1.0, "remarks": null}}	\N
 123	250	16	3	2026-08-27 15:14:23.746792	{"534": {"quantity": 1.0, "remarks": null}}	\N
 124	250	100	3	2026-08-27 15:14:23.746834	{"534": {"quantity": 1.0, "remarks": null}}	\N
+125	252	46	7	2026-08-28 11:59:40.566913	{"536": {"quantity": 10.0, "remarks": null}}	\N
+126	252	16	3	2026-08-28 12:00:21.332531	{"536": {"quantity": 10.0, "remarks": null}}	\N
+127	252	23	3	2026-08-28 12:00:21.332575	{"536": {"quantity": 10.0, "remarks": null}}	\N
+128	253	46	33	2026-08-28 12:28:52.603079	{"537": {"quantity": 5.0, "remarks": null}}	\N
+129	253	16	3	2026-08-28 12:29:18.76103	{"537": {"quantity": 5.0, "remarks": null}}	\N
+130	253	23	3	2026-08-28 12:29:18.761074	{"537": {"quantity": 5.0, "remarks": null}}	\N
+131	255	45	3	2026-08-28 16:05:48.752468	{"539": {"quantity": 5.0, "remarks": null}}	\N
+132	255	44	3	2026-08-28 16:05:48.752512	{"539": {"quantity": 5.0, "remarks": null}}	\N
+133	255	46	3	2026-08-28 16:05:48.752528	{"539": {"quantity": 5.0, "remarks": null}}	\N
+134	255	26	3	2026-08-28 16:05:48.752541	{"539": {"quantity": 5.0, "remarks": null}}	\N
+135	255	16	3	2026-08-28 16:05:55.794226	{"539": {"quantity": 5.0, "remarks": null}}	\N
+136	255	29	3	2026-08-28 16:05:55.794269	{"539": {"quantity": 5.0, "remarks": null}}	\N
+137	256	45	3	2026-08-28 18:34:57.606728	{"540": {"quantity": 2.0, "remarks": null}}	\N
+139	256	46	3	2026-08-28 18:34:57.60677	{"540": {"quantity": 2.0, "remarks": null}}	\N
+140	256	26	3	2026-08-28 18:34:57.60678	{"540": {"quantity": 2.0, "remarks": null}}	\N
+141	256	16	3	2026-08-28 18:35:02.842163	{"540": {"quantity": 2.0, "remarks": null}}	\N
+142	256	29	3	2026-08-28 18:35:02.842188	{"540": {"quantity": 2.0, "remarks": null}}	\N
 \.
 
 
@@ -11878,6 +11922,11 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 533	249	2471	1	1	1	1
 535	251	2564	1	0	0	\N
 534	250	4877	1	1	1	1
+536	252	2435	10	10	10	10
+537	253	2423	5	5	0	5
+538	254	2565	1	0	0	\N
+539	255	4604	5	0	0	5
+540	256	2435	2	2	2	2
 \.
 
 
@@ -11957,8 +12006,13 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 246	2	2	IND-00031	3	\N	\N			MICU/EICU	Complaint CMP-00029 - not working	3262.58	Issued	2	3	2026-08-19 11:35:12.988022	f	2026-08-19 17:04:58.907952	2026-08-19 17:07:51.185119	2	465	\N
 249	2	2	IND-00034	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint PM-202608-EPCMS-POST OT -SYP-061 - Scheduled Preventive Maintenance	301.97	Issued	2	3	2026-08-26 12:23:57.443537	f	2026-08-26 17:53:46.22576	2026-08-26 17:54:44.358341	11	442	\N
 247	2	2	IND-00032	3	\N	\N			Admin		46027.1	Approved	2	3	2026-08-19 12:21:35.700409	f	2026-08-19 17:51:16.202633	2026-08-19 17:51:35.702896	12	\N	\N
+253	2	2	IND-00038	17	\N	\N			Civil Engineering		17845.55	Issued	2	3	2026-08-28 06:59:18.778151	f	2026-08-28 12:28:38.44233	2026-08-28 12:37:52.402997	3	\N	\N
 248	2	2	IND-00033	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00032 - pc not working	4657.57	Issued	2	3	2026-08-26 10:01:27.364106	f	2026-08-26 15:23:26.272722	2026-08-26 15:31:43.324466	11	468	\N
+254	2	2	IND-00039	34	\N	\N			Computer Application	Complaint CMP-00023 - install the product	26703.28	Submitted	1	\N	\N	f	2026-08-28 15:21:26.433539	2026-08-28 15:21:26.433552	5	459	\N
 251	2	2	IND-00036	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00036 - AC problem	16526.16	Submitted	1	\N	\N	f	2026-08-27 15:42:57.658742	2026-08-27 15:42:57.658767	11	472	\N
+252	2	2	IND-00037	9	\N	\N			Pharmaceutics		46575.7	Issued	2	3	2026-08-28 06:30:21.367917	f	2026-08-28 11:44:54.734349	2026-08-28 12:03:40.440445	4	\N	\N
+256	2	2	IND-00041	3	237	\N	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00039 - Request for Equipment Installation: EPCMS-102-ESA-001	9315.14	Issued	2	3	2026-08-28 13:05:02.870907	f	2026-08-28 18:34:23.468818	2026-08-28 18:35:32.216772	11	475	\N
+255	2	2	IND-00040	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		16400	Approved	2	3	2026-08-28 10:35:55.885687	f	2026-08-28 16:05:39.664545	2026-08-28 16:05:55.891759	11	\N	\N
 \.
 
 
@@ -12281,6 +12335,9 @@ COPY public.material_issue_items (id, issue_id, material_id, quantity, rate, rem
 232	252	2435	1	4657.57	\N	62
 233	253	2471	1	301.97	\N	62
 234	254	4877	1	680	\N	62
+235	255	2435	10	4657.57	\N	62
+236	256	2423	5	3569.11	\N	62
+237	257	2435	2	4657.57	\N	62
 \.
 
 
@@ -12354,6 +12411,9 @@ COPY public.material_issues (id, tenant_id, site_id, issue_number, warehouse_id,
 252	2	2	ISS-00022	62	1	248	7	237	HEALTH 	\N	Fulfillment for IND-00033	Completed	3	\N	t	2026-08-26 10:24:57.786131	3	\N	f	2026-08-26 15:31:43.27442	\N
 253	2	2	ISS-00023	62	1	249	7	237	HEALTH 	\N	Fulfillment for IND-00034	Completed	3	\N	t	2026-08-26 12:25:20.423972	3	\N	f	2026-08-26 17:54:44.350204	\N
 254	2	2	ISS-00024	62	3	250	\N	\N	Medical-Surgical Nursing	\N	Fulfillment for IND-00035	Completed	3	\N	t	2026-08-27 10:16:41.314445	3	\N	f	2026-08-27 15:46:20.431599	\N
+255	2	2	ISS-00025	62	3	252	\N	\N	Pharmaceutics	\N	Fulfillment for IND-00037	Completed	3	\N	t	2026-08-28 06:33:47.050091	3	\N	f	2026-08-28 12:03:40.332158	\N
+256	2	2	ISS-00026	62	3	253	\N	\N	Civil Engineering	\N	Fulfillment for IND-00038	Completed	12	\N	f	\N	\N	\N	f	2026-08-28 12:37:52.381178	\N
+257	2	2	ISS-00027	62	1	256	7	237	HEALTH 	\N	Fulfillment for IND-00041	Completed	3	\N	t	2026-08-28 13:05:38.395185	3	\N	f	2026-08-28 18:35:32.20909	\N
 \.
 
 
@@ -15881,7 +15941,6 @@ COPY public.menu_items (id, text, icon_name, path, resource, platform_only, pare
 61	SaaS Admin	Security	/saas-admin	\N	t	\N	10	t	[]	[]	2026-08-12 10:42:10.024748	2026-08-12 10:42:10.02476
 62	Vendor Work Orders	assignment_turned_in	/procurement/vendor-work-orders	vendor_work_orders	\N	11	6	t	["read", "create", "update", "delete"]	[]	2026-08-14 13:34:38.683854	2026-08-14 13:34:38.683854
 17	Work Orders	\N	/work-orders	work_orders	f	11	5	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_send_to_vendor", "label": "Send to Vendor", "color": "#3B82F6"}, {"key": "can_short_close", "label": "Short Close", "color": "#F97316"}]	2026-08-12 10:42:10.012469	2026-08-12 10:42:10.012472
-10	Equipment	\N	/equipment	equipment	f	3	6	t	["read", "create", "update", "delete"]	[{"key": "create_po", "label": "Create PO", "color": "#10B981"}]	2026-08-12 10:42:10.010107	2026-08-12 10:42:10.01011
 63	Dept. Equip Details	Assessment	/reports/department-equipment-details	report_dept_inventory	f	40	9	t	[]	[]	2026-08-26 19:45:35.453739	2026-08-26 19:45:35.453753
 64	Calibration Details	\N	/reports/calibration-details	report_equipment	f	40	10	t	["read"]	[]	2026-08-27 15:31:37.279616	2026-08-27 15:31:37.279642
 21	GRN	\N	/grn	grn	f	18	3	t	["read", "create", "update", "delete"]	[{"key": "can_create_grn", "label": "Create GRN", "color": "#3B82F6"}, {"key": "can_complete", "label": "Complete", "color": "#10B981"}]	2026-08-12 10:42:10.014649	2026-08-27 16:17:01.887408
@@ -15891,13 +15950,14 @@ COPY public.menu_items (id, text, icon_name, path, resource, platform_only, pare
 26	Gate Pass	\N	/gate-passes	gate_passes	f	18	8	t	["read", "create", "update", "delete"]	[{"key": "can_create", "label": "Create", "color": "#3B82F6"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-08-12 10:42:10.014678	2026-08-27 16:17:01.887437
 27	Issue Acknowledgement	\N	/pending-acknowledgments	acknowledgements	f	18	9	t	["read", "create", "update", "delete"]	[{"key": "can_acknowledge", "label": "Acknowledge Receipt", "color": "#F59E0B"}]	2026-08-12 10:42:10.014684	2026-08-27 16:17:01.88744
 65	Credit Notes	ReceiptLong	/credit-notes	\N	f	18	2	t	[]	[]	2026-08-27 16:11:10.3453	2026-08-27 16:17:01.887443
-66	Stock Report	\N	/reports/stock	reports	f	40	11	t	[]	[]	2026-08-27 16:37:24.85691	2026-08-27 16:37:24.856923
-67	Consumption Report	\N	/reports/consumption	reports	f	40	12	t	[]	[]	2026-08-27 16:37:24.856929	2026-08-27 16:37:24.856933
-68	PR Status	\N	/reports/pr-status	reports	f	40	13	t	[]	[]	2026-08-27 16:37:24.856937	2026-08-27 16:37:24.85694
-69	PO Status	\N	/reports/po-status	reports	f	40	14	t	[]	[]	2026-08-27 16:37:24.856943	2026-08-27 16:37:24.856946
-70	Material Movement	\N	/reports/movement	reports	f	40	15	t	[]	[]	2026-08-27 16:37:24.85695	2026-08-27 16:37:24.856952
-71	Return Summary	\N	/reports/return-summary	reports	f	40	16	t	[]	[]	2026-08-27 16:37:24.856956	2026-08-27 16:37:24.856959
-72	Equipment Write-off	\N	/reports/equipment-writeoff	reports	f	40	17	t	[]	[]	2026-08-27 16:37:24.856962	2026-08-27 16:37:24.856965
+66	Stock Report	\N	/reports/stock	reports	f	40	11	t	["read"]	[]	2026-08-27 16:37:24.85691	2026-08-28 14:24:10.718061
+67	Consumption Report	\N	/reports/consumption	reports	f	40	12	t	["read"]	[]	2026-08-27 16:37:24.856929	2026-08-28 14:24:10.71945
+68	PR Status	\N	/reports/pr-status	reports	f	40	13	t	["read"]	[]	2026-08-27 16:37:24.856937	2026-08-28 14:24:10.721037
+69	PO Status	\N	/reports/po-status	reports	f	40	14	t	["read"]	[]	2026-08-27 16:37:24.856943	2026-08-28 14:24:10.72237
+10	Equipment	\N	/equipment	equipment	f	3	6	t	["read", "create", "update", "delete"]	[{"key": "create_po", "label": "Create PO", "color": "#10B981"}, {"key": "print_qr", "label": "Print QR", "color": "#64748B"}, {"key": "update_serial", "label": "Update Serial", "color": "#F59E0B"}, {"key": "complete_install", "label": "Complete Install", "color": "#10B981"}, {"key": "request_install", "label": "Request Install", "color": "#3B82F6"}, {"key": "upload_docs", "label": "Upload Docs", "color": "#8B5CF6"}, {"key": "log_usage", "label": "Log Usage", "color": "#EC4899"}, {"key": "relocate", "label": "Relocate", "color": "#6366F1"}]	2026-08-12 10:42:10.010107	2026-08-28 14:24:10.682016
+70	Material Movement	\N	/reports/movement	reports	f	40	15	t	["read"]	[]	2026-08-27 16:37:24.85695	2026-08-28 14:24:10.723499
+71	Return Summary	\N	/reports/return-summary	reports	f	40	16	t	["read"]	[]	2026-08-27 16:37:24.856956	2026-08-28 14:24:10.724702
+72	Equipment Write-off	\N	/reports/equipment-writeoff	reports	f	40	17	t	["read"]	[]	2026-08-27 16:37:24.856962	2026-08-28 14:24:10.725838
 \.
 
 
@@ -16107,6 +16167,17 @@ COPY public.purchase_order_approvals (id, po_id, approval_flow_id, approver_id, 
 128	279	49	3	{"1750": {"quantity": 10.0, "remarks": null}, "1751": {"quantity": 25.0, "remarks": null}}	\N	2026-08-19 16:25:00.407916
 129	279	18	3	{"1750": {"quantity": 10.0, "remarks": null}, "1751": {"quantity": 25.0, "remarks": null}}	\N	2026-08-19 16:25:07.589825
 130	279	52	3	{"1750": {"quantity": 10.0, "remarks": null}, "1751": {"quantity": 25.0, "remarks": null}}	\N	2026-08-19 16:25:07.589837
+131	285	14	3	{"1758": {"quantity": 10.0, "remarks": null}}	\N	2026-08-28 12:08:55.304662
+132	286	14	3	{"1759": {"quantity": 10.0, "remarks": null}}	\N	2026-08-28 12:09:17.142776
+133	286	18	3	{"1759": {"quantity": 10.0, "remarks": null}}	\N	2026-08-28 12:09:25.850824
+134	286	15	3	{"1759": {"quantity": 10.0, "remarks": null}}	\N	2026-08-28 12:09:25.850868
+135	285	18	3	{"1758": {"quantity": 10.0, "remarks": null}}	\N	2026-08-28 12:09:39.795577
+136	285	15	3	{"1758": {"quantity": 10.0, "remarks": null}}	\N	2026-08-28 12:09:39.79562
+137	287	14	3	{"1760": {"quantity": 10.0, "remarks": null}}	\N	2026-08-28 12:12:02.795575
+138	287	18	3	{"1760": {"quantity": 10.0, "remarks": null}}	\N	2026-08-28 12:12:09.546365
+139	287	15	3	{"1760": {"quantity": 10.0, "remarks": null}}	\N	2026-08-28 12:12:09.546407
+140	213	8	3	{}	\N	2026-08-28 18:10:35.627545
+141	213	9	3	{}	\N	2026-08-28 18:10:35.649406
 \.
 
 
@@ -16318,6 +16389,9 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 1755	283	2565	1	980	980	0	\N	0	6	6	0	f	\N
 1756	284	2564	1	16526.16	16526.16	0	\N	0	6	6	0	f	\N
 1757	284	3507	1	4349	4349	0	\N	0	6	6	0	f	\N
+1758	285	2564	10	16526.16	165261.6	0	\N	0	6	6	0	f	10
+1759	286	2564	10	16526.16	165261.6	0	\N	0	6	6	0	f	10
+1760	287	3505	10	761.41	7614.1	0	\N	0	9	9	0	f	10
 \.
 
 
@@ -16342,7 +16416,6 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 185	3	3	PO-00020	56	1	\N	188	\N	Formal	505620	\N	Sent to Vendor	\N	4	4	2026-06-09 06:03:28.427074	f	2026-05-20 11:09:40.396549	2026-06-09 12:03:22.436884	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 253	2	2	PO-00035	63	3	\N	\N	214	Formal	5310	2026-08-20	Approved	Test PO Terms	1	3	2026-08-04 12:13:22.286017	f	2026-08-03 14:11:21.328412	2026-08-04 17:43:22.287146	2		\N	3	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase		\N
 251	2	2	EPAHS/PO-00001	63	3	\N	\N	\N	Informal	37018.6	2026-07-29	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-27 06:36:54.952309	f	2026-07-27 12:06:20.027605	2026-07-27 12:06:54.953664	2		\N	11	50	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
-213	3	3	PO-00048	53	1	\N	\N	\N	Informal	59815.35	2026-07-01	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-10 18:09:04.764216	2026-06-10 18:09:04.786544	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 183	3	3	PO-00014	52	1	\N	\N	181	Formal	38878.18	\N	Closed	\N	4	\N	\N	f	2026-05-04 18:52:30.375564	2026-06-09 11:11:19.17997	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 186	3	3	PO-00021	51	1	185	\N	\N	Formal	2029750	2026-06-03	Sent to Vendor		4	4	2026-05-20 07:11:03.64198	f	2026-05-20 12:31:17.847185	2026-06-09 11:28:51.718097	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 187	3	3	PO-00022	59	1	\N	195	\N	Formal	6500000	\N	Sent to Vendor	\N	4	4	2026-06-09 06:01:45.255291	f	2026-05-20 12:44:10.329878	2026-06-09 11:31:54.352679	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
@@ -16438,6 +16511,10 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 282	2	2	PO-00038	66	3	206	\N	229	Formal	2707.5	\N	Draft	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-19 19:10:17.624234	2026-08-19 19:10:17.627119	1	\N	\N	\N	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N	\N
 283	2	2	PO-00039	63	3	206	\N	229	Formal	980	\N	Draft	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-19 19:10:17.628818	2026-08-19 19:10:17.63177	1	\N	\N	\N	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N	\N
 284	2	2	EPAHS/PO-00006	69	3	\N	\N	\N	Formal	23380.18	2026-08-31	Submitted	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-19 20:13:13.707776	2026-08-19 20:13:13.710153	1		\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase		\N
+287	2	2	NRCN/PO-00004	63	3	\N	\N	\N	Formal	8984.64	2026-08-28	Approved	1. Bill/Invoices in the name of New Royal College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-28 06:42:09.5741	f	2026-08-28 12:11:48.202352	2026-08-28 12:12:09.575205	2		\N	9	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase		\N
+286	2	2	EPAHS/PO-00008	69	3	\N	\N	\N	Formal	185092.99	2026-08-31	Approved	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-28 06:39:25.886806	f	2026-08-28 12:07:03.852307	2026-08-28 12:09:25.888867	2		\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase		\N
+285	2	2	EPAHS/PO-00007	69	3	\N	\N	\N	Formal	185092.99	2026-08-31	Approved	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-28 06:39:39.828742	f	2026-08-28 12:07:03.705958	2026-08-28 12:09:39.829873	2		\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase		\N
+213	3	3	PO-00048	53	1	\N	\N	\N	Informal	59815.35	2026-07-01	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	3	2026-08-28 12:40:35.655742	f	2026-06-10 18:09:04.764216	2026-08-28 18:10:35.656407	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 \.
 
 
@@ -16596,6 +16673,7 @@ COPY public.purchase_request_items (id, pr_id, material_id, quantity, approved_q
 628	209	2564	1	\N
 630	211	2435	20	\N
 629	210	2751	100	100
+631	212	3475	5	\N
 \.
 
 
@@ -16646,6 +16724,7 @@ COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, 
 210	2	2	PR-00017	3	\N	\N	Pharmacognosy	3	2026-08-21		Converted to PO	3	2026-08-19 12:22:54.898428	f	2026-08-19 17:52:11.12197	2026-08-19 17:53:15.23984	2	Purchase	\N	\N	\N	\N	\N	f	\N
 204	2	2	PR-00011	3	\N	\N	Biochemistry	3	2026-08-10	\n[Short Closed: none]	Short Closed	3	2026-08-03 10:21:59.342786	f	2026-08-03 15:51:29.219193	2026-08-19 17:53:45.592723	2	Purchase	\N	\N	\N	\N	\N	f	\N
 206	2	2	PR-00013	3	\N	7	HEALTH 	3	2026-08-14		Converted to PO	3	2026-08-14 07:10:05.305418	f	2026-08-14 12:37:45.391061	2026-08-19 19:10:17.630922	2	Rental	Standard Rental	\N	Months	\N	\N	f	\N
+212	2	2	PR-00019	12	\N	\N	Biochemistry	3	2026-08-31		Submitted	\N	\N	f	2026-08-28 12:04:38.176645	2026-08-28 12:04:38.17669	1	Purchase	\N	\N	\N	\N	\N	f	\N
 \.
 
 
@@ -20770,15 +20849,14 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1099	23	categories	t	t	t	t	{}
 1100	23	subcategories	t	t	t	t	{}
 712	16	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
-713	17	returns	t	t	t	t	{"can_issue": true, "can_print": true}
-714	17	transfers	t	t	t	t	{"can_issue": true, "can_print": true}
-715	17	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": false, "can_reject": false, "can_convert_to_po": false, "can_hold": false, "can_short_close": false}
-716	17	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
-717	17	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true}
-718	17	issues	t	t	t	t	{"can_issue": true, "can_print": true}
-719	17	report_issue_summary	t	f	f	f	{}
-720	17	report_receipt_summary	t	f	f	f	{}
-721	17	gate_passes	t	t	t	t	{"can_issue": true, "can_print": true}
+1941	17	returns	t	t	t	t	{"can_issue": true, "can_print": true, "can_return": true, "receive": true}
+1942	17	transfers	t	t	t	t	{"can_issue": true, "can_print": true, "can_transfer": true}
+1943	17	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": false, "can_reject": false, "can_convert_to_po": false, "can_hold": false, "can_short_close": false}
+1944	17	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
+1945	17	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true}
+1946	17	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
+1947	17	report_issue_summary	t	f	f	f	{}
+1948	17	report_receipt_summary	t	f	f	f	{}
 722	18	returns	t	t	t	t	{}
 723	18	transfers	t	t	t	t	{}
 724	18	dashboard	t	f	f	f	{}
@@ -20809,21 +20887,29 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1101	23	uom	t	t	t	t	{}
 1102	23	vendors	t	t	t	t	{}
 1103	23	warehouses	t	t	t	t	{}
+1949	17	gate_passes	t	t	t	t	{"can_issue": true, "can_print": true, "can_create": true}
+1950	17	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
+1951	17	purchase_orders	t	f	f	f	{}
+1952	17	gate_entry	t	f	f	f	{}
+1953	17	indents	t	f	f	f	{}
+1954	17	materials	t	f	f	f	{}
 765	15	dashboard	t	f	f	f	{}
 766	15	quotations	t	f	t	f	{"can_approve": true}
 767	15	purchase_orders	t	f	t	f	{"can_approve": true, "can_reject": true}
 768	15	intelligence	t	f	f	f	{}
 769	15	purchase_requests	t	f	t	f	{"can_submit": false, "can_approve": true, "can_reject": true}
 770	15	indents	t	f	t	f	{"can_approve": true, "can_reject": true}
+1955	17	categories	t	f	f	f	{}
+1956	17	subcategories	t	f	f	f	{}
+1957	17	uom	t	f	f	f	{}
+1958	17	warehouses	t	f	f	f	{}
+1959	17	vendors	t	f	f	f	{}
 934	19	indents	t	t	t	t	{"can_acknowledge": false, "can_approve": false, "can_reject": false, "can_convert_to_po": false}
 935	19	acknowledgements	t	t	t	t	{"can_acknowledge": true}
 936	19	complaints	t	t	t	t	{}
 1104	23	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
 1105	23	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
 1106	23	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
-975	13	indents	t	f	f	f	{"can_approve": true, "can_reject": true, "can_convert_to_po": false, "can_acknowledge": false}
-976	13	purchase_requests	t	f	f	f	{"can_submit": false, "can_approve": true, "can_reject": true, "can_convert_to_po": false, "can_hold": true, "can_short_close": true}
-977	13	acknowledgements	t	t	t	t	{"can_acknowledge": true}
 1107	23	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
 1108	23	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
 1109	23	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
@@ -20866,10 +20952,12 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1228	10	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1230	14	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1231	15	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
-1232	17	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
+1818	11	dashboard	t	f	f	f	{}
 1233	18	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
-1235	13	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
+1819	11	materials	t	t	t	t	{}
+1820	11	categories	t	t	t	t	{}
 1236	23	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
+1821	11	subcategories	t	t	t	t	{}
 1472	7	vendor_work_orders	t	t	t	t	{}
 1473	3	vendor_work_orders	t	t	t	t	{}
 1474	8	vendor_work_orders	t	t	t	t	{}
@@ -20881,11 +20969,57 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1480	14	vendor_work_orders	t	t	t	t	{}
 1481	15	vendor_work_orders	t	t	t	t	{}
 1482	16	vendor_work_orders	t	t	t	t	{}
-1483	17	vendor_work_orders	t	t	t	t	{}
+1822	11	uom	t	t	t	t	{}
 1484	18	vendor_work_orders	t	t	t	t	{}
 1485	19	vendor_work_orders	t	t	t	t	{}
-1488	13	vendor_work_orders	t	t	t	t	{}
+1823	11	vendors	t	t	t	t	{"can_approve": true, "can_reject": true}
+1824	11	warehouses	t	t	t	t	{}
+1825	11	equipment	t	t	t	t	{"create_po": true, "print_qr": true, "update_serial": true, "complete_install": true, "request_install": true, "upload_docs": true, "log_usage": true, "relocate": true}
+1826	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
 1490	23	vendor_work_orders	t	t	t	t	{}
+1827	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
+1828	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
+1829	11	contracts	t	t	t	t	{"can_approve": true, "can_reject": true}
+1775	13	indents	t	f	f	f	{"can_approve": true, "can_reject": true, "can_convert_to_po": false, "can_acknowledge": false}
+1776	13	purchase_requests	t	f	f	f	{"can_submit": false, "can_approve": true, "can_reject": true, "can_convert_to_po": false, "can_hold": true, "can_short_close": true}
+1777	13	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+1778	13	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
+1779	13	vendor_work_orders	t	t	t	t	{}
+1830	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
+1831	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
+1832	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
+1833	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
+1834	11	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
+1835	11	returns	t	t	t	t	{"can_return": true, "receive": true}
+1836	11	transfers	t	t	t	t	{"can_transfer": true}
+1837	11	write_offs	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true}
+1838	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
+1839	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+1840	11	inventory	t	t	t	t	{}
+1841	11	complaints	t	t	t	t	{"can_assign": true, "can_approve_level1": true, "can_approve_level2": true}
+1842	11	pm_schedule	t	t	t	t	{"generate_calls": true}
+1843	11	calibration_schedule	t	t	t	t	{"generate_calls": true}
+1844	11	intelligence	t	f	f	f	{}
+1845	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
+1846	11	report_finance	t	f	f	f	{}
+1847	11	reports	t	f	f	f	{}
+1848	11	report_issue_summary	t	f	f	f	{}
+1849	11	report_rate_analysis	t	f	f	f	{}
+1850	11	report_equipment_count	t	f	f	f	{}
+1851	11	report_receipt_summary	t	f	f	f	{}
+1852	11	report_dept_inventory	t	t	t	t	{}
+1853	11	report_pending_gatepass	t	f	f	f	{}
+1854	11	report_equipment	t	f	f	f	{}
+1855	11	admin_users	t	t	t	t	{}
+1856	11	admin_roles	t	t	t	t	{}
+1857	11	audit_logs	t	f	f	f	{}
+1858	11	approval_flows	t	t	t	t	{}
+1859	11	material_allowances	t	t	t	t	{}
+1860	11	configurations	t	t	t	t	{}
+1861	11	locations	t	t	t	t	{}
+1862	11	projects	t	t	t	t	{}
+1863	11	terms	t	t	t	t	{}
+1864	11	company_addresses	t	t	t	t	{}
 1542	20	finance_invoices	t	t	t	t	{"can_send_hard_copy": false, "can_send_for_payment": true, "can_receive_hard_copy": true, "can_mark_paid": true}
 1543	20	vendor_work_orders	t	t	t	t	{}
 1544	22	complaints	t	t	t	f	{}
@@ -20926,53 +21060,6 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1579	21	terms	t	t	t	t	{}
 1580	21	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1581	21	vendor_work_orders	t	t	t	t	{}
-1723	11	dashboard	t	f	f	f	{}
-1724	11	materials	t	t	t	t	{}
-1725	11	categories	t	t	t	t	{}
-1726	11	subcategories	t	t	t	t	{}
-1727	11	uom	t	t	t	t	{}
-1728	11	vendors	t	t	t	t	{"can_approve": true, "can_reject": true}
-1729	11	warehouses	t	t	t	t	{}
-1730	11	equipment	t	t	t	t	{"create_po": true}
-1731	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
-1732	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
-1733	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
-1734	11	contracts	t	t	t	t	{"can_approve": true, "can_reject": true}
-1735	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
-1736	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
-1737	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
-1738	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
-1739	11	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
-1740	11	returns	t	t	t	t	{"can_return": true, "receive": true}
-1741	11	transfers	t	t	t	t	{"can_transfer": true}
-1742	11	write_offs	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true}
-1743	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
-1744	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
-1745	11	inventory	t	t	t	t	{}
-1746	11	complaints	t	t	t	t	{"can_assign": true, "can_approve_level1": true, "can_approve_level2": true}
-1747	11	pm_schedule	t	t	t	t	{"generate_calls": true}
-1748	11	calibration_schedule	t	t	t	t	{"generate_calls": true}
-1749	11	intelligence	t	f	f	f	{}
-1750	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
-1751	11	report_finance	t	f	f	f	{}
-1752	11	reports	t	f	f	f	{}
-1753	11	report_issue_summary	t	f	f	f	{}
-1754	11	report_rate_analysis	t	f	f	f	{}
-1755	11	report_equipment_count	t	f	f	f	{}
-1756	11	report_receipt_summary	t	f	f	f	{}
-1757	11	report_dept_inventory	t	t	t	t	{}
-1758	11	report_pending_gatepass	t	f	f	f	{}
-1759	11	report_equipment	t	f	f	f	{}
-1760	11	admin_users	t	t	t	t	{}
-1761	11	admin_roles	t	t	t	t	{}
-1762	11	audit_logs	t	f	f	f	{}
-1763	11	approval_flows	t	t	t	t	{}
-1764	11	material_allowances	t	t	t	t	{}
-1765	11	configurations	t	t	t	t	{}
-1766	11	locations	t	t	t	t	{}
-1767	11	projects	t	t	t	t	{}
-1768	11	terms	t	t	t	t	{}
-1769	11	company_addresses	t	t	t	t	{}
 \.
 
 
@@ -20997,11 +21084,11 @@ COPY public.roles (id, tenant_id, name, code, description, is_system, created_at
 17	2	Store keeper	STOREKEEPER	the person takes care of material in store	f	2026-06-11 22:31:29.142898	Organization
 18	2	Store Manager	STOREMANAGER	The person responsible for all the store management	f	2026-06-11 22:31:29.150079	Organization
 19	2	Indenter	INDENTER	the person request for the materials required	f	2026-06-11 22:31:29.169807	Self Only
-13	2	Institution Head	DEPARTMENTHEAD	Look after their department	f	2026-06-11 22:31:29.105279	Institution
 23	4	Admin	ADMIN	Full tenant access	f	2026-07-03 12:43:37.240173	Self Only
 20	2	Accountant	ACCOUNTANT	The person responsible for finance	f	2026-06-12 03:56:49.701247	Organization
 22	2	Technician	TECHNICIAN	the person who repair Equipment	f	2026-06-18 12:55:23.728274	Self Only
 21	2	Co-Admin	COADMIN	Co admin	f	2026-06-17 17:24:10.030548	Full Administrative Access
+13	2	Institution Head	DEPARTMENTHEAD	Look after their department	f	2026-06-11 22:31:29.105279	Organization
 \.
 
 
@@ -24076,6 +24163,10 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 4300	2	2	2564	62	GRN	11	35	GRN	221	GRN-00018	3	\N	\N	3	2026-08-27 15:44:28.107588
 4301	2	2	4877	62	GRN	10	10	GRN	222	GRN-00019	3	\N	\N	3	2026-08-27 15:45:53.013525
 4302	2	2	4877	62	Issue	-1	9	Issue	254	ISS-00024	3	\N	\N	3	2026-08-27 15:46:20.454775
+4303	2	2	2435	62	Issue	-10	184	Issue	255	ISS-00025	3	\N	\N	3	2026-08-28 12:03:40.465981
+4304	2	2	2564	62	GRN	1	36	GRN	223	GRN-00020	3	\N	\N	10	2026-08-28 12:24:47.297494
+4305	2	2	2423	62	Issue	-5	6	Issue	256	ISS-00026	3	\N	\N	12	2026-08-28 12:37:52.406924
+4306	2	2	2435	62	Issue	-2	182	Issue	257	ISS-00027	1	237	\N	3	2026-08-28 18:35:32.219778
 \.
 
 
@@ -24407,15 +24498,9 @@ COPY public.user_role_assignments (id, user_id, tenant_id, role_id, site_id, ass
 40	4	3	12	3	2026-06-01 19:22:37.287287
 42	9	3	6	3	2026-06-02 10:24:27.231569
 43	12	3	4	\N	2026-06-02 10:55:26.809897
-46	7	2	13	\N	2026-06-11 22:31:29.191109
 47	8	2	16	\N	2026-06-11 22:31:29.191112
-48	9	2	19	2	2026-06-11 22:31:29.191115
-49	10	2	17	\N	2026-06-11 22:31:29.191118
-51	12	2	18	\N	2026-06-11 22:31:29.191124
 52	3	2	11	2	2026-06-11 22:37:52.57721
 53	16	2	20	\N	2026-06-12 04:18:31.35666
-55	5	2	18	\N	2026-06-17 12:05:27.495954
-56	6	2	15	\N	2026-06-17 12:05:35.250984
 57	17	2	19	\N	2026-06-17 16:32:51.02937
 59	18	2	21	\N	2026-06-17 17:24:41.009271
 60	19	2	19	\N	2026-06-17 18:44:33.288315
@@ -24439,6 +24524,12 @@ COPY public.user_role_assignments (id, user_id, tenant_id, role_id, site_id, ass
 80	11	2	15	\N	2026-08-06 11:49:40.832767
 81	4	3	7	3	2026-08-17 11:51:52.235161
 82	37	2	11	\N	2026-08-18 10:25:10.714899
+83	9	2	19	2	2026-08-28 11:41:37.861918
+84	5	2	18	\N	2026-08-28 11:42:24.75002
+85	6	2	15	\N	2026-08-28 11:42:40.603122
+86	7	2	13	\N	2026-08-28 11:53:45.977726
+88	10	2	17	\N	2026-08-28 12:33:38.710792
+90	12	2	18	\N	2026-08-28 13:45:33.112069
 \.
 
 
@@ -24447,18 +24538,12 @@ COPY public.user_role_assignments (id, user_id, tenant_id, role_id, site_id, ass
 --
 
 COPY public.users (id, username, email, full_name, hashed_password, is_active, is_platform_admin, is_deleted, created_at, updated_at, department, institution) FROM stdin;
-10	Pandi	pandi@nissigrid.com	Pandiyarajan	$2b$12$i3RkkBez7lXz6lNzd.cDhuE8rVsQh8UhOPYLZd6ZEqCHHbAV4rXTa	t	f	f	2026-06-01 10:48:25.009621	2026-06-05 11:31:33.223412	ADMIN	\N
-12	Kumar	kumar@nissigrid.com	Kumar	$2b$12$bejX..ps1x3o4JQKv6g7QuMoEO6pxkwtQ8tbwcWMkBIlJMmYA1x8m	t	f	f	2026-06-01 11:17:37.74726	2026-06-05 11:31:33.223417	\N	\N
 1	superadmin	super@nissigrid.com	Super Admin	$2b$12$fp9H8Wu0e2cQNvrXetPzUeg1n1ATh2rp.Ja3HTK.VLRxp2G7qnH.q	t	t	f	2026-05-15 10:36:51.375798	2026-06-05 11:31:33.223369	\N	\N
 4	gradmin	fredrick.antony@nissigrid.com	Fredrick	$2b$12$9VXAuU4uDZ46q3kz.Ajp2.OvUmw49ua2IZjgXTozTC6nGg1HfbuhW	t	f	f	2026-05-15 12:07:07.024311	2026-06-05 11:31:33.223394	\N	\N
-7	Ram	ramraj@nissigrid.com	Ram Raj	$2b$12$nDAelnG7n4RQECb2RlCG0uIbZhbsM4SUNnKbslx6XK8rjbEMEvirG	t	f	f	2026-06-01 10:43:26.001745	2026-06-05 11:31:33.223403	CIVIL	\N
 13	tech1	tech1@example.com	Ravi Kumar (Technician)	$2b$12$/ZGw5BG2a5YEeafE0lGspuJ7rVgGftKDyCEcGe0xJnrWbtYkE56j.	t	f	f	2026-06-12 03:34:23.653979	2026-06-12 03:34:23.653993	Maintenance	\N
 14	tech2	tech2@example.com	Amit Sharma (Technician)	$2b$12$Q3pj8PH0t1OHm4EJZqCbCOlleLxm9qREUhFAuya7vu/qdG//4aSmS	t	f	f	2026-06-12 03:34:23.878301	2026-06-12 03:34:23.878314	Civil	\N
 15	tech3	tech3@example.com	Suresh Patel (Electrician)	$2b$12$.OH7R/32TeL/W/BgWc8loerqLt2r77sSmcg1wTKtWdZ8yeP4s2SZG	t	f	f	2026-06-12 03:34:24.121184	2026-06-12 03:34:24.121198	Electrical	\N
 16	Arun	arun@nissigrid.com	Arun	$2b$12$ZOJdL4q8og8q3i.8EjoXF.FVYLtzUtbHAW25RqqSuEEo.6TyAkc/y	t	f	f	2026-06-12 04:18:31.353696	2026-06-12 04:18:31.353711	\N	\N
-9	Rajesh	kirubahar@nissigrid.com	Rajesh G	$2b$12$yr02EF791zI/wDtCORcl.Ow6SeO06ZMzyfT2TC6gzWKqlL3S6hXjW	t	f	f	2026-06-01 10:47:27.257166	2026-06-05 11:31:33.223409	CIVIL	\N
-5	grmanager	samson@grinfra.com	Samson	$2b$12$zsXuU.M1LB1lJ.XM24/ve.KcSZL3oxjOyeqzRzwD/4zwnYMk9wr4u	t	f	f	2026-05-27 16:17:53.070455	2026-06-17 12:05:27.493476	HEALTH 	\N
-6	grceo	fred@nissigrid.com	Fred	$2b$12$8Yus/rvrJSwtEbMsAnMooeiy2uQd3.M4RXhfbg2buXmfQqprvRZKu	t	f	f	2026-05-27 16:48:52.327279	2026-06-17 12:05:35.250574	HEALTH 	\N
 17	EPCET	ilangkumaran1@nissigrid.com	East Point College of Engineering & Technology	$2b$12$j.tuqCGfRFKZ6dm5OYPxX.NnSX8ndjR/JdkWasxWh9b0FYXKysTHa	t	f	f	2026-06-17 16:32:51.026776	2026-06-17 16:32:51.02679	\N	EPCET (East Point College of Engineering & Technology)
 18	ragothaman	ragothamankannu@gmail.com	ragothaman	$2b$12$7R3wEQWB/R1PRffOF6ChAum0EdqG.Uaz/Pbnu3OCx8E.U0qNX9v2a	t	f	f	2026-06-17 16:55:34.138989	2026-06-17 16:55:34.139005	\N	\N
 19	EPAHS	EPAHS@nissigrid.com	East Point Allied Health Sciences	$2b$12$fcFEfaIBXqlaCB9s4MVuMO/ucBS.03eXX/QZQqU/9Jon6pQu/aIXS	t	f	f	2026-06-17 18:44:33.285409	2026-06-17 18:44:33.285423	\N	EPAHS (East Point Allied Health Sciences)
@@ -24484,6 +24569,12 @@ COPY public.users (id, username, email, full_name, hashed_password, is_active, i
 37	vikky	GVIKKY242@gmail.com	vikky	$2b$12$J2ArEc3tE3m9oB4S2PUHOOrnlxai/2kh4CxuxPXCQwyuxgVs7bLeC	t	f	f	2026-08-18 10:25:10.665199	2026-08-18 10:26:00.402788	\N	\N
 11	CEO	ceo@nissigrid.com	CEO Approver	$2b$12$5vPyjKr71cO08Ma3BwERGOTLchViQYVYB6nUDmhEaBBD44zDf9DR2	t	f	f	2026-06-01 10:50:02.222821	2026-08-06 11:49:40.830647	\N	\N
 8	Babu	babu@nissigrid.com	Babu Gate Keeper	$2b$12$b48jMuLrVQXEfxE.QCfg/uIX2.90LesRlbj7mGGXIDVEot4HBchY6	t	t	f	2026-06-01 10:46:37.253944	2026-08-18 20:12:35.176263	ADMIN	\N
+9	Rajesh	kirubahar@nissigrid.com	Rajesh G	$2b$12$yr02EF791zI/wDtCORcl.Ow6SeO06ZMzyfT2TC6gzWKqlL3S6hXjW	t	f	f	2026-06-01 10:47:27.257166	2026-08-28 11:41:37.860079	\N	\N
+5	grmanager	samson@grinfra.com	Samson	$2b$12$zsXuU.M1LB1lJ.XM24/ve.KcSZL3oxjOyeqzRzwD/4zwnYMk9wr4u	t	f	f	2026-05-27 16:17:53.070455	2026-08-28 11:42:24.74939	\N	\N
+6	grceo	fred@nissigrid.com	Fred	$2b$12$8Yus/rvrJSwtEbMsAnMooeiy2uQd3.M4RXhfbg2buXmfQqprvRZKu	t	f	f	2026-05-27 16:48:52.327279	2026-08-28 11:42:40.601908	\N	\N
+7	Ram	ramraj@nissigrid.com	Ram Raj	$2b$12$nDAelnG7n4RQECb2RlCG0uIbZhbsM4SUNnKbslx6XK8rjbEMEvirG	t	f	f	2026-06-01 10:43:26.001745	2026-08-28 11:53:45.975365	\N	\N
+10	Pandi	pandi@nissigrid.com	Pandiyarajan	$2b$12$i3RkkBez7lXz6lNzd.cDhuE8rVsQh8UhOPYLZd6ZEqCHHbAV4rXTa	t	f	f	2026-06-01 10:48:25.009621	2026-08-28 12:32:28.648133	\N	\N
+12	Kumar	kumar@nissigrid.com	Kumar	$2b$12$bejX..ps1x3o4JQKv6g7QuMoEO6pxkwtQ8tbwcWMkBIlJMmYA1x8m	t	f	f	2026-06-01 11:17:37.74726	2026-08-28 13:45:33.110459	\N	\N
 \.
 
 
@@ -24496,13 +24587,15 @@ COPY public.vendor_approvals (id, vendor_id, approval_flow_id, approver_id, rema
 7	73	86	3	\N	2026-08-06 17:42:44.562893
 8	72	86	3	\N	2026-08-06 17:42:45.835967
 10	71	86	3	\N	2026-08-06 19:16:16.628292
-11	65	111	3	\N	2026-08-11 18:08:44.815888
 12	74	65	3	\N	2026-08-11 18:13:30.970628
 14	75	65	3	\N	2026-08-17 10:33:38.713024
 15	76	65	3	\N	2026-08-18 10:56:17.53842
 16	63	65	3	\N	2026-08-19 20:59:48.969861
 17	69	65	3	\N	2026-08-19 21:26:29.904241
 18	78	65	3	\N	2026-08-27 12:58:33.781782
+20	65	65	3	\N	2026-08-28 17:46:44.845686
+21	64	65	3	\N	2026-08-28 17:47:20.819179
+22	68	65	3	\N	2026-08-28 17:48:18.81061
 \.
 
 
@@ -24521,9 +24614,6 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 68	51	41
 69	53	41
 70	56	45
-80	64	65
-81	64	66
-82	64	68
 89	62	66
 90	62	65
 91	62	73
@@ -24538,8 +24628,6 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 190	71	80
 191	71	67
 192	71	68
-195	65	66
-196	65	67
 197	74	66
 198	74	67
 199	74	68
@@ -24548,12 +24636,6 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 205	67	76
 206	67	69
 207	67	70
-223	75	80
-224	75	68
-225	68	66
-226	68	76
-227	68	68
-228	76	81
 229	77	65
 230	77	66
 231	77	81
@@ -24566,8 +24648,19 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 241	69	80
 242	69	67
 243	69	68
-246	78	66
-247	78	81
+251	65	66
+252	65	67
+253	64	65
+254	64	66
+255	64	68
+265	68	66
+266	68	76
+267	68	68
+268	75	80
+269	75	68
+270	78	66
+271	78	81
+272	76	81
 \.
 
 
@@ -24641,6 +24734,20 @@ COPY public.vendor_history (id, vendor_id, action, changes, remarks, action_by_i
 63	69	Fully Approved	\N	\N	3	2026-08-19 21:26:29.921341
 64	78	Created	\N	\N	3	2026-08-27 12:58:18.124993
 65	78	Fully Approved	\N	\N	3	2026-08-27 12:58:33.824699
+66	68	Edited and Resubmitted	{"rating": {"old": 0.0, "new": 4.5}, "is_active": {"old": false, "new": true}}	\N	5	2026-08-28 12:42:35.306895
+67	68	Fully Approved	\N	\N	3	2026-08-28 12:43:23.02956
+68	65	Edited and Resubmitted	{"is_active": {"old": false, "new": true}}	\N	3	2026-08-28 17:46:39.378468
+69	65	Fully Approved	\N	\N	3	2026-08-28 17:46:44.868374
+70	64	Edited and Resubmitted	{"is_active": {"old": true, "new": false}}	\N	3	2026-08-28 17:46:59.68379
+71	64	Fully Approved	\N	\N	3	2026-08-28 17:47:20.841258
+72	68	Edited and Resubmitted	{"is_active": {"old": true, "new": false}}	\N	3	2026-08-28 17:48:07.51737
+73	68	Fully Approved	\N	\N	3	2026-08-28 17:48:18.84524
+74	68	Edited	{"is_active": {"old": true, "new": false}}	\N	3	2026-08-28 17:56:42.749747
+75	68	Edited	{"is_active": {"old": false, "new": true}}	\N	3	2026-08-28 17:57:05.868951
+76	68	Edited	{"is_active": {"old": true, "new": false}}	\N	3	2026-08-28 17:57:16.402278
+77	75	Edited	{"is_active": {"old": true, "new": false}}	\N	3	2026-08-28 17:57:35.716982
+78	78	Edited	{"is_active": {"old": true, "new": false}}	\N	3	2026-08-28 17:57:44.991487
+79	76	Edited	{"is_active": {"old": true, "new": false}}	\N	3	2026-08-28 17:57:54.199743
 \.
 
 
@@ -26930,23 +27037,23 @@ COPY public.vendors (id, tenant_id, site_id, name, code, contact_person, phone, 
 53	3	3	ACC Limited	VEN-0003	Amit Shah	9876543212	sc.acc@atomicmail.io	29ACCCC1234F1Z5	\N	Bangalore	29 - Karnataka	560020	\N	\N	\N	4.7	t	f	2026-05-15 15:19:36.627527	2026-06-09 12:38:58.299555	Cement House, 	121, Maharshi Karve Road,	Approved	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
 56	3	3	Hindware Home Innovation Ltd.	VEN-0006	Suresh Raina	9876543215	sc.hindware@atomicmail.io	29HINDV1234F1Z5	\N	Bangalore	29 - Karnataka	560061	\N	\N	\N	4.4	t	f	2026-05-15 15:19:36.631833	2026-06-09 12:40:31.762475	301-302, 	3rd Floor, Park Centra, Sector-30,	Approved	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
 61	3	3	samsung	VND-00011	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	t	f	2026-06-11 16:11:48.285063	2026-06-11 16:11:48.285095	\N	\N	Approved	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
-64	2	2	Royal Hardware & Electricals	VND-00003	Kumar	37878738723	ilangkumaran@yahoo.com	29AACCE9951B1ZR	\N	Bangalore	29 - Karnataka	560049	\N	\N	\N	4.5	t	f	2026-06-12 01:34:04.150106	2026-06-12 01:34:04.150149	Ground Floor, Sri Lakshminivasareswara Nilaya,	Avalahalli, Ittamadu Main Road, Virgonagar Post,	Approved	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
 62	2	2	Mataji Electricals	VND-00001	Lal	9898989898	pradnesh@nissigrid.com	29AFHPC7600L1ZD	\N	Bangalore	29 - Karnataka	560075	\N	\N	\N	4.5	t	f	2026-06-11 22:01:38.68366	2026-06-17 14:24:10.031865	Shop No. 1, Door No.  31, Malleshpalaya Main Road	New Thippasandra PO	Approved	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
 66	2	2	dell laptops 	VND-00005	Pradnesh A	25484656448	pradnesha1234@gmail.com	29AACCE9951H1ZY	\N	bangalore 	29 - Karnataka	560016	\N	\N	\N	4.5	t	f	2026-07-21 16:45:27.700736	2026-07-31 10:51:31.498809	new madras road , pai layout		Approved	1	3	2026-07-31 05:21:31.496168	\N	\N	\N	Rejected	\N	\N	{"categories": {"old": ["LAB", "HOUSE KEEPING", "IT"], "new": ["LAB", "IT"]}}
 73	2	2	ROBLIN SCIENTIFIC	VND-00012	Roblin	7348954963	roblinscientific@nissigrid.com	29AGEPR8249L1ZK	\N	Bangalore	29 - Karnataka	560077	\N	\N	\N	5	t	f	2026-08-06 17:02:54.328776	2026-08-06 17:42:44.613869	#12, Shop No:05 First Floor	NearAnjineya Temple, Byrathi,Kothanur Post, Bangalore East	Approved	2	3	2026-08-06 12:12:44.613434	\N	\N	\N	\N	\N	\N	\N
 67	2	2	Test	VND-00006	Sam	81928198291	sam@nissigrid.com	22AAAAA0000A1Z9	\N	Bengaluru	29 - Karnataka	560016	\N	\N	\N	3.5	f	f	2026-08-04 13:01:06.060685	2026-08-11 18:45:40.954348	Addr1		Rejected	1	3	2026-08-06 05:55:34.50251	currently not in markety\n	3	2026-08-11 13:15:40.951615	Approved	3	2026-08-06 05:55:34.50251	{"is_active": {"old": true, "new": false}}
 70	2	2	Jai Maruthi Scientific	VND-00009	JAI	9379566366	JaiMaruthiScientific@nissigrid.com	29ASBPJ7427R1Z0	\N	Bangalore	29 - Karnataka	560079	\N	\N	\N	4	t	f	2026-08-06 16:51:28.044047	2026-08-06 17:42:41.872169	      #147,2nd Main Road,  	Near RES Convent, Kaveripura, Kamakshipalya  	Approved	2	3	2026-08-06 12:12:41.871755	\N	\N	\N	\N	\N	\N	\N
 74	2	2	Nissi	VND-00013	Kumar	8989898989	ku699444mar@gmail.com	22AAAAA0000A1Z9	\N	Bangalore	29 - Karnataka	560016	\N	\N	\N	4.5	t	f	2026-08-11 18:11:04.265512	2026-08-11 18:13:31.007006	Addr1, Addr1	Addr2	Approved	1	3	2026-08-11 12:43:31.004466	\N	\N	\N	\N	\N	\N	\N
-68	2	2	vik	VND-00007	vvik	0987654321	gfdjkghj@gmail.com	29ABCDE1234F1Z5	\N	chennai	33 - Tamil Nadu	600001	\N	\N	\N	0	f	f	2026-08-06 13:25:15.684843	2026-08-11 18:46:00.827552	main road,chennai		Rejected	1	3	2026-08-06 07:55:39.378217	no needed	3	2026-08-11 13:16:00.826953	Approved	3	2026-08-06 07:55:39.378217	{"is_active": {"old": true, "new": false}}
 72	2	2	THE PRINCE CHEMICAL CO	VND-00011	Prince	64375443788	theprincechem@nissigrid.com	22AAAAA0000A1Z5	\N	Bangalore 	29 - Karnataka	56002	\N	\N	\N	4.5	t	f	2026-08-06 16:59:08.113193	2026-08-06 17:42:45.855548	      NO,19,5th cross, H.Siddaiah road 		Approved	2	3	2026-08-06 12:12:45.855115	\N	\N	\N	\N	\N	\N	\N
-65	2	2	havells pvt limited	VND-00004	Pradnesh A	56954664565	pradnesha12345@gmail.com	29AACCE9951H1ZR	\N	bangalore	29 - Karnataka	560016	\N	\N	\N	4.5	f	f	2026-07-21 15:30:53.78455	2026-08-11 18:08:45.055856	old madras road,pai layout		Approved	2	3	2026-08-11 12:38:45.053197	\N	3	2026-08-06 05:56:13.093826	Rejected	3	2026-08-06 05:56:13.093826	{"email": {"old": "pradnesha1234@gmail.com", "new": "pradnesha12345@gmail.com"}}
 71	2	2	ISIRI SCIENTIFICS	VND-00010	ISIRI	8884483838	pradnesh@nissigrid.com	29AXXPD1835A1ZH	\N	Bangalore	29 - Karnataka	560086	\N	\N	\N	5	t	f	2026-08-06 16:54:45.792264	2026-08-06 19:16:16.642761	No.189/18,Coressponding no.17,	6th Cross,Ravi English school road	Approved	2	3	2026-08-06 13:46:16.642283	\N	\N	\N	Approved	3	2026-08-06 12:12:40.888623	{"email": {"old": "isiriscientifics@nissigrid.com", "new": "pradnesh@nissigrid.com"}}
-75	2	2	sam	VND-00014	sam	0987123898	sam@gmail.com	27ABCDE1234F2Z5	\N	chennai	33 - Tamil Nadu	600094	\N	\N	\N	5	t	f	2026-08-17 10:33:12.443748	2026-08-17 10:33:38.728703	main road, north street.		Approved	1	3	2026-08-17 05:03:38.727901	\N	\N	\N	\N	\N	\N	\N
-76	2	2	Sakthi	VND-00015	sakthi	9835863778	sakthi@gmail.com	29ABCDE1234F1Z5	\N	Bengaluru	29 - Karnataka	500001	\N	\N	\N	5	t	f	2026-08-18 10:55:42.660685	2026-08-18 10:56:17.576042	north street, main road		Approved	1	3	2026-08-18 05:26:17.572458	\N	\N	\N	\N	\N	\N	\N
 77	2	2	ronaldo	VND-00016	ronaldo	77710101077	ronaldomessi@gmail.com	29AAAAA1111A1Z1	\N	chennai	33 - Tamil Nadu	600009	\N	\N	\N	0	f	f	2026-08-19 17:50:20.497753	2026-08-19 20:56:15.70306	new no, south st		Rejected	1	\N	\N	Not Required	3	2026-08-19 15:26:15.701679	\N	\N	\N	\N
+68	2	2	vik	VND-00007	vvik	0987654321	gfdjkghj@gmail.com	29ABCDE1234F1Z5	\N	chennai	33 - Tamil Nadu	600001	\N	\N	\N	4.5	f	f	2026-08-06 13:25:15.684843	2026-08-28 17:57:16.401115	main road,chennai		Approved	1	3	2026-08-28 12:18:18.844251	\N	3	2026-08-11 13:16:00.826953	Approved	3	2026-08-28 07:13:23.024309	{"is_active": {"old": true, "new": false}}
 69	2	2	AIC ENTERPRISES PVT LTD	VND-00008	AICENT	9742270172	ilangkumaran@nissigrid.in	29AASCA0900A1Z4	\N	Bangalore	29 - Karnataka	560058	\N	\N	\N	4.5	t	f	2026-08-06 16:45:15.340276	2026-08-19 21:26:29.920903	V-79A and V-79B, 1ST A Main Road	2nd Stage, Peenya Industrial Estate	Approved	1	3	2026-08-19 15:56:29.920469	\N	\N	\N	Approved	3	2026-08-06 13:45:24.810803	{"gst_number": {"old": "29AASCA0900A1Z3", "new": "29AASCA0900A1Z4"}}
+75	2	2	sam	VND-00014	sam	0987123898	sam@gmail.com	27ABCDE1234F2Z5	\N	chennai	33 - Tamil Nadu	600094	\N	\N	\N	5	f	f	2026-08-17 10:33:12.443748	2026-08-28 17:57:35.715911	main road, north street.		Approved	1	3	2026-08-17 05:03:38.727901	\N	\N	\N	\N	\N	\N	\N
+65	2	2	havells pvt limited	VND-00004	Pradnesh A	56954664565	pradnesha12345@gmail.com	29AACCE9951H1ZR	\N	bangalore	29 - Karnataka	560016	\N	\N	\N	4.5	t	f	2026-07-21 15:30:53.78455	2026-08-28 17:46:44.867612	old madras road,pai layout		Approved	1	3	2026-08-28 12:16:44.866696	\N	3	2026-08-06 05:56:13.093826	Approved	3	2026-08-11 12:38:45.053197	{"is_active": {"old": false, "new": true}}
+64	2	2	Royal Hardware & Electricals	VND-00003	Kumar	37878738723	ilangkumaran@yahoo.com	29AACCE9951B1ZR	\N	Bangalore	29 - Karnataka	560049	\N	\N	\N	4.5	t	f	2026-06-12 01:34:04.150106	2026-08-28 17:47:20.83999	Ground Floor, Sri Lakshminivasareswara Nilaya,	Avalahalli, Ittamadu Main Road, Virgonagar Post,	Approved	1	3	2026-08-28 12:17:20.838988	\N	\N	\N	Approved	\N	\N	{"is_active": {"old": true, "new": false}}
+76	2	2	Sakthi	VND-00015	sakthi	9835863778	sakthi@gmail.com	29ABCDE1234F1Z5	\N	Bengaluru	29 - Karnataka	500001	\N	\N	\N	5	f	f	2026-08-18 10:55:42.660685	2026-08-28 17:57:54.198677	north street, main road		Approved	1	3	2026-08-18 05:26:17.572458	\N	\N	\N	\N	\N	\N	\N
 63	2	2	ELCAB ENGINEERS PRIVATE LIMITED	VND-00002	Bala	47347347833	pradnesha12345@gmail.com	29AACCE9951H1ZQ	\N	Bangalore	29 - Karnataka	560060	\N	\N	\N	4.5	t	f	2026-06-12 01:31:58.140808	2026-08-19 20:59:49.017862	V R Cindem Complex, Sy. No. 1193/34/4, Kengeri Main Road,	Behind Mr Prem Bun, Ramasandra Village,	Approved	1	3	2026-08-19 15:29:49.016949	\N	\N	\N	Approved	3	2026-08-17 04:59:40.711144	{"gst_number": {"old": "29AACCE9951H1ZR", "new": "29AACCE9951H1ZQ"}}
-78	2	2	ramesh	VND-00017	ramesh	9988656468	ramesh@gmail.com	29ABCDE1284F1Z5	\N	chennai	33 - Tamil Nadu	600004	\N	\N	\N	2.5	t	f	2026-08-27 12:58:18.080665	2026-08-27 12:58:33.821894	main road, north street		Approved	1	3	2026-08-27 07:28:33.818029	\N	\N	\N	\N	\N	\N	\N
+78	2	2	ramesh	VND-00017	ramesh	9988656468	ramesh@gmail.com	29ABCDE1284F1Z5	\N	chennai	33 - Tamil Nadu	600004	\N	\N	\N	2.5	f	f	2026-08-27 12:58:18.080665	2026-08-28 17:57:44.990427	main road, north street		Approved	1	3	2026-08-27 07:28:33.818029	\N	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -27074,7 +27181,7 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 121, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 130, true);
 
 
 --
@@ -27137,28 +27244,28 @@ SELECT pg_catalog.setval('public.complaint_images_id_seq', 37, true);
 -- Name: complaints_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaints_id_seq', 472, true);
+SELECT pg_catalog.setval('public.complaints_id_seq', 475, true);
 
 
 --
 -- Name: contract_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_approvals_id_seq', 26, true);
+SELECT pg_catalog.setval('public.contract_approvals_id_seq', 28, true);
 
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_items_id_seq', 16, true);
+SELECT pg_catalog.setval('public.contract_items_id_seq', 17, true);
 
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contracts_id_seq', 16, true);
+SELECT pg_catalog.setval('public.contracts_id_seq', 17, true);
 
 
 --
@@ -27214,14 +27321,14 @@ SELECT pg_catalog.setval('public.document_sequences_id_seq', 151, true);
 -- Name: equipment_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.equipment_history_id_seq', 16, true);
+SELECT pg_catalog.setval('public.equipment_history_id_seq', 20, true);
 
 
 --
 -- Name: equipment_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.equipment_items_id_seq', 1616, true);
+SELECT pg_catalog.setval('public.equipment_items_id_seq', 1617, true);
 
 
 --
@@ -27242,7 +27349,7 @@ SELECT pg_catalog.setval('public.floors_id_seq', 30, true);
 -- Name: gate_entries_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_entries_id_seq', 209, true);
+SELECT pg_catalog.setval('public.gate_entries_id_seq', 210, true);
 
 
 --
@@ -27263,35 +27370,35 @@ SELECT pg_catalog.setval('public.gate_passes_id_seq', 24, true);
 -- Name: grn_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_id_seq', 222, true);
+SELECT pg_catalog.setval('public.grn_id_seq', 223, true);
 
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_items_id_seq', 525, true);
+SELECT pg_catalog.setval('public.grn_items_id_seq', 526, true);
 
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_approvals_id_seq', 124, true);
+SELECT pg_catalog.setval('public.indent_approvals_id_seq', 142, true);
 
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_items_id_seq', 535, true);
+SELECT pg_catalog.setval('public.indent_items_id_seq', 540, true);
 
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indents_id_seq', 251, true);
+SELECT pg_catalog.setval('public.indents_id_seq', 256, true);
 
 
 --
@@ -27326,14 +27433,14 @@ SELECT pg_catalog.setval('public.location_master_id_seq', 149, true);
 -- Name: material_issue_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issue_items_id_seq', 234, true);
+SELECT pg_catalog.setval('public.material_issue_items_id_seq', 237, true);
 
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issues_id_seq', 254, true);
+SELECT pg_catalog.setval('public.material_issues_id_seq', 257, true);
 
 
 --
@@ -27396,21 +27503,21 @@ SELECT pg_catalog.setval('public.projects_id_seq', 9, true);
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 130, true);
+SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 141, true);
 
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 1757, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 1760, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 284, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 288, true);
 
 
 --
@@ -27424,14 +27531,14 @@ SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 58, true);
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 630, true);
+SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 631, true);
 
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_requests_id_seq', 211, true);
+SELECT pg_catalog.setval('public.purchase_requests_id_seq', 212, true);
 
 
 --
@@ -27501,7 +27608,7 @@ SELECT pg_catalog.setval('public.repair_work_orders_id_seq', 1, false);
 -- Name: role_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.role_permissions_id_seq', 1769, true);
+SELECT pg_catalog.setval('public.role_permissions_id_seq', 1959, true);
 
 
 --
@@ -27529,7 +27636,7 @@ SELECT pg_catalog.setval('public.sites_id_seq', 4, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4302, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4306, true);
 
 
 --
@@ -27599,7 +27706,7 @@ SELECT pg_catalog.setval('public.uom_id_seq', 48, true);
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_role_assignments_id_seq', 82, true);
+SELECT pg_catalog.setval('public.user_role_assignments_id_seq', 90, true);
 
 
 --
@@ -27613,21 +27720,21 @@ SELECT pg_catalog.setval('public.users_id_seq', 37, true);
 -- Name: vendor_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 18, true);
+SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 22, true);
 
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_categories_id_seq', 247, true);
+SELECT pg_catalog.setval('public.vendor_categories_id_seq', 272, true);
 
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_history_id_seq', 65, true);
+SELECT pg_catalog.setval('public.vendor_history_id_seq', 79, true);
 
 
 --
@@ -32276,13 +32383,16 @@ ALTER TABLE ONLY public.write_offs
 
 
 --
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
 --
 
+REVOKE USAGE ON SCHEMA public FROM PUBLIC;
+GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict bRqgE6beImfTYFMgJvWImDA8lihhBqMlaAprp6OTLTdAmPTGowvKF9KgWj7cbfg
+\unrestrict dqEhap6OuXp5avUrZB7F66pZR02ZNXFzYtkR62kRSiMLAcMUf7YcuIPjocMT2xK
 

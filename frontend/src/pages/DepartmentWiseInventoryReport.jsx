@@ -366,8 +366,8 @@ export default function DepartmentWiseInventoryReport() {
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={6} md={3}>
             <FormControl size="small" fullWidth>
-              <InputLabel>Material Category</InputLabel>
-              <Select value={filters.categoryId} label="Material Category" onChange={e => setFilters({ ...filters, categoryId: e.target.value })}>
+              <InputLabel shrink>Material Category</InputLabel>
+              <Select displayEmpty value={filters.categoryId} label="Material Category" onChange={e => setFilters({ ...filters, categoryId: e.target.value })}>
                 <MenuItem value="">All Categories</MenuItem>
                 {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
               </Select>
@@ -375,8 +375,8 @@ export default function DepartmentWiseInventoryReport() {
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
             <FormControl size="small" fullWidth>
-              <InputLabel>Institution</InputLabel>
-              <Select value={filters.institutionId} label="Institution" onChange={e => setFilters({ ...filters, institutionId: e.target.value, departmentIds: [] })}>
+              <InputLabel shrink>Institution</InputLabel>
+              <Select displayEmpty value={filters.institutionId} label="Institution" onChange={e => setFilters({ ...filters, institutionId: e.target.value, departmentIds: [] })}>
                 <MenuItem value="">All Institutions</MenuItem>
                 {institutions.map(inst => <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>)}
               </Select>

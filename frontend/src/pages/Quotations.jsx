@@ -2763,8 +2763,8 @@ const Quotations = () => {
               Terms and Conditions
             </Typography>
             <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
-              <InputLabel>Select Template</InputLabel>
-              <Select
+              <InputLabel shrink>Select Template</InputLabel>
+              <Select displayEmpty
                 label="Select Template"
                 onChange={e => {
                   const t = termsTemplates.find(x => x.id === e.target.value);
@@ -2773,7 +2773,7 @@ const Quotations = () => {
                 defaultValue=""
                 sx={{ bgcolor: '#fff' }}
               >
-                <MenuItem value=""><em>Select a Template</em></MenuItem>
+                <MenuItem value="">Select a Template</MenuItem>
                 {termsTemplates.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
               </Select>
             </FormControl>

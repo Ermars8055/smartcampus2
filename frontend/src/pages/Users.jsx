@@ -122,19 +122,19 @@ export default function Users() {
             inputProps={{ autoComplete: 'off', form: { autocomplete: 'off' } }}
           />
           <FormControl size="small" sx={{ flex: 1, minWidth: 160, maxWidth: 220 }}>
-            <InputLabel>Filter by Institute</InputLabel>
-            <Select value={filterInst} label="Filter by Institute" onChange={e => {
+            <InputLabel shrink>Filter by Institute</InputLabel>
+            <Select displayEmpty value={filterInst} label="Filter by Institute" onChange={e => {
               setFilterInst(e.target.value);
               setFilterDept(''); // Reset department filter when institute changes
             }}>
-              <MenuItem value=""><em>All Institutes</em></MenuItem>
+              <MenuItem value="">All Institutes</MenuItem>
               {institutions.map(i => <MenuItem key={i.id} value={i.name}>{i.name}</MenuItem>)}
             </Select>
           </FormControl>
           <FormControl size="small" sx={{ flex: 1, minWidth: 160, maxWidth: 220 }}>
-            <InputLabel>Filter by Department</InputLabel>
-            <Select value={filterDept} label="Filter by Department" onChange={e => setFilterDept(e.target.value)}>
-              <MenuItem value=""><em>All Departments</em></MenuItem>
+            <InputLabel shrink>Filter by Department</InputLabel>
+            <Select displayEmpty value={filterDept} label="Filter by Department" onChange={e => setFilterDept(e.target.value)}>
+              <MenuItem value="">All Departments</MenuItem>
               {departments
                 .filter(d => {
                   if (!filterInst) return true;
@@ -145,9 +145,9 @@ export default function Users() {
             </Select>
           </FormControl>
           <FormControl size="small" sx={{ flex: 1, minWidth: 140, maxWidth: 200 }}>
-            <InputLabel>Filter by Role</InputLabel>
-            <Select value={filterRole} label="Filter by Role" onChange={e => setFilterRole(e.target.value)}>
-              <MenuItem value=""><em>All Roles</em></MenuItem>
+            <InputLabel shrink>Filter by Role</InputLabel>
+            <Select displayEmpty value={filterRole} label="Filter by Role" onChange={e => setFilterRole(e.target.value)}>
+              <MenuItem value="">All Roles</MenuItem>
               {Array.from(new Set(users.map(u => u.role_name || u.role).filter(Boolean))).map(r => <MenuItem key={r} value={r}>{r}</MenuItem>)}
             </Select>
           </FormControl>
@@ -274,8 +274,8 @@ export default function Users() {
             )}
             <Grid item xs={6}>
               <FormControl fullWidth>
-                <InputLabel>Institute</InputLabel>
-                <Select
+                <InputLabel shrink>Institute</InputLabel>
+                <Select displayEmpty
                   value={form.institution || ''}
                   label="Institute"
                   onChange={e => {
@@ -283,20 +283,20 @@ export default function Users() {
                     setForm({ ...form, institution: newInst, department: '' });
                   }}
                 >
-                  <MenuItem value=""><em>All Institutions</em></MenuItem>
+                  <MenuItem value="">All Institutions</MenuItem>
                   {institutions.map(i => <MenuItem key={i.id} value={i.name}>{i.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={6}>
               <FormControl fullWidth>
-                <InputLabel>Department</InputLabel>
-                <Select
+                <InputLabel shrink>Department</InputLabel>
+                <Select displayEmpty
                   value={form.department || ''}
                   label="Department"
                   onChange={e => setForm({ ...form, department: e.target.value })}
                 >
-                  <MenuItem value=""><em>All Departments</em></MenuItem>
+                  <MenuItem value="">All Departments</MenuItem>
                   {departments
                     .filter(d => {
                       if (!form.institution || form.institution === 'All Institutions') return true;

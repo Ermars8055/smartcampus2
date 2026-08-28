@@ -237,7 +237,7 @@ export default function ContractForm() {
               onChange={e => setForm({ ...form, institution_id: e.target.value, department_id: '' })}
               disabled={isViewMode}
             >
-              <MenuItem value=""><em>None</em></MenuItem>
+              <MenuItem value="">None</MenuItem>
               {institutions.map(i => <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>)}
             </TextField>
           </Grid>
@@ -250,7 +250,7 @@ export default function ContractForm() {
               onChange={e => setForm({ ...form, department_id: e.target.value })}
               disabled={!form.institution_id || isViewMode}
             >
-              <MenuItem value=""><em>None</em></MenuItem>
+              <MenuItem value="">None</MenuItem>
               {departments.map(d => <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>)}
             </TextField>
           </Grid>

@@ -424,7 +424,7 @@ export default function Projects() {
                       label="Building (Optional)" value={form.building_id || ''} onChange={e => setForm({ ...form, building_id: e.target.value })}
                       sx={{ borderRadius: '12px' }} displayEmpty
                     >
-                      <MenuItem value=""><em>None</em></MenuItem>
+                      <MenuItem value="">None</MenuItem>
                       {buildings.filter(b => !form.institution_id || b.institution_id === form.institution_id).map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
                     </Select>
                   </FormControl>
@@ -459,7 +459,7 @@ export default function Projects() {
                       label="Assign Department (Optional)" value={form.department_name || ''} onChange={e => setForm({ ...form, department_name: e.target.value })}
                       sx={{ borderRadius: '12px' }} displayEmpty
                     >
-                      <MenuItem value=""><em>None</em></MenuItem>
+                      <MenuItem value="">None</MenuItem>
                       {departments.filter(d => !form.institution_id || d.institution_id === form.institution_id).map(d => <MenuItem key={d.id} value={d.name}>{d.name}</MenuItem>)}
                     </Select>
                   </FormControl>
@@ -498,7 +498,7 @@ export default function Projects() {
                       label="Assign Department (Optional)" value={form.department_name || ''} onChange={e => setForm({ ...form, department_name: e.target.value })}
                       sx={{ borderRadius: '12px' }} displayEmpty
                     >
-                      <MenuItem value=""><em>None</em></MenuItem>
+                      <MenuItem value="">None</MenuItem>
                       {departments.filter(d => !form._institution_id || d.institution_id === form._institution_id).map(d => <MenuItem key={d.id} value={d.name}>{d.name}</MenuItem>)}
                     </Select>
                   </FormControl>
@@ -554,7 +554,7 @@ export default function Projects() {
                       label="Assign Department (Optional)" value={form.department_name || ''} onChange={e => setForm({ ...form, department_name: e.target.value })}
                       sx={{ borderRadius: '12px' }} displayEmpty
                     >
-                      <MenuItem value=""><em>None</em></MenuItem>
+                      <MenuItem value="">None</MenuItem>
                       {departments.filter(d => !form._institution_id || d.institution_id === form._institution_id).map(d => <MenuItem key={d.id} value={d.name}>{d.name}</MenuItem>)}
                     </Select>
                   </FormControl>

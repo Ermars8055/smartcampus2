@@ -3,9 +3,9 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Grid, Dialog, DialogTitle,
   DialogContent, DialogActions, Chip, IconButton, Tooltip, MenuItem,
-  Select, FormControl, InputLabel, Switch, FormControlLabel
+  Select, FormControl, InputLabel, Switch, FormControlLabel, InputAdornment
 } from '@mui/material';
-import { Add, Edit, AccountTree as FlowIcon } from '@mui/icons-material';
+import { Add, Edit, AccountTree as FlowIcon, Search, Clear } from '@mui/icons-material';
 import api from '../services/api';
 import { useMessage } from '../context/MessageContext';
 
@@ -30,6 +30,25 @@ export default function ApprovalFlows() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ document_type: 'INDENT', level: 1, role_name: '', user_id: '', min_amount: 0, max_amount: null, is_active: true });
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterDocType, setFilterDocType] = useState('All');
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [filterRole, setFilterRole] = useState('All');
+
+  const uniqueDocTypes = [...new Set(approvalFlows.map(f => f.document_type))].filter(Boolean);
+  const uniqueRoles = [...new Set(approvalFlows.map(f => f.role_name))].filter(Boolean);
+
+  const filteredFlows = approvalFlows.filter(f => {
+    const matchesSearch = !searchQuery || 
+      [f.document_type, f.role_name, f.user_full_name].some(val => 
+        val && val.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    const matchesDocType = filterDocType === 'All' || f.document_type === filterDocType;
+    const matchesStatus = filterStatus === 'All' || (filterStatus === 'Active' ? f.is_active : !f.is_active);
+    const matchesRole = filterRole === 'All' || f.role_name === filterRole;
+    return matchesSearch && matchesDocType && matchesStatus && matchesRole;
+  });
+
   const load = () => {
     api.get('/api/approval-flows').then(r => setApprovalFlows(r.data || [])).catch(() => setApprovalFlows([]));
     api.get('/api/rbac/roles').then(r => setRoles(r.data || [])).catch(() => setRoles([]));
@@ -42,8 +61,60 @@ export default function ApprovalFlows() {
     <Box>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>Approval Flows</Typography>
 
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <Button variant="contained" startIcon={<Add />} onClick={() => {
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 2, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 2, flex: 1, minWidth: 0, flexWrap: 'wrap' }}>
+          <TextField
+            size="small"
+            placeholder="Search flows..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
+            }}
+            sx={{ minWidth: 200, bgcolor: '#fff' }}
+          />
+          <FormControl size="small" sx={{ minWidth: 150, bgcolor: '#fff' }}>
+            <InputLabel>Document Type</InputLabel>
+            <Select value={filterDocType} label="Document Type" onChange={(e) => setFilterDocType(e.target.value)}>
+              <MenuItem value="All">All Types</MenuItem>
+              {uniqueDocTypes.map(type => (
+                <MenuItem key={type} value={type}>{type}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ minWidth: 120, bgcolor: '#fff' }}>
+            <InputLabel>Status</InputLabel>
+            <Select value={filterStatus} label="Status" onChange={(e) => setFilterStatus(e.target.value)}>
+              <MenuItem value="All">All Status</MenuItem>
+              <MenuItem value="Active">Active</MenuItem>
+              <MenuItem value="Inactive">Inactive</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ minWidth: 150, bgcolor: '#fff' }}>
+            <InputLabel>Role</InputLabel>
+            <Select value={filterRole} label="Role" onChange={(e) => setFilterRole(e.target.value)}>
+              <MenuItem value="All">All Roles</MenuItem>
+              {uniqueRoles.map(role => (
+                <MenuItem key={role} value={role}>{role}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {(searchQuery || filterDocType !== 'All' || filterStatus !== 'All' || filterRole !== 'All') && (
+            <Button 
+              color="error" 
+              onClick={() => {
+                setSearchQuery('');
+                setFilterDocType('All');
+                setFilterStatus('All');
+                setFilterRole('All');
+              }}
+              startIcon={<Clear />}
+            >
+              Clear
+            </Button>
+          )}
+        </Box>
+        <Button variant="contained" startIcon={<Add />} sx={{ whiteSpace: 'nowrap' }} onClick={() => {
           setEditing(null); 
           setForm({ document_type: 'INDENT', level: 1, role_name: '', user_id: '', min_amount: 0, max_amount: null, is_active: true }); 
           setDialog(true);
@@ -60,7 +131,7 @@ export default function ApprovalFlows() {
               <TableCell>Status</TableCell><TableCell>Actions</TableCell>
             </TableRow></TableHead>
             <TableBody>
-              {approvalFlows.map(f => (
+              {filteredFlows.map(f => (
                 <TableRow key={f.id}>
                   <TableCell sx={{ fontWeight: 600 }}>{f.document_type}</TableCell>
                   <TableCell>{f.level}</TableCell>
@@ -133,9 +204,9 @@ export default function ApprovalFlows() {
               </FormControl>
             </Grid>
             <Grid item xs={6}>
-              <FormControl fullWidth><InputLabel>Specific User (Optional)</InputLabel>
-                <Select value={form.user_id || ''} label="Specific User (Optional)" onChange={e => setForm({ ...form, user_id: e.target.value })}>
-                  <MenuItem value=""><em>Any User</em></MenuItem>
+              <FormControl fullWidth><InputLabel shrink>Specific User (Optional)</InputLabel>
+                <Select displayEmpty value={form.user_id || ''} label="Specific User (Optional)" onChange={e => setForm({ ...form, user_id: e.target.value })}>
+                  <MenuItem value="">Any User</MenuItem>
                   {users.map(u => <MenuItem key={u.id} value={u.id}>{u.full_name}</MenuItem>)}
                 </Select>
               </FormControl>

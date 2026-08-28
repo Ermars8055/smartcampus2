@@ -597,13 +597,13 @@ export default function WriteOffs() {
             {createModal.isEquipmentMode ? (
               <Grid item xs={12} sm={3}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Location</InputLabel>
-                  <Select
+                  <InputLabel shrink>Location</InputLabel>
+                  <Select displayEmpty
                     label="Location"
                     value={createModal.items[0]?.location_id || ''}
                     onChange={e => updateItem(0, 'location_id', e.target.value)}
                   >
-                    <MenuItem value=""><em>None</em></MenuItem>
+                    <MenuItem value="">None</MenuItem>
                     {locations.map(l => <MenuItem key={l.id} value={l.id}>{l.location_name}</MenuItem>)}
                   </Select>
                 </FormControl>
@@ -611,13 +611,13 @@ export default function WriteOffs() {
             ) : (
               <Grid item xs={12} sm={3}>
                 <FormControl id="field-department_name" fullWidth size="small">
-                  <InputLabel>Department</InputLabel>
-                  <Select
+                  <InputLabel shrink>Department</InputLabel>
+                  <Select displayEmpty
                     label="Department"
                     value={createModal.department_name}
                     onChange={e => setCreateModal({ ...createModal, department_name: e.target.value })}
                   >
-                    <MenuItem value=""><em>None</em></MenuItem>
+                    <MenuItem value="">None</MenuItem>
                     {departments.map(d => <MenuItem key={d.id} value={d.name}>{d.name}</MenuItem>)}
                   </Select>
                 </FormControl>

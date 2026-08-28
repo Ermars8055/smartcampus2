@@ -129,65 +129,80 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        isExpanded: true,
-                        value: uniqueInstitutions.contains(_selectedInstitution) ? _selectedInstitution : 'All',
-                        hint: const Text('Institution'),
-                        items: uniqueInstitutions.map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
-                          );
-                        }).toList(),
-                        onChanged: (newValue) {
-                          setState(() {
-                            _selectedInstitution = newValue!;
-                          });
-                        },
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Institution', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                        DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            value: uniqueInstitutions.contains(_selectedInstitution) ? _selectedInstitution : 'All',
+                            items: uniqueInstitutions.map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                _selectedInstitution = newValue!;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        isExpanded: true,
-                        value: uniqueDepartments.contains(_selectedDepartment) ? _selectedDepartment : 'All',
-                        hint: const Text('Department'),
-                        items: uniqueDepartments.map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
-                          );
-                        }).toList(),
-                        onChanged: (newValue) {
-                          setState(() {
-                            _selectedDepartment = newValue!;
-                          });
-                        },
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Department', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                        DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            value: uniqueDepartments.contains(_selectedDepartment) ? _selectedDepartment : 'All',
+                            items: uniqueDepartments.map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                _selectedDepartment = newValue!;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        isExpanded: true,
-                        value: uniqueBuildings.contains(_selectedBuilding) ? _selectedBuilding : 'All',
-                        hint: const Text('Building'),
-                        items: uniqueBuildings.map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
-                          );
-                        }).toList(),
-                        onChanged: (newValue) {
-                          setState(() {
-                            _selectedBuilding = newValue!;
-                          });
-                        },
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Building', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                        DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            value: uniqueBuildings.contains(_selectedBuilding) ? _selectedBuilding : 'All',
+                            items: uniqueBuildings.map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                _selectedBuilding = newValue!;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

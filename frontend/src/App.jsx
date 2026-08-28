@@ -31,6 +31,8 @@ import GateEntry from './pages/GateEntry';
 import Invoices from './pages/Invoices';
 import InvoiceTracking from './pages/InvoiceTracking';
 import RegisterInvoice from './pages/RegisterInvoice';
+import CreditNotes from './pages/CreditNotes';
+import CreditNoteForm from './pages/CreditNoteForm';
 import GRNPage from './pages/GRN';
 import Equipment from './pages/Equipment';
 import EquipmentQRPrint from './pages/EquipmentQRPrint';
@@ -42,13 +44,14 @@ import GatePasses from './pages/GatePasses';
 import PendingAcknowledgments from './pages/PendingAcknowledgments';
 import Inventory from './pages/Inventory';
 import Intelligence from './pages/Intelligence';
-import Reports from './pages/Reports';
+import DynamicReport from './pages/DynamicReport';
 import IssueSummaryReport from './pages/IssueSummaryReport';
 import RateAnalysisReport from './pages/RateAnalysisReport';
 import ReceiptSummaryReport from './pages/ReceiptSummaryReport';
 import DepartmentWiseInventoryReport from './pages/DepartmentWiseInventoryReport';
 import DepartmentWiseEquipmentReport from './pages/DepartmentWiseEquipmentReport';
 import DepartmentWiseEquipmentDetailsReport from './pages/DepartmentWiseEquipmentDetailsReport';
+import CalibrationDetailReport from './pages/CalibrationDetailReport';
 import EquipmentCountReport from './pages/EquipmentCountReport';
 import PendingGatepassReturnsReport from './pages/PendingGatepassReturnsReport';
 import CallStatusReport from './pages/CallStatusReport';
@@ -153,6 +156,9 @@ function AppRoutes() {
         <Route path="invoice-tracking" element={<InvoiceTracking />} />
         <Route path="invoices/register" element={<RegisterInvoice />} />
         <Route path="invoices/edit/:id" element={<RegisterInvoice />} />
+        <Route path="credit-notes" element={<CreditNotes />} />
+        <Route path="credit-notes/new" element={<CreditNoteForm />} />
+        <Route path="credit-notes/edit/:id" element={<CreditNoteForm />} />
         <Route path="grn" element={<GRNPage />} />
         <Route path="equipment" element={<Equipment />} />
         <Route path="equipment/print-qr" element={<EquipmentQRPrint />} />
@@ -166,7 +172,14 @@ function AppRoutes() {
         <Route path="gate-passes" element={<GatePasses />} />
         <Route path="inventory" element={<Inventory />} />
         <Route path="intelligence" element={<Intelligence />} />
-        <Route path="reports" element={<Reports />} />
+        <Route path="reports/stock" element={<DynamicReport title="Stock Report" description="Download and analyze operational data" endpoint="/api/reports/stock" hasWarehouseFilter={true} downloadFilename="stock_report" />} />
+        <Route path="reports/consumption" element={<DynamicReport title="Consumption Report" description="Download and analyze operational data" endpoint="/api/reports/consumption" downloadFilename="consumption_report" />} />
+        <Route path="reports/pr-status" element={<DynamicReport title="PR Status Report" description="Download and analyze operational data" endpoint="/api/reports/pr-status" downloadFilename="pr_status_report" />} />
+        <Route path="reports/po-status" element={<DynamicReport title="PO Status Report" description="Download and analyze operational data" endpoint="/api/reports/po-status" downloadFilename="po_status_report" />} />
+        <Route path="reports/movement" element={<DynamicReport title="Material Movement Report" description="Download and analyze operational data" endpoint="/api/reports/movement" downloadFilename="material_movement_report" />} />
+        <Route path="reports/return-summary" element={<DynamicReport title="Return Summary Report" description="Download and analyze operational data" endpoint="/api/reports/return-summary" downloadFilename="return_summary_report" />} />
+        <Route path="reports/equipment-writeoff" element={<DynamicReport title="Equipment Write-off Report" description="Download and analyze operational data" endpoint="/api/reports/equipment-writeoffs" downloadFilename="equipment_writeoff_report" />} />
+        
         <Route path="reports/issue-summary" element={<IssueSummaryReport />} />
         <Route path="reports/rate-analysis" element={<RateAnalysisReport />} />
         <Route path="reports/equipment-count" element={<EquipmentCountReport />} />
@@ -174,6 +187,7 @@ function AppRoutes() {
         <Route path="reports/department-inventory" element={<DepartmentWiseInventoryReport />} />
         <Route path="reports/department-equipment" element={<DepartmentWiseEquipmentReport />} />
         <Route path="reports/department-equipment-details" element={<DepartmentWiseEquipmentDetailsReport />} />
+        <Route path="reports/calibration-details" element={<CalibrationDetailReport />} />
         <Route path="reports/pending-gatepass-returns" element={<PendingGatepassReturnsReport />} />
         <Route path="reports/call-status" element={<CallStatusReport />} />
         <Route path="admin" element={<Navigate to="/admin/configurations" replace />} />

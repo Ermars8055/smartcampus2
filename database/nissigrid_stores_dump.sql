@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict Rqlne0BBAYxxvSII2G8UurRoTaBMgWJEDbya3kbEtgASfOtbIbn6kLHWWzujQNh
+\restrict bRqgE6beImfTYFMgJvWImDA8lihhBqMlaAprp6OTLTdAmPTGowvKF9KgWj7cbfg
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
--- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
+-- Dumped by pg_dump version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -659,6 +659,161 @@ ALTER SEQUENCE public.contracts_id_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.contracts_id_seq OWNED BY public.contracts.id;
+
+
+--
+-- Name: credit_note_approvals; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.credit_note_approvals (
+    id integer NOT NULL,
+    credit_note_id integer NOT NULL,
+    approval_flow_id integer NOT NULL,
+    approver_id integer NOT NULL,
+    remarks text,
+    approved_at timestamp without time zone
+);
+
+
+ALTER TABLE public.credit_note_approvals OWNER TO postgres;
+
+--
+-- Name: credit_note_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.credit_note_approvals_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.credit_note_approvals_id_seq OWNER TO postgres;
+
+--
+-- Name: credit_note_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.credit_note_approvals_id_seq OWNED BY public.credit_note_approvals.id;
+
+
+--
+-- Name: credit_note_items; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.credit_note_items (
+    id integer NOT NULL,
+    credit_note_id integer NOT NULL,
+    material_id integer,
+    description character varying(255),
+    hsn_sac character varying(50),
+    quantity double precision NOT NULL,
+    rate double precision NOT NULL,
+    uom character varying(50),
+    discount_percent double precision,
+    cgst_rate double precision,
+    sgst_rate double precision,
+    igst_rate double precision,
+    cgst_amount double precision,
+    sgst_amount double precision,
+    igst_amount double precision,
+    taxable_amount double precision,
+    amount double precision NOT NULL,
+    remarks text
+);
+
+
+ALTER TABLE public.credit_note_items OWNER TO postgres;
+
+--
+-- Name: credit_note_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.credit_note_items_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.credit_note_items_id_seq OWNER TO postgres;
+
+--
+-- Name: credit_note_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.credit_note_items_id_seq OWNED BY public.credit_note_items.id;
+
+
+--
+-- Name: credit_notes; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.credit_notes (
+    id integer NOT NULL,
+    tenant_id integer NOT NULL,
+    site_id integer NOT NULL,
+    credit_note_number character varying(100) NOT NULL,
+    date date NOT NULL,
+    vendor_id integer NOT NULL,
+    invoice_id integer,
+    consignee_id integer,
+    buyer_id integer,
+    original_invoice_number character varying(100),
+    original_invoice_date date,
+    reference_number character varying(100),
+    reference_date date,
+    buyer_order_number character varying(100),
+    buyer_order_date date,
+    dispatch_doc_number character varying(100),
+    dispatched_through character varying(100),
+    destination character varying(255),
+    terms_of_delivery text,
+    total_taxable_amount double precision,
+    total_cgst double precision,
+    total_sgst double precision,
+    total_igst double precision,
+    total_discount double precision,
+    total_amount double precision,
+    status character varying(50),
+    current_approval_level integer,
+    remarks text,
+    scan_url character varying(500),
+    created_by_id integer NOT NULL,
+    approved_by_id integer,
+    approved_at timestamp without time zone,
+    is_deleted boolean,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+ALTER TABLE public.credit_notes OWNER TO postgres;
+
+--
+-- Name: credit_notes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.credit_notes_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.credit_notes_id_seq OWNER TO postgres;
+
+--
+-- Name: credit_notes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.credit_notes_id_seq OWNED BY public.credit_notes.id;
 
 
 --
@@ -4087,6 +4242,27 @@ ALTER TABLE ONLY public.contracts ALTER COLUMN id SET DEFAULT nextval('public.co
 
 
 --
+-- Name: credit_note_approvals id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_note_approvals ALTER COLUMN id SET DEFAULT nextval('public.credit_note_approvals_id_seq'::regclass);
+
+
+--
+-- Name: credit_note_items id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_note_items ALTER COLUMN id SET DEFAULT nextval('public.credit_note_items_id_seq'::regclass);
+
+
+--
+-- Name: credit_notes id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_notes ALTER COLUMN id SET DEFAULT nextval('public.credit_notes_id_seq'::regclass);
+
+
+--
 -- Name: current_stock id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4602,7 +4778,7 @@ ALTER TABLE ONLY public.write_offs ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-fffe4e467573
+8bd5c0c33801
 \.
 
 
@@ -4714,6 +4890,7 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 102	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00031	You have been assigned to complaint CMP-00031. Nature of complaint: not working	ComplaintAssigned	467	\N	f	f	2026-08-19 17:34:08.563385	\N	35
 103	2	2	Indent Approved	Success	Indent IND-00032 Approved	The indent (IND-00032) has been approved by EastPoint Admin.	IndentApproved	247	\N	f	f	2026-08-19 17:51:35.701871	\N	3
 104	2	2	Pending Action	Warning	Action Required: Vendor VND-00016 Approval	\N	Vendor	77	\N	t	t	2026-08-19 19:09:08.444675	2026-08-19 19:09:08.44437	\N
+114	2	2	Contract Approved	Success	Contract CNT-00011 Approved	The contract (CNT-00011) has been approved by EastPoint Admin.	ContractApproved	11	\N	f	f	2026-08-27 14:41:31.467964	\N	3
 98	2	2	Indent Approved	Success	Indent IND-00031 Approved	The indent (IND-00031) has been approved by EastPoint Admin.	IndentApproved	246	\N	t	t	2026-08-19 17:05:12.989625	2026-08-19 19:09:20.266283	3
 105	2	2	Contract Approved	Success	Contract CNT-00009 Approved	The contract (CNT-00009) has been approved by EastPoint Admin.	ContractApproved	9	\N	f	f	2026-08-19 19:17:25.43389	\N	3
 106	2	2	Contract Approved	Success	Contract CNT-00010 Approved	The contract (CNT-00010) has been approved by EastPoint Admin.	ContractApproved	10	\N	f	f	2026-08-19 19:27:39.740154	\N	3
@@ -4724,6 +4901,13 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 111	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00034) have been issued. Please review and acknowledge receipt.	IndentIssued	249	\N	f	f	2026-08-26 17:54:44.356557	\N	3
 112	2	2	Complaint Assigned	Info	Complaint Assigned: PM-202608-EPCMS-POST OT -PM-116	You have been assigned to complaint PM-202608-EPCMS-POST OT -PM-116. Nature of complaint: Scheduled Preventive Maintenance	ComplaintAssigned	443	\N	f	f	2026-08-27 12:06:47.975241	\N	34
 113	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00033	You have been assigned to complaint CMP-00033. Nature of complaint: need installation	ComplaintAssigned	469	\N	f	f	2026-08-27 13:04:01.430553	\N	35
+115	2	2	Contract Approved	Success	Contract CNT-00012 Approved	The contract (CNT-00012) has been approved by EastPoint Admin.	ContractApproved	12	\N	f	f	2026-08-27 14:47:02.28443	\N	3
+116	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00034	You have been assigned to complaint CMP-00034. Nature of complaint: need installation	ComplaintAssigned	470	\N	f	f	2026-08-27 14:57:02.959234	\N	34
+117	2	2	Indent Approved	Success	Indent IND-00035 Approved	The indent (IND-00035) has been approved by EastPoint Admin.	IndentApproved	250	\N	f	f	2026-08-27 15:14:23.78353	\N	3
+118	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00035	You have been assigned to complaint CMP-00035. Nature of complaint: need installation	ComplaintAssigned	471	\N	f	f	2026-08-27 15:23:29.332724	\N	35
+119	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00036	You have been assigned to complaint CMP-00036. Nature of complaint: AC problem	ComplaintAssigned	472	\N	f	f	2026-08-27 15:42:07.29086	\N	34
+120	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00035) have been issued. Please review and acknowledge receipt.	IndentIssued	250	\N	f	f	2026-08-27 15:46:20.45206	\N	3
+121	2	2	Contract Approved	Success	Contract CNT-00016 Approved	The contract (CNT-00016) has been approved by EastPoint Admin.	ContractApproved	16	\N	f	f	2026-08-27 17:10:28.46131	\N	3
 \.
 
 
@@ -4744,24 +4928,12 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 18	2	2	PURCHASE_ORDER	2	CEO	0	\N	\N	t
 19	2	2	PURCHASE_REQUEST	1	Store Manager	0	\N	\N	t
 45	2	2	INDENT	1	Department Head	0	\N	\N	f
-95	2	2	VENDOR	2	Admin	0	\N	\N	f
 44	2	2	INDENT	1	CEO	0	\N	19	t
 46	2	2	INDENT	1	Institution Head	0	\N	\N	f
+95	2	2	VENDOR	2	Admin	0	\N	\N	f
 103	2	2	VENDOR	2	Admin	0	\N	\N	f
-104	2	2	INDENT	1	Admin	0	\N	\N	f
-106	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-107	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
-108	2	2	INDENT	2	Admin	0	\N	\N	f
-109	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
-110	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 111	2	2	VENDOR	2	Admin	0	\N	\N	f
-13	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
-14	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-15	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
-20	2	2	INDENT	1	Admin	0	\N	\N	f
-21	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 22	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-23	2	2	INDENT	2	Admin	0	\N	\N	f
 24	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 25	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 26	2	2	INDENT	1	Admin	0	\N	\N	f
@@ -4773,13 +4945,25 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 11	2	2	INDENT	2	Admin	0	\N	\N	f
 12	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 49	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-96	2	2	INDENT	1	Admin	0	\N	\N	t
-98	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
-99	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
-100	2	2	INDENT	2	Admin	0	\N	\N	t
-101	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
-102	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
+96	2	2	INDENT	1	Admin	0	\N	\N	f
+98	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
+99	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
+100	2	2	INDENT	2	Admin	0	\N	\N	f
+101	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
+102	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+104	2	2	INDENT	1	Admin	0	\N	\N	f
+106	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
+107	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
+108	2	2	INDENT	2	Admin	0	\N	\N	f
+109	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
+13	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
+14	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
+15	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
+20	2	2	INDENT	1	Admin	0	\N	\N	t
+21	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
+23	2	2	INDENT	2	Admin	0	\N	\N	t
 105	2	2	CONTRACT	1	Admin	0	\N	\N	t
+87	2	2	PURCHASE_ORDER	1	Technician	5000	123456789	\N	f
 54	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 56	2	2	INDENT	2	Admin	0	\N	\N	f
 59	2	2	INDENT	1	Admin	0	\N	\N	f
@@ -4801,13 +4985,16 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 76	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 77	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 85	2	2	INDENT	2	Admin	0	\N	\N	f
-87	2	2	PURCHASE_ORDER	1	Technician	5000	123456789	\N	f
 88	2	2	INDENT	1	Admin	0	\N	\N	f
 90	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 91	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 92	2	2	INDENT	2	Admin	0	\N	\N	f
 93	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 94	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+110	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+40	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
+41	2	2	INDENT	2	Admin	0	\N	\N	f
+42	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 51	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 52	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 89	2	2	CONTRACT	1	Admin	0	\N	\N	f
@@ -4827,9 +5014,6 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 81	2	2	CONTRACT	1	Admin	0	\N	\N	f
 86	2	2	VENDOR	2	Admin	0	\N	\N	f
 39	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
-40	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-41	2	2	INDENT	2	Admin	0	\N	\N	f
-42	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 43	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 47	2	2	INDENT	1	Admin	0	\N	\N	f
 48	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
@@ -6353,6 +6537,7 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 461	2	2	CMP-00025	2026-08-19	16:47	Computer Science & Engineering	\N	\N		Fan is not working	Fan is not working		Registered	\N	\N	3	\N	f	2026-08-19 16:47:41.27962	2026-08-19 16:47:41.279665	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 469	2	2	CMP-00033	2026-08-27	13:03	Child Health Nursing	\N	\N		need installation	installation\n		Closed	35	\N	3	\N	f	2026-08-27 13:03:47.494949	2026-08-27 13:07:24.691489	\N	f	\N	\N	\N		\N	\N	\N	\N	Installation	f	3	2026-08-27 07:37:23.627213	3	2026-08-27 07:37:24.689061	fied	installed		t	2026-08-27	13:06	{}
 464	2	2	CMP-00028	2026-08-19	16:53	Medical Surgical Nursing	\N	\N		need training	how to use it	usain	Closed	35	\N	3	\N	f	2026-08-19 16:53:58.079011	2026-08-19 17:03:11.806033	\N	f	\N	\N	\N	trained	\N	\N	\N	\N	User Training	f	3	2026-08-19 11:33:10.929709	3	2026-08-19 11:33:11.804801	done	trained	\N	\N	\N	\N	\N
+471	2	2	CMP-00035	2026-08-27	15:21	Electrotherapy Lab	\N	\N		need installation	installation		Closed	35	\N	3	\N	f	2026-08-27 15:21:09.848089	2026-08-27 15:25:49.800118	\N	f	\N	\N	\N		\N	12	\N	1615	Installation	f	3	2026-08-27 09:55:48.922981	3	2026-08-27 09:55:49.797378	done	installed		t	2026-08-27	15:24	{}
 466	2	2	CMP-00030	2026-08-19	17:32	Electrotherapy Lab	\N	\N		need training	need training	messi	Closed	35	\N	3	\N	f	2026-08-19 17:32:37.906319	2026-08-19 17:33:27.708296	\N	f	\N	\N	\N	done	\N	\N	\N	\N	User Training	f	3	2026-08-19 12:03:27.081112	3	2026-08-19 12:03:27.707708	yes	trained	\N	\N	\N	\N	\N
 467	2	2	CMP-00031	2026-08-19	17:33	Mental Health Nursing	\N	\N		not working	not working	suraj	Closed	35	\N	3	\N	f	2026-08-19 17:33:59.011076	2026-08-19 17:34:51.469115	\N	f	\N	\N	\N	done	\N	\N	\N	\N	Machine Not Working	f	3	2026-08-19 12:04:51.006803	3	2026-08-19 12:04:51.468779	done	fixed	\N	\N	\N	\N	\N
 468	2	2	CMP-00032	2026-08-26	15:19	HEALTH 	8	\N		pc not working	pc not working	Pradnesh A	Closed	34	\N	3	\N	f	2026-08-26 15:19:11.721592	2026-08-26 15:38:54.435465	\N	f	\N	\N	\N		\N	\N	\N	1607	General Complaint	f	3	2026-08-26 10:08:49.606651	3	2026-08-26 10:08:54.434811	\nResolution Entered (Action Taken) \n	Closure Reason \n	\N	\N	\N	\N	\N
@@ -6361,6 +6546,8 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 465	2	2	CMP-00029	2026-08-19	17:04	MICU/EICU	\N	\N		not working	not working properly	rio	Closed	34	\N	3	\N	f	2026-08-19 17:04:18.049899	2026-08-19 17:10:04.960124	\N	t	\N	\N	\N	not working	\N	\N	\N	1608	Machine Not Working	f	3	2026-08-19 11:40:04.214735	3	2026-08-19 11:40:04.958474	yes	work done	\N	\N	\N	\N	\N
 463	2	2	CMP-00027	2026-08-19	16:49	Biochemistry	\N	\N		Installation	Installation		In Progress	35	\N	3	\N	f	2026-08-19 16:49:16.095694	2026-08-26 16:39:09.211212	\N	f	\N	\N	\N		\N	\N	\N	1605	Installation	f	\N	\N	\N	\N			\N	\N	\N	\N	\N
 442	2	2	PM-202608-EPCMS-POST OT -SYP-061	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	In Progress	34	\N	3	\N	f	2026-08-11 18:37:11.684778	2026-08-26 17:16:20.524298	\N	f	\N	\N	\N		\N	\N	\N	1506	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+470	2	2	CMP-00034	2026-08-27	14:56	Medical-Surgical Nursing	\N	\N		need installation	need installation\n		Material Pending	34	\N	3	\N	f	2026-08-27 14:56:42.343441	2026-08-27 15:13:35.469717	\N	t	\N	\N	\N		\N	\N	\N	\N	Installation	f	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N
+472	2	2	CMP-00036	2026-08-27	15:41	HEALTH 	7	237		AC problem	macine problem 	Pradnesh A	Material Pending	34	\N	3	\N	f	2026-08-27 15:41:43.135145	2026-08-27 15:42:35.763186	\N	t	\N	\N	\N		\N	\N	\N	1609	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N
 \.
 
 
@@ -6389,6 +6576,12 @@ COPY public.contract_approvals (id, contract_id, approval_flow_id, approver_id, 
 18	9	84	3	\N	2026-08-19 19:17:25.435515
 19	10	89	3	\N	2026-08-19 19:27:35.307618
 20	10	84	3	\N	2026-08-19 19:27:39.74146
+21	11	105	3	\N	2026-08-27 14:41:26.312445
+22	11	84	3	\N	2026-08-27 14:41:31.473669
+23	12	105	3	\N	2026-08-27 14:46:57.72802
+24	12	84	3	\N	2026-08-27 14:47:02.286369
+25	16	105	3	\N	2026-08-27 17:10:24.463785
+26	16	84	3	\N	2026-08-27 17:10:28.466893
 \.
 
 
@@ -6407,6 +6600,12 @@ COPY public.contract_items (id, contract_id, material_id, equipment_id, uom, rat
 8	8	3474	\N	NOS	1098	12	\N	\N	0	\N			\N	\N
 9	9	\N	1401		100	18	\N	\N	0	\N			2	f
 10	10	\N	1614		3500	18	\N	\N	0	\N			0	f
+11	11	4877	\N	NOS	680	18	\N	2	0	2			0	f
+12	12	\N	1615		600	12	\N	\N	0	\N			0	f
+13	13	2565	\N	NOS	2000	12	\N	2	0	2			0	f
+14	14	\N	1612		0	18	\N	\N	0	\N			0	f
+15	15	2565	\N	NOS	1234	12	\N	1	0	1			0	f
+16	16	\N	1614		3500	18	\N	\N	0	\N			0	f
 \.
 
 
@@ -6424,7 +6623,37 @@ COPY public.contracts (id, tenant_id, site_id, contract_number, contract_type, v
 7	2	2	CNT-00007	RC	76	3	301	2026-08-24	2026-09-24	\N				f	f	Approved	3	3	2026-08-18 07:18:18.020239	f	2026-08-18 12:47:40.794077	2026-08-18 12:48:18.027478		2
 8	2	2	CNT-00008	RC	73	3	304	2026-08-10	2026-08-19	\N				f	f	Approved	3	3	2026-08-18 07:21:33.115157	f	2026-08-18 12:51:02.449778	2026-08-18 12:51:33.121418		2
 9	2	2	CNT-00009	CMC	69	3	264	2026-08-19	2027-08-18	175000	Payment will be made quarterly against submission of valid invoices and satisfactory service reports. Payment shall be processed within 30 days from the date of invoice approval. Applicable taxes will be paid as per prevailing GST regulations. Any disputed invoice amount may be withheld until the discrepancy is resolved.	The contract is valid for one year from the start date and may be renewed subject to mutual written agreement between the institution and vendor. Renewal terms, pricing, scope of services, and SLA conditions shall be reviewed before renewal. Either party may initiate renewal discussions at least 30 days before the contract expiry date.	Vendor shall respond to critical service requests within 4 hours and commence corrective action within 8 hours. Preventive maintenance shall be performed as per the agreed maintenance schedule. Critical equipment downtime shall be minimized, and service reports must be submitted after each maintenance visit. Repeated SLA violations may result in applicable penalties.	t	t	Approved	3	3	2026-08-19 13:47:25.432999	f	2026-08-19 19:16:47.267736	2026-08-19 19:17:25.434851	The contract does not cover major equipment replacement, structural modifications, damage caused by misuse, accidents, natural disasters, unauthorized repairs, or consumables not specifically included in the contract. Any additional work outside the agreed scope will require prior approval and may be charged separately.	2
+15	2	2	CNT-00015	RC	78	11	266	2026-08-27	2027-08-26	\N				f	f	Submitted	3	\N	\N	f	2026-08-27 14:56:03.183536	2026-08-27 14:56:24.144011		1
 10	2	2	CNT-00010	AMC	73	5	335	2026-08-19	2027-08-18	500000	Payment will be made quarterly against submission of valid invoices and satisfactory service reports. Payment shall be processed within 30 days from the date of invoice approval. Applicable taxes will be paid as per prevailing GST regulations. Any disputed invoice amount may be withheld until the discrepancy is resolved.	The contract is valid for one year from the start date and may be renewed subject to mutual written agreement between the institution and vendor. Renewal terms, pricing, scope of services, and SLA conditions shall be reviewed before renewal. Either party may initiate renewal discussions at least 30 days before the contract expiry date.	Vendor shall respond to critical service requests within 4 hours and commence corrective action within 8 hours. Preventive maintenance shall be performed as per the agreed maintenance schedule. Critical equipment downtime shall be minimized, and service reports must be submitted after each maintenance visit. Repeated SLA violations may result in applicable penalties.	f	f	Approved	3	3	2026-08-19 13:57:39.739207	f	2026-08-19 19:27:19.205109	2026-08-19 19:27:39.740907	The contract does not cover major equipment replacement, structural modifications, damage caused by misuse, accidents, natural disasters, unauthorized repairs, or consumables not specifically included in the contract. Any additional work outside the agreed scope will require prior approval and may be charged separately.	2
+14	2	2	CNT-00014	AMC	78	4	279	2026-08-31	2027-08-30	30000				f	f	Submitted	3	\N	\N	f	2026-08-27 14:55:15.424672	2026-08-27 15:48:44.675307		1
+11	2	2	CNT-00011	RC	78	9	314	2026-08-31	2026-09-30	\N				f	f	Approved	3	3	2026-08-27 09:11:31.462533	f	2026-08-27 14:40:56.356936	2026-08-27 14:41:31.471642		2
+16	2	2	CNT-00016	CMC	71	3	308	2026-08-19	2027-08-18	150000				t	t	Approved	3	3	2026-08-27 11:40:28.45723	f	2026-08-27 15:24:40.795135	2026-08-27 17:10:28.464593		2
+12	2	2	CNT-00012	AMC	76	12	329	2026-08-24	2026-10-31	50000				f	f	Approved	3	3	2026-08-27 09:17:02.282836	f	2026-08-27 14:45:22.638761	2026-08-27 14:47:02.285591		2
+13	2	2	CNT-00013	RC	63	11	266	2026-08-27	2026-08-31	\N				f	f	Draft	3	\N	\N	f	2026-08-27 14:50:03.665159	2026-08-27 14:50:03.665172		1
+\.
+
+
+--
+-- Data for Name: credit_note_approvals; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.credit_note_approvals (id, credit_note_id, approval_flow_id, approver_id, remarks, approved_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: credit_note_items; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.credit_note_items (id, credit_note_id, material_id, description, hsn_sac, quantity, rate, uom, discount_percent, cgst_rate, sgst_rate, igst_rate, cgst_amount, sgst_amount, igst_amount, taxable_amount, amount, remarks) FROM stdin;
+\.
+
+
+--
+-- Data for Name: credit_notes; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.credit_notes (id, tenant_id, site_id, credit_note_number, date, vendor_id, invoice_id, consignee_id, buyer_id, original_invoice_number, original_invoice_date, reference_number, reference_date, buyer_order_number, buyer_order_date, dispatch_doc_number, dispatched_through, destination, terms_of_delivery, total_taxable_amount, total_cgst, total_sgst, total_igst, total_discount, total_amount, status, current_approval_level, remarks, scan_url, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at) FROM stdin;
 \.
 
 
@@ -9270,7 +9499,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 3868	2	2	2565	63	1	2026-08-06 14:53:32.831506
 3867	2	2	2338	62	50	2026-08-12 11:07:29.314793
 3013	2	2	2751	62	22	2026-08-14 12:56:12.832462
-2854	2	2	2564	62	24	2026-08-18 11:24:08.807234
 3690	2	2	3507	62	81	2026-08-18 11:25:58.079746
 2855	2	2	2565	62	51	2026-08-18 11:31:10.256609
 4136	2	2	4604	62	522	2026-08-06 13:36:11.191772
@@ -9311,6 +9539,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 4171	2	2	4639	62	670	2026-08-06 13:36:11.19188
 4172	2	2	4640	62	246	2026-08-06 13:36:11.191883
 4173	2	2	4641	62	797	2026-08-06 13:36:11.191886
+2854	2	2	2564	62	35	2026-08-27 15:44:28.098007
 4174	2	2	4642	62	688	2026-08-06 13:36:11.191889
 4175	2	2	4643	62	552	2026-08-06 13:36:11.191892
 4176	2	2	4644	62	111	2026-08-06 13:36:11.191894
@@ -9545,6 +9774,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2775	2	2	2481	62	27	2026-08-18 11:13:00.275373
 3660	2	2	3474	62	59	2026-08-19 17:07:51.183648
 2734	2	2	2435	62	194	2026-08-26 15:31:43.298643
+4404	2	2	4877	62	9	2026-08-27 15:46:20.452707
 \.
 
 
@@ -10257,7 +10487,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 93	2	2	WRITE_OFF	WO	11
 100	2	2	EQUIPMENT_WRITE_OFF	EWO	2
 72	2	2	WAREHOUSE	WH	14
-75	2	2	GRN	GRN	17
 112	2	2	WORK_ORDER	WO	8
 149	2	2	PURCHASE_ORDER_1	EPCMSR/PO	1
 136	2	2	MATERIAL_69	HSK	71
@@ -10269,14 +10498,15 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 138	2	2	EQP_110	EQP_110	3
 94	2	2	PURCHASE_ORDER_11	EPAHS/PO	6
 120	2	2	MATERIAL_80	CHE	267
+78	2	2	COMPLAINT	CMP	36
 151	2	2	EQP_208	EQP_208	1
 70	2	2	QUOTATION_REQUEST	QR	43
+66	2	2	INDENT	IND	36
 68	2	2	PURCHASE_REQUEST	PR	18
-78	2	2	COMPLAINT	CMP	33
 69	2	2	PURCHASE_ORDER	PO	39
-96	2	2	CONTRACT	CNT	10
-66	2	2	INDENT	IND	34
-67	2	2	ISSUE	ISS	23
+75	2	2	GRN	GRN	19
+67	2	2	ISSUE	ISS	24
+96	2	2	CONTRACT	CNT	16
 \.
 
 
@@ -10300,6 +10530,7 @@ COPY public.equipment_history (id, equipment_id, event_type, event_date, descrip
 13	1615	Manual Registration	2026-08-19 17:42:55.813968	Equipment added manually	\N	3
 14	1608	Marked as RBER	2026-08-26 00:00:00	Beyond the worth of equipment 	\N	3
 15	1616	Manual Registration	2026-08-27 13:00:36.332362	Equipment added manually	\N	3
+16	1615	Installation	2026-08-27 15:25:49.801188	Installation completed via Complaint Ticket CMP-00035	\N	3
 \.
 
 
@@ -10309,7 +10540,9 @@ COPY public.equipment_history (id, equipment_id, event_type, event_date, descrip
 
 COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id, grn_id, grn_item_id, serial_number, serial_number_status, is_biomedical, requires_installation, installation_status, installation_date, installation_report_url, installation_remarks, warehouse_id, project_id, status, created_at, updated_at, warranty_available, warranty_expiry_date, amc_cmc_status, amc_cmc_end_date, amc_po_number, last_pm_date, next_pm_due_date, last_calibration_date, next_calibration_due_date, rental_agreement_number, rental_start_date, rental_end_date, rental_vendor_id, location_id, contact_number, institution_id, po_id, make, model, equipment_cost, equipment_category, serial_number_photo_url, equipment_photo_url, installed_by, amc_cost, pm_required, calibration_required, battery_details, procurement_type, rental_type, rental_cost, billing_frequency, cost_per_test, linked_reagents, agreement_status, renewal_date, expected_return_date, rental_status, warranty_end_date, rental_agreement_document, year_of_purchase, po_number, po_date, rber_reason, amc_cmc_required, amc_cmc_start_date) FROM stdin;
 1507	2	2	EPCMS-POST OT -PM-116	3899	\N	\N	301410M1380490002	Captured	t	f	Not Required	\N	\N	\N	62	\N	Under maintenance	2026-08-05 19:04:45.381725	2026-08-27 12:07:08.960642	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-1616	2	2	EPSN-208-CHAI-00001	4877	\N	\N	38579C	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-27 13:00:36.277739	2026-08-27 07:46:00.479182	t	2030-08-27	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	85	\N	8	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+1616	2	2	EPSN-208-CHAI-00001	4877	\N	\N	38579C	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-27 13:00:36.277739	2026-08-27 10:19:45.948861	t	2030-08-27	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	85	\N	8	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+1615	2	2	NRCN-109-00X1-00002	2564	\N	\N	1234L	Pending Update	f	f	Installed	2026-08-27 09:55:49.798232	/api/uploads/complaints/2/20260827_095543_0c00352e.jpg	\N	62	\N	Operational	2026-08-19 17:42:55.780212	2026-08-27 15:25:49.799168	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	79	\N	9	\N	\N	\N	\N	\N	/api/uploads/complaints/2/20260827_095543_2d524a8c.jpg	/api/uploads/complaints/2/20260827_095543_c400a8c7.jpg	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+1609	2	2	EPAHS-ER-ASDC-00002	4022	\N	\N	NA	Captured	f	t	Not Required	\N	\N	\N	62	\N	Spare Requested	2026-08-17 13:08:06.237234	2026-08-27 15:42:57.677851	t	2027-08-17	AMC	2028-08-17	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	11	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	t	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N
 1469	2	2	EPCMS-PHYSIO-SIMU-001	4052	\N	\N	PSD-1824	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.211283	2026-08-11 18:37:11.375202	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	BMS	PHYSIOSTM 1	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1277	2	2	EPCMS-ORTHO OPD-VBOX-019	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.050995	2026-08-05 19:04:43.050998	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	123	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1278	2	2	EPCMS-ORTHO OPD-VBOX-020	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.051	2026-08-05 19:04:43.051003	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	123	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -10441,7 +10674,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1132	2	2	EPCMS-MICU-SYP-034	3900	\N	\N	0010312624A01759	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906305	2026-08-10 17:17:54.221467	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1133	2	2	EPCMS-MICU-SYP-035	3900	\N	\N	0010312624A01700	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.90631	2026-08-10 17:17:54.22147	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1134	2	2	EPCMS-MICU-SYP-036	3900	\N	\N	0010312624A01751	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906316	2026-08-10 17:17:54.221473	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-1615	2	2	NRCN-109-00X1-00002	2564	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-19 17:42:55.780212	2026-08-19 12:13:06.85142	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	79	\N	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1135	2	2	EPCMS-MICU-SYP-037	3900	\N	\N	0010312624A01752	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906323	2026-08-10 17:17:54.221476	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1136	2	2	EPCMS-MICU-SYP-038	3900	\N	\N	0010312624A01767	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906328	2026-08-10 17:17:54.221479	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1137	2	2	EPCMS-MICU-SYP-039	3900	\N	\N	SM3-4B034946	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906334	2026-08-10 17:17:54.221482	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -10737,10 +10969,9 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 835	2	2	EPCMS-210-BPA-014	3903	\N	\N	BPM 2021 053102865	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.480118	2026-08-05 19:04:39.480126	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	87	\N	\N	\N	\N	MI HEART 101	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 836	2	2	EPCMS-211-BPA-015	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.484247	2026-08-05 19:04:39.484255	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	88	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1607	2	2	EPCET-BME-3OTG-00001	3993	\N	\N	2002003	Captured	f	t	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 12:44:55.931347	2026-08-26 15:23:26.318092	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	97	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-805	2	2	EPCMS-102-ESA-001	3896	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.217136	2026-08-26 10:46:52.466917	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 837	2	2	EPCMS-213-BPA-016	3903	\N	\N	BPM 202105 3102878	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.491005	2026-08-05 19:04:39.491014	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	MI EVIDA	MI HEART 101	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 838	2	2	EPCMS-213-VBOX-007	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.491018	2026-08-05 19:04:39.491021	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-1609	2	2	EPAHS-ER-ASDC-00002	4022	\N	\N	NA	Captured	f	t	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 13:08:06.237234	2026-08-27 07:00:31.987789	t	2027-08-17	AMC	2028-08-17	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	11	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	t	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N
+805	2	2	EPCMS-102-ESA-001	3896	\N	\N	\N	Pending Update	t	t	Pending Installation	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.217136	2026-08-27 12:07:46.705058	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 839	2	2	EPCMS-214-ECG-003	3902	\N	\N	DETE3A26885	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.495765	2026-08-05 19:04:39.495774	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	90	\N	\N	\N	BPL	CARIDO HEART 6208	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 840	2	2	EPCMS-216-BPA-017	3895	\N	\N	RH014060	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.502132	2026-08-05 19:04:39.50214	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 841	2	2	EPCMS-216-ECG-004	3902	\N	\N	106759-M13804740003	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.502144	2026-08-05 19:04:39.502147	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	EDAN	SE1200	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -11210,7 +11441,6 @@ COPY public.gate_entries (id, tenant_id, site_id, entry_number, vehicle_number, 
 199	2	2	GE-00004		\N	\N	\N	\N	\N	2026-06-12 02:41:55.864898	Vijayan	\N	Vijayan	Standard	\N	/uploads/invoices/2/20260611_211153_feff01fd.jpg		Completed	8	f	2026-06-12 02:41:55.869321	IV543	2026-06-04	18000	\N	\N	\N	\N	\N	\N	\N	\N
 201	2	2	GE-00006		\N	\N	\N	\N	\N	2026-07-22 17:35:16.068379	Fredrick	\N	Fredrick	Standard	\N	/api/uploads/invoices/2/20260722_120501_36d4ec51.jpg		Awaiting GRN	3	f	2026-07-22 17:35:16.070259	inv0002	2026-07-16	20000	\N	\N	\N				\N	\N
 198	2	2	GE-00003		\N	\N	\N	\N	\N	2026-06-12 02:21:24.198782	ram	\N	ram	Standard	\N	/uploads/invoices/2/20260611_205122_2e043a7f.png		Completed	3	f	2026-06-12 02:21:24.199618	inv123	2026-06-11	10500	\N	\N	\N	\N	\N	\N	\N	\N
-202	2	2	GE-00007		\N	\N	\N	\N	\N	2026-08-05 20:33:59.079737	General	\N	General	Standard	\N			Awaiting GRN	3	f	2026-08-05 20:33:59.08112		\N	0	\N	\N	\N		/api/uploads/invoices/2/20260805_150345_8ce00da4.pdf	33333	2026-08-04	\N
 203	2	2	GE-00008	KA 05 H 1234	\N	\N	\N	\N	\N	2026-08-06 13:34:04.704551	vikkk	\N	vikkk	Standard	\N	/api/uploads/invoices/2/20260806_080322_994710f4.png	none	Completed	3	f	2026-08-06 13:34:04.706791	A2456Y	2026-08-04	10000	\N	\N	\N		/api/uploads/invoices/2/20260806_080207_3c61f7e0.png	5555555	2026-08-03	\N
 204	2	2	GE-00009	TN 08 N 4567	\N	\N	\N	\N	\N	2026-08-06 14:56:45.52839	NOS	\N	NOS	Standard	\N	/api/uploads/invoices/2/20260806_092619_1796e5e4.png		Completed	3	f	2026-08-06 14:56:45.529696	A566S54	2026-08-03	60606	\N	\N	\N		/api/uploads/invoices/2/20260806_092552_24c3c8d0.png	88888	2026-08-02	\N
 205	2	2	GE-00010	TN 09 M 8901	\N	\N	\N	\N	\N	2026-08-06 15:01:27.215344	done	\N	done	Standard	\N	/api/uploads/invoices/2/20260806_093046_c67c0c7d.png		Completed	3	f	2026-08-06 15:01:27.215882	C67G98VV	2026-08-05	90990	\N	\N	\N		/api/uploads/invoices/2/20260806_093010_ac01d917.png	56565656	2026-08-01	\N
@@ -11218,6 +11448,7 @@ COPY public.gate_entries (id, tenant_id, site_id, entry_number, vehicle_number, 
 207	2	2	GE-00012	TN 09 N 1234	\N	\N	\N	\N	\N	2026-08-17 11:05:56.207301	udhay	\N	udhay	Standard	\N	/api/uploads/invoices/2/20260817_053552_b931067d.webp		Completed	3	f	2026-08-17 11:05:56.20925	A4576C56	2026-08-11	100000	\N	\N	\N		/api/uploads/invoices/2/20260817_053405_974aef41.png	4546745	2026-08-10	\N
 208	2	2	GE-00013	KA 02 EX 1234	\N	\N	\N	\N	\N	2026-08-17 12:12:05.350568	Ram	\N	Ram	Standard	\N			Completed	3	f	2026-08-17 12:12:05.351843		\N	0	1700	2500	800	/api/uploads/invoices/2/20260817_064203_39a6471d.png	/api/uploads/invoices/2/20260817_064120_6c6f0417.png	DC5463	2026-08-16	\N
 209	2	2	GE-00014	TN 08 V 2508	\N	\N	\N	\N	\N	2026-08-18 11:56:36.527989	giri	\N	giri	Standard	\N	/api/uploads/invoices/2/20260818_062605_6be797fa.png		Completed	3	f	2026-08-18 11:56:36.529581	A89B7655	2026-08-10	20000	\N	\N	\N		/api/uploads/invoices/2/20260818_062532_d6fd3d5a.png	12657	2026-08-10	\N
+202	2	2	GE-00007		\N	\N	\N	\N	\N	2026-08-05 20:33:59.079737	General	\N	General	Standard	\N			Completed	3	f	2026-08-05 20:33:59.08112		\N	0	\N	\N	\N		/api/uploads/invoices/2/20260805_150345_8ce00da4.pdf	33333	2026-08-04	\N
 \.
 
 
@@ -11319,6 +11550,8 @@ COPY public.grn (id, tenant_id, site_id, grn_number, po_id, gate_entry_id, wareh
 218	2	2	GRN-00015	\N	207	62	3	66	Direct Invoice	A4576C56	2026-08-11	100000	/api/uploads/invoices/2/20260817_053552_b931067d.webp	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-17 11:06:30.964927	2026-08-17 05:36:30.98859	\N	\N	4546745	2026-08-10	/api/uploads/invoices/2/20260817_053405_974aef41.png
 219	2	2	GRN-00016	277	208	62	3	63	PO-Based		\N	100		\N	100	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-08-17 12:13:01.989646	2026-08-17 06:43:02.018181	\N	\N	DC5463	2026-08-16	/api/uploads/invoices/2/20260817_064120_6c6f0417.png
 220	2	2	GRN-00017	\N	209	62	3	76	Direct Invoice	A89B7655	2026-08-10	20000	/api/uploads/invoices/2/20260818_062605_6be797fa.png	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-18 14:55:09.045809	2026-08-18 09:25:09.124023	\N	\N	12657	2026-08-10	/api/uploads/invoices/2/20260818_062532_d6fd3d5a.png
+221	2	2	GRN-00018	\N	\N	62	3	69	Direct Invoice	121212	2026-08-26	1200		\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-27 15:44:28.070195	2026-08-27 10:14:28.097061	\N	\N		\N	
+222	2	2	GRN-00019	\N	202	62	3	69	Direct Invoice	123123	\N	0		\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-27 15:45:52.983411	2026-08-27 10:15:53.009989	\N	\N	33333	2026-08-04	/api/uploads/invoices/2/20260805_150345_8ce00da4.pdf
 \.
 
 
@@ -11388,6 +11621,8 @@ COPY public.grn_items (id, grn_id, material_id, po_item_id, ordered_quantity, re
 521	216	3501	702	35	35	35	0	4379.25	\N	0	0	0	0	0	0	153273.75	0	\N
 522	219	3910	1747	1	1	1	0	100	\N	0	0	0	0	0	0	100	0	\N
 523	220	2435	\N	0	100	80	20	0	\N	0	0	0	0	0	0	0	0	\N
+524	221	2564	\N	0	11	11	0	0	\N	0	0	0	0	0	0	0	0	\N
+525	222	4877	\N	0	10	10	0	0	\N	0	0	0	0	0	0	0	0	\N
 \.
 
 
@@ -11516,6 +11751,10 @@ COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, appr
 118	249	53	3	2026-08-26 17:53:53.247708	{"533": {"quantity": 1.0, "remarks": null}}	\N
 119	249	16	3	2026-08-26 17:53:57.416353	{"533": {"quantity": 1.0, "remarks": null}}	\N
 120	249	50	3	2026-08-26 17:53:57.416368	{"533": {"quantity": 1.0, "remarks": null}}	\N
+121	250	44	3	2026-08-27 15:14:08.908664	{"534": {"quantity": 1.0, "remarks": null}}	\N
+122	250	96	3	2026-08-27 15:14:08.908707	{"534": {"quantity": 1.0, "remarks": null}}	\N
+123	250	16	3	2026-08-27 15:14:23.746792	{"534": {"quantity": 1.0, "remarks": null}}	\N
+124	250	100	3	2026-08-27 15:14:23.746834	{"534": {"quantity": 1.0, "remarks": null}}	\N
 \.
 
 
@@ -11637,6 +11876,8 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 531	247	3475	10	0	0	10
 532	248	2435	1	1	1	1
 533	249	2471	1	1	1	1
+535	251	2564	1	0	0	\N
+534	250	4877	1	1	1	1
 \.
 
 
@@ -11711,11 +11952,13 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 239	2	2	IND-00024	3	\N	\N			Chemistry	Complaint CMP-00013 - fdgdfg	10443.43	Issued	2	3	2026-08-12 04:48:14.16361	f	2026-08-10 16:47:23.026424	2026-08-14 12:56:12.833616	3	15	\N
 242	2	2	IND-00027	3	\N	\N			Child Health Nursing (Pediatric Nursing)		13050.32	Issued	2	3	2026-08-17 05:10:12.238591	f	2026-08-17 10:39:56.617303	2026-08-17 11:06:47.934818	7	\N	\N
 243	2	2	IND-00028	3	\N	\N			Exercise Therapy Lab		46027.1	Approved	2	3	2026-08-17 07:36:45.162629	f	2026-08-17 13:06:23.961804	2026-08-17 13:06:45.170121	10	\N	\N
+250	2	2	IND-00035	3	\N	\N			Medical-Surgical Nursing	Complaint CMP-00034 - need installation	680	Issued	2	3	2026-08-27 09:44:23.780146	f	2026-08-27 15:13:55.051724	2026-08-27 15:46:20.453353	7	470	\N
 245	2	2	IND-00030	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00026 - Installation required	4657.57	Approved	2	3	2026-08-19 11:35:33.319666	f	2026-08-19 17:04:54.561918	2026-08-19 17:05:33.32616	11	462	\N
 246	2	2	IND-00031	3	\N	\N			MICU/EICU	Complaint CMP-00029 - not working	3262.58	Issued	2	3	2026-08-19 11:35:12.988022	f	2026-08-19 17:04:58.907952	2026-08-19 17:07:51.185119	2	465	\N
 249	2	2	IND-00034	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint PM-202608-EPCMS-POST OT -SYP-061 - Scheduled Preventive Maintenance	301.97	Issued	2	3	2026-08-26 12:23:57.443537	f	2026-08-26 17:53:46.22576	2026-08-26 17:54:44.358341	11	442	\N
 247	2	2	IND-00032	3	\N	\N			Admin		46027.1	Approved	2	3	2026-08-19 12:21:35.700409	f	2026-08-19 17:51:16.202633	2026-08-19 17:51:35.702896	12	\N	\N
 248	2	2	IND-00033	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00032 - pc not working	4657.57	Issued	2	3	2026-08-26 10:01:27.364106	f	2026-08-26 15:23:26.272722	2026-08-26 15:31:43.324466	11	468	\N
+251	2	2	IND-00036	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00036 - AC problem	16526.16	Submitted	1	\N	\N	f	2026-08-27 15:42:57.658742	2026-08-27 15:42:57.658767	11	472	\N
 \.
 
 
@@ -12037,6 +12280,7 @@ COPY public.material_issue_items (id, issue_id, material_id, quantity, rate, rem
 231	251	3474	1	3262.58	\N	62
 232	252	2435	1	4657.57	\N	62
 233	253	2471	1	301.97	\N	62
+234	254	4877	1	680	\N	62
 \.
 
 
@@ -12109,6 +12353,7 @@ COPY public.material_issues (id, tenant_id, site_id, issue_number, warehouse_id,
 251	2	2	ISS-00021	62	3	246	\N	\N	MICU/EICU	\N	Fulfillment for IND-00031	Completed	3	\N	t	2026-08-19 11:38:17.099876	3	\N	f	2026-08-19 17:07:51.159323	\N
 252	2	2	ISS-00022	62	1	248	7	237	HEALTH 	\N	Fulfillment for IND-00033	Completed	3	\N	t	2026-08-26 10:24:57.786131	3	\N	f	2026-08-26 15:31:43.27442	\N
 253	2	2	ISS-00023	62	1	249	7	237	HEALTH 	\N	Fulfillment for IND-00034	Completed	3	\N	t	2026-08-26 12:25:20.423972	3	\N	f	2026-08-26 17:54:44.350204	\N
+254	2	2	ISS-00024	62	3	250	\N	\N	Medical-Surgical Nursing	\N	Fulfillment for IND-00035	Completed	3	\N	t	2026-08-27 10:16:41.314445	3	\N	f	2026-08-27 15:46:20.431599	\N
 \.
 
 
@@ -15600,13 +15845,6 @@ COPY public.menu_items (id, text, icon_name, path, resource, platform_only, pare
 18	Store Operations	Store	\N	\N	f	\N	3	t	[]	[]	2026-08-12 10:42:10.013512	2026-08-12 10:42:10.013523
 19	Gate Entry	\N	/gate-entry	gate_entry	f	18	0	t	["read", "create", "update", "delete"]	[{"key": "can_record_entry", "label": "Record Entry", "color": "#3B82F6"}, {"key": "can_verify", "label": "Verify", "color": "#10B981"}]	2026-08-12 10:42:10.014624	2026-08-12 10:42:10.014639
 20	Invoices	\N	/invoices	invoice	f	18	1	t	["read", "create", "update", "delete"]	[{"key": "can_register", "label": "Register", "color": "#3B82F6"}, {"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-08-12 10:42:10.014643	2026-08-12 10:42:10.014646
-21	GRN	\N	/grn	grn	f	18	2	t	["read", "create", "update", "delete"]	[{"key": "can_create_grn", "label": "Create GRN", "color": "#3B82F6"}, {"key": "can_complete", "label": "Complete", "color": "#10B981"}]	2026-08-12 10:42:10.014649	2026-08-12 10:42:10.014652
-22	Material Issue	\N	/issues	issues	f	18	3	t	["read", "create", "update", "delete"]	[{"key": "can_issue", "label": "Issue Materials", "color": "#3B82F6"}, {"key": "can_direct_issue", "label": "Direct Issue", "color": "#10B981"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-08-12 10:42:10.014655	2026-08-12 10:42:10.014657
-23	Returns	\N	/returns	returns	f	18	4	t	["read", "create", "update", "delete"]	[{"key": "can_return", "label": "Return Materials", "color": "#3B82F6"}, {"key": "receive", "label": "Receive Return", "color": "#10B981"}]	2026-08-12 10:42:10.01466	2026-08-12 10:42:10.014663
-24	Stock Transfer	\N	/transfers	transfers	f	18	5	t	["read", "create", "update", "delete"]	[{"key": "can_transfer", "label": "Transfer Stock", "color": "#3B82F6"}]	2026-08-12 10:42:10.014666	2026-08-12 10:42:10.014669
-25	Write Off	\N	/write-offs	write_offs	f	18	6	t	["read", "create", "update", "delete"]	[{"key": "can_submit", "label": "Submit", "color": "#3B82F6"}, {"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}]	2026-08-12 10:42:10.014672	2026-08-12 10:42:10.014675
-26	Gate Pass	\N	/gate-passes	gate_passes	f	18	7	t	["read", "create", "update", "delete"]	[{"key": "can_create", "label": "Create", "color": "#3B82F6"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-08-12 10:42:10.014678	2026-08-12 10:42:10.01468
-27	Issue Acknowledgement	\N	/pending-acknowledgments	acknowledgements	f	18	8	t	["read", "create", "update", "delete"]	[{"key": "can_acknowledge", "label": "Acknowledge Receipt", "color": "#F59E0B"}]	2026-08-12 10:42:10.014684	2026-08-12 10:42:10.014687
 28	Inventory	Warehouse	/inventory	\N	f	\N	4	t	[]	[]	2026-08-12 10:42:10.015722	2026-08-12 10:42:10.015731
 29	Inventory	\N	/inventory	inventory	f	28	0	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.016437	2026-08-12 10:42:10.016445
 30	Maintenance	Build	\N	\N	f	\N	5	t	[]	[]	2026-08-12 10:42:10.016789	2026-08-12 10:42:10.016797
@@ -15616,11 +15854,11 @@ COPY public.menu_items (id, text, icon_name, path, resource, platform_only, pare
 35	Intelligence	\N	/intelligence	intelligence	f	34	0	t	["read"]	[]	2026-08-12 10:42:10.018931	2026-08-12 10:42:10.01894
 36	Finance	AccountBalance	\N	\N	f	\N	7	t	[]	[]	2026-08-12 10:42:10.019286	2026-08-12 10:42:10.019294
 34	Intelligence	Insights	/intelligence	\N	f	\N	6	t	[]	[]	2026-08-12 10:42:10.018194	2026-08-12 10:42:10.018203
+24	Stock Transfer	\N	/transfers	transfers	f	18	6	t	["read", "create", "update", "delete"]	[{"key": "can_transfer", "label": "Transfer Stock", "color": "#3B82F6"}]	2026-08-12 10:42:10.014666	2026-08-27 16:17:01.887431
 37	Invoice Tracking	\N	/invoice-tracking	finance_invoices	f	36	0	t	["read", "create", "update", "delete"]	[{"key": "can_send_hard_copy", "label": "Send Hard Copy", "color": "#3B82F6"}, {"key": "can_receive_hard_copy", "label": "Receive Hard Copy", "color": "#10B981"}, {"key": "can_send_for_payment", "label": "Send for Payment", "color": "#F59E0B"}, {"key": "can_mark_paid", "label": "Mark as Paid", "color": "#8B5CF6"}]	2026-08-12 10:42:10.020023	2026-08-12 10:42:10.020031
 38	Pending Invoices Report	\N	/finance/reports/pending-invoices	report_finance	f	36	1	t	["read"]	[]	2026-08-12 10:42:10.020035	2026-08-12 10:42:10.020038
 39	Pending Payments Report	\N	/finance/reports/pending-payments	report_finance	f	36	2	t	["read"]	[]	2026-08-12 10:42:10.020041	2026-08-12 10:42:10.020044
 40	Reports	Assessment	\N	\N	f	\N	8	t	[]	[]	2026-08-12 10:42:10.020668	2026-08-12 10:42:10.020676
-41	General Reports	\N	/reports	reports	f	40	0	t	["read"]	[]	2026-08-12 10:42:10.021624	2026-08-12 10:42:10.021641
 42	Issue Summary	\N	/reports/issue-summary	report_issue_summary	f	40	1	t	["read"]	[]	2026-08-12 10:42:10.021645	2026-08-12 10:42:10.021648
 43	Rate Analysis	\N	/reports/rate-analysis	report_rate_analysis	f	40	2	t	["read"]	[]	2026-08-12 10:42:10.021651	2026-08-12 10:42:10.021654
 44	Equipment Count	\N	/reports/equipment-count	report_equipment_count	f	40	3	t	["read"]	[]	2026-08-12 10:42:10.021657	2026-08-12 10:42:10.021659
@@ -15645,6 +15883,21 @@ COPY public.menu_items (id, text, icon_name, path, resource, platform_only, pare
 17	Work Orders	\N	/work-orders	work_orders	f	11	5	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_send_to_vendor", "label": "Send to Vendor", "color": "#3B82F6"}, {"key": "can_short_close", "label": "Short Close", "color": "#F97316"}]	2026-08-12 10:42:10.012469	2026-08-12 10:42:10.012472
 10	Equipment	\N	/equipment	equipment	f	3	6	t	["read", "create", "update", "delete"]	[{"key": "create_po", "label": "Create PO", "color": "#10B981"}]	2026-08-12 10:42:10.010107	2026-08-12 10:42:10.01011
 63	Dept. Equip Details	Assessment	/reports/department-equipment-details	report_dept_inventory	f	40	9	t	[]	[]	2026-08-26 19:45:35.453739	2026-08-26 19:45:35.453753
+64	Calibration Details	\N	/reports/calibration-details	report_equipment	f	40	10	t	["read"]	[]	2026-08-27 15:31:37.279616	2026-08-27 15:31:37.279642
+21	GRN	\N	/grn	grn	f	18	3	t	["read", "create", "update", "delete"]	[{"key": "can_create_grn", "label": "Create GRN", "color": "#3B82F6"}, {"key": "can_complete", "label": "Complete", "color": "#10B981"}]	2026-08-12 10:42:10.014649	2026-08-27 16:17:01.887408
+22	Material Issue	\N	/issues	issues	f	18	4	t	["read", "create", "update", "delete"]	[{"key": "can_issue", "label": "Issue Materials", "color": "#3B82F6"}, {"key": "can_direct_issue", "label": "Direct Issue", "color": "#10B981"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-08-12 10:42:10.014655	2026-08-27 16:17:01.887421
+23	Returns	\N	/returns	returns	f	18	5	t	["read", "create", "update", "delete"]	[{"key": "can_return", "label": "Return Materials", "color": "#3B82F6"}, {"key": "receive", "label": "Receive Return", "color": "#10B981"}]	2026-08-12 10:42:10.01466	2026-08-27 16:17:01.887427
+25	Write Off	\N	/write-offs	write_offs	f	18	7	t	["read", "create", "update", "delete"]	[{"key": "can_submit", "label": "Submit", "color": "#3B82F6"}, {"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}]	2026-08-12 10:42:10.014672	2026-08-27 16:17:01.887434
+26	Gate Pass	\N	/gate-passes	gate_passes	f	18	8	t	["read", "create", "update", "delete"]	[{"key": "can_create", "label": "Create", "color": "#3B82F6"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-08-12 10:42:10.014678	2026-08-27 16:17:01.887437
+27	Issue Acknowledgement	\N	/pending-acknowledgments	acknowledgements	f	18	9	t	["read", "create", "update", "delete"]	[{"key": "can_acknowledge", "label": "Acknowledge Receipt", "color": "#F59E0B"}]	2026-08-12 10:42:10.014684	2026-08-27 16:17:01.88744
+65	Credit Notes	ReceiptLong	/credit-notes	\N	f	18	2	t	[]	[]	2026-08-27 16:11:10.3453	2026-08-27 16:17:01.887443
+66	Stock Report	\N	/reports/stock	reports	f	40	11	t	[]	[]	2026-08-27 16:37:24.85691	2026-08-27 16:37:24.856923
+67	Consumption Report	\N	/reports/consumption	reports	f	40	12	t	[]	[]	2026-08-27 16:37:24.856929	2026-08-27 16:37:24.856933
+68	PR Status	\N	/reports/pr-status	reports	f	40	13	t	[]	[]	2026-08-27 16:37:24.856937	2026-08-27 16:37:24.85694
+69	PO Status	\N	/reports/po-status	reports	f	40	14	t	[]	[]	2026-08-27 16:37:24.856943	2026-08-27 16:37:24.856946
+70	Material Movement	\N	/reports/movement	reports	f	40	15	t	[]	[]	2026-08-27 16:37:24.85695	2026-08-27 16:37:24.856952
+71	Return Summary	\N	/reports/return-summary	reports	f	40	16	t	[]	[]	2026-08-27 16:37:24.856956	2026-08-27 16:37:24.856959
+72	Equipment Write-off	\N	/reports/equipment-writeoff	reports	f	40	17	t	[]	[]	2026-08-27 16:37:24.856962	2026-08-27 16:37:24.856965
 \.
 
 
@@ -20648,36 +20901,6 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1554	21	warehouses	t	t	t	t	{}
 1555	21	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
 1556	21	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
-1646	11	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
-1647	11	returns	t	t	t	t	{"can_return": true, "receive": true}
-1648	11	transfers	t	t	t	t	{"can_transfer": true}
-1649	11	write_offs	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true}
-1650	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
-1651	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
-1652	11	inventory	t	t	t	t	{}
-1653	11	complaints	t	t	t	t	{"can_assign": true, "can_approve_level1": true, "can_approve_level2": true}
-1654	11	pm_schedule	t	t	t	t	{"generate_calls": true}
-1655	11	calibration_schedule	t	t	t	t	{"generate_calls": true}
-1656	11	intelligence	t	f	f	f	{}
-1657	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
-1658	11	report_finance	t	f	f	f	{}
-1659	11	reports	t	f	f	f	{}
-1660	11	report_issue_summary	t	f	f	f	{}
-1661	11	report_rate_analysis	t	f	f	f	{}
-1662	11	report_equipment_count	t	f	f	f	{}
-1663	11	report_receipt_summary	t	f	f	f	{}
-1664	11	report_dept_inventory	t	t	t	t	{}
-1665	11	report_pending_gatepass	t	f	f	f	{}
-1666	11	admin_users	t	t	t	t	{}
-1667	11	admin_roles	t	t	t	t	{}
-1668	11	audit_logs	t	f	f	f	{}
-1669	11	approval_flows	t	t	t	t	{}
-1670	11	material_allowances	t	t	t	t	{}
-1671	11	configurations	t	t	t	t	{}
-1672	11	locations	t	t	t	t	{}
-1673	11	projects	t	t	t	t	{}
-1674	11	terms	t	t	t	t	{}
-1675	11	company_addresses	t	t	t	t	{}
 1557	21	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
 1558	21	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
 1559	21	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
@@ -20703,22 +20926,53 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1579	21	terms	t	t	t	t	{}
 1580	21	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1581	21	vendor_work_orders	t	t	t	t	{}
-1630	11	dashboard	t	f	f	f	{}
-1631	11	materials	t	t	t	t	{}
-1632	11	categories	t	t	t	t	{}
-1633	11	subcategories	t	t	t	t	{}
-1634	11	uom	t	t	t	t	{}
-1635	11	vendors	t	t	t	t	{"can_approve": true, "can_reject": true}
-1636	11	warehouses	t	t	t	t	{}
-1637	11	equipment	t	t	t	t	{"create_po": true}
-1638	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
-1639	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
-1640	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
-1641	11	contracts	t	t	t	t	{"can_approve": true, "can_reject": true}
-1642	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
-1643	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
-1644	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
-1645	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
+1723	11	dashboard	t	f	f	f	{}
+1724	11	materials	t	t	t	t	{}
+1725	11	categories	t	t	t	t	{}
+1726	11	subcategories	t	t	t	t	{}
+1727	11	uom	t	t	t	t	{}
+1728	11	vendors	t	t	t	t	{"can_approve": true, "can_reject": true}
+1729	11	warehouses	t	t	t	t	{}
+1730	11	equipment	t	t	t	t	{"create_po": true}
+1731	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
+1732	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
+1733	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
+1734	11	contracts	t	t	t	t	{"can_approve": true, "can_reject": true}
+1735	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
+1736	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
+1737	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
+1738	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
+1739	11	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
+1740	11	returns	t	t	t	t	{"can_return": true, "receive": true}
+1741	11	transfers	t	t	t	t	{"can_transfer": true}
+1742	11	write_offs	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true}
+1743	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
+1744	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+1745	11	inventory	t	t	t	t	{}
+1746	11	complaints	t	t	t	t	{"can_assign": true, "can_approve_level1": true, "can_approve_level2": true}
+1747	11	pm_schedule	t	t	t	t	{"generate_calls": true}
+1748	11	calibration_schedule	t	t	t	t	{"generate_calls": true}
+1749	11	intelligence	t	f	f	f	{}
+1750	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
+1751	11	report_finance	t	f	f	f	{}
+1752	11	reports	t	f	f	f	{}
+1753	11	report_issue_summary	t	f	f	f	{}
+1754	11	report_rate_analysis	t	f	f	f	{}
+1755	11	report_equipment_count	t	f	f	f	{}
+1756	11	report_receipt_summary	t	f	f	f	{}
+1757	11	report_dept_inventory	t	t	t	t	{}
+1758	11	report_pending_gatepass	t	f	f	f	{}
+1759	11	report_equipment	t	f	f	f	{}
+1760	11	admin_users	t	t	t	t	{}
+1761	11	admin_roles	t	t	t	t	{}
+1762	11	audit_logs	t	f	f	f	{}
+1763	11	approval_flows	t	t	t	t	{}
+1764	11	material_allowances	t	t	t	t	{}
+1765	11	configurations	t	t	t	t	{}
+1766	11	locations	t	t	t	t	{}
+1767	11	projects	t	t	t	t	{}
+1768	11	terms	t	t	t	t	{}
+1769	11	company_addresses	t	t	t	t	{}
 \.
 
 
@@ -23819,6 +24073,9 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 4297	2	2	3474	62	Issue	-1	59	Issue	251	ISS-00021	3	\N	\N	3	2026-08-19 17:07:51.18891
 4298	2	2	2435	62	Issue	-1	194	Issue	252	ISS-00022	1	237	\N	3	2026-08-26 15:31:43.329743
 4299	2	2	2471	62	Issue	-1	484	Issue	253	ISS-00023	1	237	\N	3	2026-08-26 17:54:44.360879
+4300	2	2	2564	62	GRN	11	35	GRN	221	GRN-00018	3	\N	\N	3	2026-08-27 15:44:28.107588
+4301	2	2	4877	62	GRN	10	10	GRN	222	GRN-00019	3	\N	\N	3	2026-08-27 15:45:53.013525
+4302	2	2	4877	62	Issue	-1	9	Issue	254	ISS-00024	3	\N	\N	3	2026-08-27 15:46:20.454775
 \.
 
 
@@ -26817,7 +27074,7 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 113, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 121, true);
 
 
 --
@@ -26880,35 +27137,56 @@ SELECT pg_catalog.setval('public.complaint_images_id_seq', 37, true);
 -- Name: complaints_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaints_id_seq', 469, true);
+SELECT pg_catalog.setval('public.complaints_id_seq', 472, true);
 
 
 --
 -- Name: contract_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_approvals_id_seq', 20, true);
+SELECT pg_catalog.setval('public.contract_approvals_id_seq', 26, true);
 
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_items_id_seq', 10, true);
+SELECT pg_catalog.setval('public.contract_items_id_seq', 16, true);
 
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contracts_id_seq', 10, true);
+SELECT pg_catalog.setval('public.contracts_id_seq', 16, true);
+
+
+--
+-- Name: credit_note_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.credit_note_approvals_id_seq', 1, false);
+
+
+--
+-- Name: credit_note_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.credit_note_items_id_seq', 1, false);
+
+
+--
+-- Name: credit_notes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.credit_notes_id_seq', 1, false);
 
 
 --
 -- Name: current_stock_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.current_stock_id_seq', 4403, true);
+SELECT pg_catalog.setval('public.current_stock_id_seq', 4404, true);
 
 
 --
@@ -26936,7 +27214,7 @@ SELECT pg_catalog.setval('public.document_sequences_id_seq', 151, true);
 -- Name: equipment_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.equipment_history_id_seq', 15, true);
+SELECT pg_catalog.setval('public.equipment_history_id_seq', 16, true);
 
 
 --
@@ -26985,35 +27263,35 @@ SELECT pg_catalog.setval('public.gate_passes_id_seq', 24, true);
 -- Name: grn_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_id_seq', 220, true);
+SELECT pg_catalog.setval('public.grn_id_seq', 222, true);
 
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_items_id_seq', 523, true);
+SELECT pg_catalog.setval('public.grn_items_id_seq', 525, true);
 
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_approvals_id_seq', 120, true);
+SELECT pg_catalog.setval('public.indent_approvals_id_seq', 124, true);
 
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_items_id_seq', 533, true);
+SELECT pg_catalog.setval('public.indent_items_id_seq', 535, true);
 
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indents_id_seq', 249, true);
+SELECT pg_catalog.setval('public.indents_id_seq', 251, true);
 
 
 --
@@ -27048,14 +27326,14 @@ SELECT pg_catalog.setval('public.location_master_id_seq', 149, true);
 -- Name: material_issue_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issue_items_id_seq', 233, true);
+SELECT pg_catalog.setval('public.material_issue_items_id_seq', 234, true);
 
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issues_id_seq', 253, true);
+SELECT pg_catalog.setval('public.material_issues_id_seq', 254, true);
 
 
 --
@@ -27083,7 +27361,7 @@ SELECT pg_catalog.setval('public.materials_id_seq', 4877, true);
 -- Name: menu_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.menu_items_id_seq', 63, true);
+SELECT pg_catalog.setval('public.menu_items_id_seq', 72, true);
 
 
 --
@@ -27223,7 +27501,7 @@ SELECT pg_catalog.setval('public.repair_work_orders_id_seq', 1, false);
 -- Name: role_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.role_permissions_id_seq', 1675, true);
+SELECT pg_catalog.setval('public.role_permissions_id_seq', 1769, true);
 
 
 --
@@ -27251,7 +27529,7 @@ SELECT pg_catalog.setval('public.sites_id_seq', 4, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4299, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4302, true);
 
 
 --
@@ -27525,6 +27803,30 @@ ALTER TABLE ONLY public.contract_items
 
 ALTER TABLE ONLY public.contracts
     ADD CONSTRAINT contracts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: credit_note_approvals credit_note_approvals_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_note_approvals
+    ADD CONSTRAINT credit_note_approvals_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: credit_note_items credit_note_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_note_items
+    ADD CONSTRAINT credit_note_items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: credit_notes credit_notes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_notes
+    ADD CONSTRAINT credit_notes_pkey PRIMARY KEY (id);
 
 
 --
@@ -28029,6 +28331,14 @@ ALTER TABLE ONLY public.calibration_schedules
 
 ALTER TABLE ONLY public.categories
     ADD CONSTRAINT uq_cat_per_site UNIQUE (site_id, name);
+
+
+--
+-- Name: credit_notes uq_cn_per_vendor_tenant; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_notes
+    ADD CONSTRAINT uq_cn_per_vendor_tenant UNIQUE (tenant_id, credit_note_number, vendor_id);
 
 
 --
@@ -28566,6 +28876,34 @@ CREATE INDEX ix_contracts_contract_number ON public.contracts USING btree (contr
 --
 
 CREATE INDEX ix_contracts_id ON public.contracts USING btree (id);
+
+
+--
+-- Name: ix_credit_note_approvals_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_credit_note_approvals_id ON public.credit_note_approvals USING btree (id);
+
+
+--
+-- Name: ix_credit_note_items_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_credit_note_items_id ON public.credit_note_items USING btree (id);
+
+
+--
+-- Name: ix_credit_notes_credit_note_number; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_credit_notes_credit_note_number ON public.credit_notes USING btree (credit_note_number);
+
+
+--
+-- Name: ix_credit_notes_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_credit_notes_id ON public.credit_notes USING btree (id);
 
 
 --
@@ -29607,6 +29945,110 @@ ALTER TABLE ONLY public.contracts
 
 ALTER TABLE ONLY public.contracts
     ADD CONSTRAINT contracts_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id);
+
+
+--
+-- Name: credit_note_approvals credit_note_approvals_approval_flow_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_note_approvals
+    ADD CONSTRAINT credit_note_approvals_approval_flow_id_fkey FOREIGN KEY (approval_flow_id) REFERENCES public.approval_flows(id);
+
+
+--
+-- Name: credit_note_approvals credit_note_approvals_approver_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_note_approvals
+    ADD CONSTRAINT credit_note_approvals_approver_id_fkey FOREIGN KEY (approver_id) REFERENCES public.users(id);
+
+
+--
+-- Name: credit_note_approvals credit_note_approvals_credit_note_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_note_approvals
+    ADD CONSTRAINT credit_note_approvals_credit_note_id_fkey FOREIGN KEY (credit_note_id) REFERENCES public.credit_notes(id) ON DELETE CASCADE;
+
+
+--
+-- Name: credit_note_items credit_note_items_credit_note_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_note_items
+    ADD CONSTRAINT credit_note_items_credit_note_id_fkey FOREIGN KEY (credit_note_id) REFERENCES public.credit_notes(id) ON DELETE CASCADE;
+
+
+--
+-- Name: credit_note_items credit_note_items_material_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_note_items
+    ADD CONSTRAINT credit_note_items_material_id_fkey FOREIGN KEY (material_id) REFERENCES public.materials(id);
+
+
+--
+-- Name: credit_notes credit_notes_approved_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_notes
+    ADD CONSTRAINT credit_notes_approved_by_id_fkey FOREIGN KEY (approved_by_id) REFERENCES public.users(id);
+
+
+--
+-- Name: credit_notes credit_notes_buyer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_notes
+    ADD CONSTRAINT credit_notes_buyer_id_fkey FOREIGN KEY (buyer_id) REFERENCES public.company_addresses(id);
+
+
+--
+-- Name: credit_notes credit_notes_consignee_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_notes
+    ADD CONSTRAINT credit_notes_consignee_id_fkey FOREIGN KEY (consignee_id) REFERENCES public.company_addresses(id);
+
+
+--
+-- Name: credit_notes credit_notes_created_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_notes
+    ADD CONSTRAINT credit_notes_created_by_id_fkey FOREIGN KEY (created_by_id) REFERENCES public.users(id);
+
+
+--
+-- Name: credit_notes credit_notes_invoice_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_notes
+    ADD CONSTRAINT credit_notes_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id);
+
+
+--
+-- Name: credit_notes credit_notes_site_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_notes
+    ADD CONSTRAINT credit_notes_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.sites(id) ON DELETE CASCADE;
+
+
+--
+-- Name: credit_notes credit_notes_tenant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_notes
+    ADD CONSTRAINT credit_notes_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
+
+
+--
+-- Name: credit_notes credit_notes_vendor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_notes
+    ADD CONSTRAINT credit_notes_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id);
 
 
 --
@@ -31842,5 +32284,5 @@ ALTER TABLE ONLY public.write_offs
 -- PostgreSQL database dump complete
 --
 
-\unrestrict Rqlne0BBAYxxvSII2G8UurRoTaBMgWJEDbya3kbEtgASfOtbIbn6kLHWWzujQNh
+\unrestrict bRqgE6beImfTYFMgJvWImDA8lihhBqMlaAprp6OTLTdAmPTGowvKF9KgWj7cbfg
 

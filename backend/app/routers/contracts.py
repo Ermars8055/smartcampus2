@@ -228,7 +228,6 @@ def create_contract(
     contract = Contract(
         **contract_data,
         contract_number=contract_number,
-        status="Draft",
         current_approval_level=1,
         created_by_id=current_user.id,
         tenant_id=tenant_id,

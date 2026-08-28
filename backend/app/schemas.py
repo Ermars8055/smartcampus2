@@ -1143,6 +1143,121 @@ class PaymentStatusUpdate(BaseModel):
     payment_reference: Optional[str] = None
 
 
+# ── Credit Notes ────────────────────────────────────────────────────────
+
+class CreditNoteItemBase(BaseModel):
+    material_id: Optional[int] = None
+    description: Optional[str] = None
+    hsn_sac: Optional[str] = None
+    quantity: float = Field(..., gt=0)
+    rate: float = Field(..., ge=0)
+    uom: Optional[str] = None
+    discount_percent: float = 0
+    cgst_rate: float = 0
+    sgst_rate: float = 0
+    igst_rate: float = 0
+    cgst_amount: float = 0
+    sgst_amount: float = 0
+    igst_amount: float = 0
+    taxable_amount: float = 0
+    amount: float = 0
+    remarks: Optional[str] = Field(None, max_length=255)
+
+class CreditNoteItemOut(CreditNoteItemBase):
+    id: int
+    material_name: Optional[str] = None
+    material_code: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class CreditNoteBase(BaseModel):
+    date: date
+    vendor_id: int
+    invoice_id: Optional[int] = None
+    consignee_id: Optional[int] = None
+    buyer_id: Optional[int] = None
+    original_invoice_number: Optional[str] = None
+    original_invoice_date: Optional[date] = None
+    reference_number: Optional[str] = None
+    reference_date: Optional[date] = None
+    buyer_order_number: Optional[str] = None
+    buyer_order_date: Optional[date] = None
+    dispatch_doc_number: Optional[str] = None
+    dispatched_through: Optional[str] = None
+    destination: Optional[str] = None
+    terms_of_delivery: Optional[str] = None
+    
+    total_taxable_amount: float = 0
+    total_cgst: float = 0
+    total_sgst: float = 0
+    total_igst: float = 0
+    total_discount: float = 0
+    total_amount: float = 0
+    
+    remarks: Optional[str] = Field(None, max_length=255)
+    scan_url: Optional[str] = None
+    items: List[CreditNoteItemBase] = []
+
+class CreditNoteCreate(CreditNoteBase):
+    status: Optional[str] = "Draft"
+
+class CreditNoteUpdate(BaseModel):
+    date: Optional[date] = None
+    vendor_id: Optional[int] = None
+    invoice_id: Optional[int] = None
+    consignee_id: Optional[int] = None
+    buyer_id: Optional[int] = None
+    original_invoice_number: Optional[str] = None
+    original_invoice_date: Optional[date] = None
+    reference_number: Optional[str] = None
+    reference_date: Optional[date] = None
+    buyer_order_number: Optional[str] = None
+    buyer_order_date: Optional[date] = None
+    dispatch_doc_number: Optional[str] = None
+    dispatched_through: Optional[str] = None
+    destination: Optional[str] = None
+    terms_of_delivery: Optional[str] = None
+    
+    total_taxable_amount: Optional[float] = None
+    total_cgst: Optional[float] = None
+    total_sgst: Optional[float] = None
+    total_igst: Optional[float] = None
+    total_discount: Optional[float] = None
+    total_amount: Optional[float] = None
+    
+    status: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
+    scan_url: Optional[str] = None
+    items: Optional[List[CreditNoteItemBase]] = None
+
+class CreditNoteApproveRequest(BaseModel):
+    remarks: Optional[str] = Field(None, max_length=255)
+
+class CreditNoteOut(CreditNoteBase):
+    id: int
+    credit_note_number: str
+    status: str
+    current_approval_level: int
+    created_at: datetime
+    
+    vendor_name: Optional[str] = None
+    vendor_address: Optional[str] = None
+    vendor_city: Optional[str] = None
+    vendor_state: Optional[str] = None
+    vendor_pincode: Optional[str] = None
+    vendor_gst_number: Optional[str] = None
+    
+    invoice_number: Optional[str] = None
+    created_by_name: Optional[str] = None
+    consignee_title: Optional[str] = None
+    buyer_title: Optional[str] = None
+    can_user_approve: Optional[bool] = False
+    
+    items: List[CreditNoteItemOut] = []
+    class Config:
+        from_attributes = True
+
+
 # ── GRN ──────────────────────────────────────────────────────────────────
 
 class GRNItemBase(BaseModel):
@@ -2296,6 +2411,8 @@ class EquipmentUpdate(BaseModel):
     billing_frequency: Optional[str] = None
     cost_per_test: Optional[float] = None
     linked_reagents: Optional[List[dict]] = None
+    requires_installation: Optional[bool] = None
+    is_biomedical: Optional[bool] = None
 class EquipmentInstallationUpdate(BaseModel):
     serial_number: Optional[str] = None
     installation_date: Optional[datetime] = None
@@ -2566,7 +2683,7 @@ class ContractBase(BaseModel):
     items: List[ContractItemBase] = []
 
 class ContractCreate(ContractBase):
-    pass
+    status: Optional[str] = "Draft"
 
 class ContractUpdate(BaseModel):
     start_date: Optional[date] = None

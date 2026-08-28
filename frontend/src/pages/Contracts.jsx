@@ -15,6 +15,7 @@ import { useMessage } from '../context/MessageContext';
 import { useConfig } from '../context/ConfigContext';
 import { formatDate } from '../utils/dateUtils';
 import { computeGstSplit } from '../utils/gstCalculations';
+import { numberToWords } from '../utils/numberUtils';
 
 export default function Contracts() {
   const { showMessage } = useMessage();
@@ -210,20 +211,19 @@ export default function Contracts() {
       
       const itemName = contractToView.contract_type === 'RC' 
         ? (item.material?.name || item.material_id)
-        : (item.material_name ? `${item.material_name} (${item.equipment_serial || 'No SN'})` : (item.equipment_serial || item.equipment_id));
+        : (item.material_name || item.equipment_id);
 
       return `
         <tr>
           <td>${idx + 1}</td>
           <td style="text-align: left;">${itemName}</td>
-          <td>${qty}</td>
+          <td>${contractToView.contract_type === 'RC' ? '-' : (item.equipment_serial || 'NA')}</td>
           <td style="text-align: right;">${rate.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-          <td style="text-align: right;">${amt.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
           <td style="text-align: right;">${disc.toLocaleString(undefined, {minimumFractionDigits: 2})}%</td>
           <td style="text-align: right;">${(split.cgst_percentage || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}%<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
           <td style="text-align: right;">${(split.sgst_percentage || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}%<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
           <td style="text-align: right;">${(split.igst_percentage || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}%<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
-          <td>${item.uom || (contractToView.contract_type !== 'RC' ? 'NOS' : '-')}</td>
+          <td style="text-align: right;">${amt.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
         </tr>
       `;
     }).join('') || '<tr><td colSpan="10" style="text-align: center;">No items found</td></tr>';
@@ -308,14 +308,13 @@ export default function Contracts() {
                 <tr>
                   <th>Sr. No.</th>
                   <th style="text-align: left;">Item Description</th>
-                  <th>Qty</th>
+                  <th>Serial No.</th>
                   <th style="text-align: right;">RATE</th>
-                  <th style="text-align: right;">Amt.</th>
                   <th style="text-align: right;">Disc. %</th>
                   <th style="text-align: right;">CGST %</th>
                   <th style="text-align: right;">SGST/UTGST %</th>
                   <th style="text-align: right;">IGST %</th>
-                  <th>UOM</th>
+                  <th style="text-align: right;">Item Amt.</th>
                 </tr>
               </thead>
               <tbody>
@@ -325,14 +324,19 @@ export default function Contracts() {
             
             <table class="summary-table">
               <tr>
-                <td style="width: 70%;">Pricing inclusive of GST</td>
-                <td style="text-align: right; width: 15%;"><b>Round Off :</b></td>
-                <td style="text-align: right; width: 15%;">0.00</td>
+                <td style="width: 70%; vertical-align: top;" rowspan="3">
+                  <div><b>Amount in Words:</b><br/>${numberToWords(totalNet)}</div>
+                </td>
+                <td style="text-align: right; width: 15%;"><b>Total Amount</b></td>
+                <td style="text-align: right; width: 15%;">${totalNet.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
               </tr>
               <tr>
-                <td></td>
-                <td style="text-align: right;"><b>Total Amount :</b></td>
-                <td style="text-align: right;"><b>${totalNet.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b></td>
+                <td style="text-align: right;"><b>Round Off</b></td>
+                <td style="text-align: right;">0.00</td>
+              </tr>
+              <tr>
+                <td style="text-align: right;"><b>Total Net Amount</b></td>
+                <td style="text-align: right;">${totalNet.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
               </tr>
             </table>
             
@@ -345,10 +349,6 @@ export default function Contracts() {
               ${contractToView.contract_type !== 'RC' ? `05. Inclusions: Spare Parts (${contractToView.spare_parts_included ? 'Yes' : 'No'}), Consumables (${contractToView.consumables_included ? 'Yes' : 'No'})<br/>` : ''}
               ${contractToView.contract_type !== 'RC' ? `06. Exclusions: ${contractToView.exclusions || '-'}<br/>` : ''}
               ${contractToView.contract_type !== 'RC' ? `07. SLA Details: ${contractToView.sla_details || '-'}<br/>` : ''}
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-              Please expedite supplies accordingly, and arrange to send the bill of cost in duplicate for arranging payment of the same on receipt and inspection of materials at our end.
             </div>
             
             <table class="signature-table">
@@ -373,7 +373,8 @@ export default function Contracts() {
 
   const filteredContracts = contracts.filter(c => {
     if (tabValue === 'All') return true;
-    if (tabValue === 'Approved') return c.status === 'Approved' && !isContractInactive(c);
+    if (tabValue === 'Approved') return c.status === 'Approved' && isContractActive(c);
+    if (tabValue === 'Upcoming') return c.status === 'Approved' && !isContractActive(c) && !isContractInactive(c);
     if (tabValue === 'Expired') return isContractInactive(c);
     return c.status === tabValue;
   }).sort((a, b) => {
@@ -444,14 +445,15 @@ export default function Contracts() {
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: 1, borderColor: 'divider', pr: 2 }}>
           <Tabs
-            value={['Draft', 'Submitted', 'Approved', 'Expired', 'Rejected', 'All'].includes(tabValue) ? tabValue : false}
+            value={['Draft', 'Submitted', 'Approved', 'Upcoming', 'Expired', 'Rejected', 'All'].includes(tabValue) ? tabValue : false}
             onChange={(e, v) => setTabValue(v)}
             variant="scrollable"
             scrollButtons={false}
           >
-            {['Draft', 'Submitted', 'Approved', 'Expired', 'Rejected', 'All'].map(s => {
+            {['Draft', 'Submitted', 'Approved', 'Upcoming', 'Expired', 'Rejected', 'All'].map(s => {
               const count = s === 'All' ? contracts.length : contracts.filter(c => {
-                if (s === 'Approved') return c.status === 'Approved' && !isContractInactive(c);
+                if (s === 'Approved') return c.status === 'Approved' && isContractActive(c);
+                if (s === 'Upcoming') return c.status === 'Approved' && !isContractActive(c) && !isContractInactive(c);
                 if (s === 'Expired') return isContractInactive(c);
                 return c.status === s;
               }).length;
@@ -709,6 +711,7 @@ export default function Contracts() {
                       ) : (
                         <>
                           <TableCell sx={{ fontWeight: 700 }}>EQUIPMENT</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>SERIAL NUMBER</TableCell>
                           <TableCell align="right" sx={{ fontWeight: 700 }}>RATE (₹)</TableCell>
                           <TableCell align="right" sx={{ fontWeight: 700 }}>DISC %</TableCell>
                           <TableCell sx={{ fontWeight: 700 }}>GST TYPE</TableCell>
@@ -736,7 +739,8 @@ export default function Contracts() {
                             const split = computeGstSplit(item.gst || 0, contractToView.vendorDetails?.state, tenantConfig?.base_state, tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent);
                             return (
                               <>
-                                <TableCell>{item.material_name || item.equipment_serial || item.equipment_id}</TableCell>
+                                <TableCell>{item.material_name || item.equipment_id}</TableCell>
+                                <TableCell>{item.equipment_serial || 'NA'}</TableCell>
                                 <TableCell align="right">₹{item.rate?.toLocaleString()}</TableCell>
                                 <TableCell align="right">{item.discount_percent || 0}%</TableCell>
                                 <TableCell>{item.is_gst_inclusive ? 'Inclusive' : 'Exclusive'}</TableCell>
@@ -751,7 +755,7 @@ export default function Contracts() {
                     ))}
                     {(!contractToView.items || contractToView.items.length === 0) && (
                       <TableRow>
-                        <TableCell colSpan={contractToView.contract_type === 'RC' ? 6 : 7} align="center" sx={{ py: 2, color: 'text.secondary' }}>No items found</TableCell>
+                        <TableCell colSpan={contractToView.contract_type === 'RC' ? 6 : 8} align="center" sx={{ py: 2, color: 'text.secondary' }}>No items found</TableCell>
                       </TableRow>
                     )}
                   </TableBody>

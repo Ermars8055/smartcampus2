@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 from typing import Optional, List
 from app.database import get_db
-from app.models import CreditNote, CreditNoteItem, CreditNoteApproval, User, Vendor, CompanyAddress, ApprovalFlow
+from app.models import CreditNote, CreditNoteItem, CreditNoteApproval, User, Vendor, CompanyAddress, ApprovalFlow, Invoice
 from app.schemas import CreditNoteCreate, CreditNoteOut, CreditNoteUpdate, CreditNoteApproveRequest
-from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
+from app.auth import get_current_user, require_permission, require_action, get_tenant_id, get_site_id
 from app.utils.sequences import get_next_number
 from app.utils.tz import get_now_ist
 
@@ -27,8 +27,10 @@ def _build_cn_out(db, cn, current_user):
             (ApprovalFlow.max_amount >= cn.total_amount) | (ApprovalFlow.max_amount == None)
         ).all()
         
-        roles = [r.name for r in current_user.roles]
+        roles = getattr(current_user, "_roles", [])
         if any(flow.user_id == current_user.id or flow.role_name in roles for flow in applicable_flows):
+            can_user_approve = True
+        elif getattr(current_user, "_is_platform_admin", False):
             can_user_approve = True
             
     return CreditNoteOut(
@@ -61,7 +63,7 @@ def _build_cn_out(db, cn, current_user):
         scan_url=cn.scan_url,
         created_at=cn.created_at,
         vendor_name=f"{cn.vendor.code} - {cn.vendor.name}" if cn.vendor else None,
-        vendor_address=cn.vendor.address if cn.vendor else None,
+        vendor_address=cn.vendor.address_line_1 if cn.vendor else None,
         vendor_city=cn.vendor.city if cn.vendor else None,
         vendor_state=cn.vendor.state if cn.vendor else None,
         vendor_pincode=cn.vendor.pincode if cn.vendor else None,
@@ -89,7 +91,7 @@ def list_credit_notes(
     status: Optional[str] = None,
     vendor_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("invoice", "read")),
+    current_user: User = Depends(require_permission("credit_note", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -116,7 +118,7 @@ def list_credit_notes(
 def get_credit_note(
     id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("invoice", "read")),
+    current_user: User = Depends(require_permission("credit_note", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -136,13 +138,25 @@ def get_credit_note(
 def create_credit_note(
     data: CreditNoteCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("invoice", "create")),
+    current_user: User = Depends(require_permission("credit_note", "create")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
     vendor = db.query(Vendor).filter(Vendor.id == data.vendor_id, Vendor.tenant_id == tenant_id, Vendor.site_id == site_id).first()
     if not vendor:
         raise HTTPException(status_code=400, detail="Invalid vendor")
+
+    if data.invoice_id:
+        invoice = db.query(Invoice).filter(Invoice.id == data.invoice_id, Invoice.tenant_id == tenant_id, Invoice.site_id == site_id).first()
+        if invoice:
+            existing_cns = db.query(CreditNote).filter(
+                CreditNote.invoice_id == invoice.id,
+                CreditNote.is_deleted == False,
+                CreditNote.status != "Rejected"
+            ).all()
+            existing_total = sum(cn.total_amount for cn in existing_cns)
+            if existing_total + data.total_amount > invoice.total_amount:
+                raise HTTPException(status_code=400, detail=f"Total Credit Note amount ({existing_total + data.total_amount}) exceeds Invoice amount ({invoice.total_amount})")
 
     cn_number = get_next_number(db, tenant_id, site_id, "CREDIT_NOTE", "CN")
 
@@ -212,7 +226,7 @@ def update_credit_note(
     id: int,
     data: CreditNoteUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("invoice", "update")),
+    current_user: User = Depends(require_permission("credit_note", "update")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -226,6 +240,22 @@ def update_credit_note(
     if not cn:
         raise HTTPException(status_code=404, detail="Credit Note not found")
         
+    # Validation against Invoice Amount
+    invoice_id_to_check = data.invoice_id if data.invoice_id is not None else cn.invoice_id
+    if invoice_id_to_check:
+        invoice = db.query(Invoice).filter(Invoice.id == invoice_id_to_check, Invoice.tenant_id == tenant_id, Invoice.site_id == site_id).first()
+        if invoice:
+            existing_cns = db.query(CreditNote).filter(
+                CreditNote.invoice_id == invoice.id,
+                CreditNote.is_deleted == False,
+                CreditNote.status != "Rejected",
+                CreditNote.id != id
+            ).all()
+            existing_total = sum(existing_cn.total_amount for existing_cn in existing_cns)
+            new_total = data.total_amount if data.total_amount is not None else cn.total_amount
+            if existing_total + new_total > invoice.total_amount:
+                raise HTTPException(status_code=400, detail=f"Total Credit Note amount ({existing_total + new_total}) exceeds Invoice amount ({invoice.total_amount})")
+                
     for key, value in data.model_dump(exclude_unset=True, exclude={"items"}).items():
         setattr(cn, key, value)
         
@@ -263,7 +293,7 @@ def approve_credit_note(
     id: int,
     data: CreditNoteApproveRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("invoice", "approve")),
+    current_user: User = Depends(require_action("credit_note", "can_approve")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -284,7 +314,7 @@ def approve_credit_note(
         (ApprovalFlow.max_amount >= cn.total_amount) | (ApprovalFlow.max_amount == None)
     ).all()
 
-    roles = [r.name for r in current_user.roles]
+    roles = getattr(current_user, "_roles", [])
     matched_flow = next((flow for flow in applicable_flows if flow.user_id == current_user.id or flow.role_name in roles), None)
 
     if getattr(current_user, "_is_platform_admin", False):
@@ -338,7 +368,7 @@ def reject_credit_note(
     id: int,
     data: CreditNoteApproveRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("invoice", "approve")),
+    current_user: User = Depends(require_action("credit_note", "can_reject")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):

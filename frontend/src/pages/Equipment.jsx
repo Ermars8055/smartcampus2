@@ -602,12 +602,20 @@ export default function Equipment() {
       if (uploadDocsFiles.equipment_photo) formData.append('equipment_photo', uploadDocsFiles.equipment_photo);
       if (uploadDocsFiles.serial_number_photo) formData.append('serial_number_photo', uploadDocsFiles.serial_number_photo);
 
-      await api.post(`/api/equipment/${uploadDocsDialog.id}/upload-docs`, formData, {
+      const response = await api.post(`/api/equipment/${uploadDocsDialog.id}/upload-docs`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       showMessage('Documents uploaded successfully', 'Success', 'success');
       setUploadDocsDialog(null);
       loadData();
+      
+      // Update open dialogs instantly
+      if (editDialog && editDialog.id === uploadDocsDialog.id) {
+        setEditDialog({ ...editDialog, ...response.data });
+      }
+      if (viewDialog && viewDialog.id === uploadDocsDialog.id) {
+        setViewDialog({ ...viewDialog, ...response.data });
+      }
     } catch (err) {
       showMessage(err.response?.data?.detail || 'Failed to upload documents', 'Error', 'error');
     }
@@ -1016,26 +1024,8 @@ export default function Equipment() {
                       Ticket Raised
                     </Button>
                   )}
-                  {item.installation_status === 'Installed' && (
-                    <Button size="small" variant="outlined" color="primary" startIcon={<UploadFile />} onClick={(e) => { e.stopPropagation(); setUploadDocsFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setUploadDocsDialog(item); }}>
-                      Upload Docs
-                    </Button>
-                  )}
-                  {item.equipment_photo_url && (
-                    <Button size="small" variant="outlined" color="primary" startIcon={<PhotoCamera />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.equipment_photo_url), '_blank'); }}>
-                      Eq. Photo
-                    </Button>
-                  )}
-                  {item.serial_number_photo_url && (
-                    <Button size="small" variant="outlined" color="secondary" startIcon={<PhotoCamera />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.serial_number_photo_url), '_blank'); }}>
-                      SN Photo
-                    </Button>
-                  )}
-                  {item.installation_report_url && (
-                    <Button size="small" variant="outlined" color="success" startIcon={<OpenInNew />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.installation_report_url), '_blank'); }}>
-                      Report
-                    </Button>
-                  )}
+
+
                   {item.status === 'Operational' && (item.cost_per_test > 0 || item.rental_type === 'Cost per test') && (
                     <Button size="small" variant="outlined" color="secondary" startIcon={<Science />} onClick={(e) => { e.stopPropagation(); setConsumptionDialog(item); setConsumptionDate(new Date().toISOString().split('T')[0]); setTestsPerformed(''); setConsumptionRemarks(''); }}>
                       Log Usage
@@ -1229,34 +1219,8 @@ export default function Equipment() {
                           </span>
                         </Tooltip>
 
-                        {item.installation_status === 'Installed' && (
-                          <Tooltip title="Upload Documents">
-                            <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setUploadDocsFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setUploadDocsDialog(item); }}>
-                              <UploadFile fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                        {item.equipment_photo_url && (
-                          <Tooltip title="View Equipment Photo">
-                            <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.equipment_photo_url), '_blank'); }}>
-                              <PhotoCamera fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                        {item.serial_number_photo_url && (
-                          <Tooltip title="View Serial Number Photo">
-                            <IconButton size="small" color="secondary" onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.serial_number_photo_url), '_blank'); }}>
-                              <PhotoCamera fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                        {item.installation_report_url && (
-                          <Tooltip title="View Installation Report">
-                            <IconButton size="small" color="success" onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.installation_report_url), '_blank'); }}>
-                              <OpenInNew fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        )}
+
+
                         <Tooltip title="Print QR Code">
                           <span>
                             <IconButton size="small" color="primary" disabled={item.status !== 'Operational'} onClick={(e) => { e.stopPropagation(); handleOpenQr(item); }}>
@@ -1729,6 +1693,35 @@ export default function Equipment() {
                 </Table>
               </Grid>
 
+              <Grid item xs={12}>
+                <Divider sx={{ my: 1 }} />
+                <Typography variant="subtitle2" color="primary" sx={{ mb: 1, fontWeight: 700 }}>
+                  Attached Documents
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                  {viewDialog?.installation_status === 'Installed' && (
+                    <Button size="small" variant="outlined" color="primary" startIcon={<UploadFile />} onClick={(e) => { e.stopPropagation(); setUploadDocsFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setUploadDocsDialog(viewDialog); }}>
+                      Manage Documents
+                    </Button>
+                  )}
+                  {viewDialog?.equipment_photo_url && (
+                    <Button size="small" variant="outlined" color="primary" startIcon={<PhotoCamera />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(viewDialog.equipment_photo_url), '_blank'); }}>
+                      Eq. Photo
+                    </Button>
+                  )}
+                  {viewDialog?.serial_number_photo_url && (
+                    <Button size="small" variant="outlined" color="secondary" startIcon={<PhotoCamera />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(viewDialog.serial_number_photo_url), '_blank'); }}>
+                      SN Photo
+                    </Button>
+                  )}
+                  {viewDialog?.installation_report_url && (
+                    <Button size="small" variant="outlined" color="success" startIcon={<OpenInNew />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(viewDialog.installation_report_url), '_blank'); }}>
+                      Installation Report
+                    </Button>
+                  )}
+                </Box>
+              </Grid>
+
               {viewDialog.linked_reagents && viewDialog.linked_reagents.length > 0 && (
                 <Grid item xs={12}>
                   <Divider sx={{ my: 1 }} />
@@ -1850,39 +1843,39 @@ export default function Equipment() {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Store (Warehouse)</InputLabel>
-                  <Select
+                  <InputLabel shrink>Store (Warehouse)</InputLabel>
+                  <Select displayEmpty
                     value={addForm.warehouse_id || ''}
                     label="Store (Warehouse)"
                     onChange={e => setAddForm({ ...addForm, warehouse_id: e.target.value })}
                   >
-                    <MenuItem value=""><em>None</em></MenuItem>
+                    <MenuItem value="">None</MenuItem>
                     {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
                   </Select>
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={4}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Institution *</InputLabel>
-                  <Select
+                  <InputLabel shrink>Institution *</InputLabel>
+                  <Select displayEmpty
                     value={addForm.institution_id || ''}
                     label="Institution *"
                     onChange={e => setAddForm({ ...addForm, institution_id: e.target.value })}
                   >
-                    <MenuItem value=""><em>None</em></MenuItem>
+                    <MenuItem value="">None</MenuItem>
                     {institutions.map(i => <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>)}
                   </Select>
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={4}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Location *</InputLabel>
-                  <Select
+                  <InputLabel shrink>Location *</InputLabel>
+                  <Select displayEmpty
                     value={addForm.location_id || ''}
                     label="Location *"
                     onChange={e => setAddForm({ ...addForm, location_id: e.target.value })}
                   >
-                    <MenuItem value=""><em>None</em></MenuItem>
+                    <MenuItem value="">None</MenuItem>
                     {locations.map(l => <MenuItem key={l.id} value={l.id}>{l.location_name}</MenuItem>)}
                   </Select>
                 </FormControl>
@@ -2306,6 +2299,35 @@ export default function Equipment() {
               </Grid>
 
               <Grid item xs={12}>
+                <Divider sx={{ my: 1 }} />
+                <Typography variant="subtitle2" color="primary" sx={{ mb: 1, fontWeight: 700 }}>
+                  Attached Documents
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                  {editDialog?.installation_status === 'Installed' && (
+                    <Button size="small" variant="outlined" color="primary" startIcon={<UploadFile />} onClick={(e) => { e.stopPropagation(); setUploadDocsFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setUploadDocsDialog(editDialog); }}>
+                      Manage Documents
+                    </Button>
+                  )}
+                  {editDialog?.equipment_photo_url && (
+                    <Button size="small" variant="outlined" color="primary" startIcon={<PhotoCamera />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(editDialog.equipment_photo_url), '_blank'); }}>
+                      Eq. Photo
+                    </Button>
+                  )}
+                  {editDialog?.serial_number_photo_url && (
+                    <Button size="small" variant="outlined" color="secondary" startIcon={<PhotoCamera />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(editDialog.serial_number_photo_url), '_blank'); }}>
+                      SN Photo
+                    </Button>
+                  )}
+                  {editDialog?.installation_report_url && (
+                    <Button size="small" variant="outlined" color="success" startIcon={<OpenInNew />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(editDialog.installation_report_url), '_blank'); }}>
+                      Installation Report
+                    </Button>
+                  )}
+                </Box>
+              </Grid>
+
+              <Grid item xs={12}>
                 <Divider sx={{ my: 2 }} />
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>Reagents</Typography>
@@ -2432,15 +2454,60 @@ export default function Equipment() {
 
             <Box>
               <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Installation Report (PDF/Image)</Typography>
-              <TextField type="file" size="small" fullWidth inputProps={{ accept: '.pdf,image/*' }} onChange={e => setUploadDocsFiles({ ...uploadDocsFiles, file: e.target.files[0] })} />
+              <TextField 
+                type="file" 
+                size="small" 
+                fullWidth 
+                inputProps={{ accept: '.pdf,image/*' }} 
+                onChange={e => setUploadDocsFiles({ ...uploadDocsFiles, file: e.target.files[0] })}
+                InputProps={{
+                  endAdornment: uploadDocsDialog?.installation_report_url ? (
+                    <InputAdornment position="end">
+                      <Button size="small" color="success" startIcon={<OpenInNew />} onClick={() => window.open(getFileUrl(uploadDocsDialog.installation_report_url), '_blank')} sx={{ textTransform: 'none', fontWeight: 600, mr: -1 }}>
+                        View Current
+                      </Button>
+                    </InputAdornment>
+                  ) : null
+                }}
+              />
             </Box>
             <Box>
               <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Equipment Photo</Typography>
-              <TextField type="file" size="small" fullWidth inputProps={{ accept: 'image/*' }} onChange={e => setUploadDocsFiles({ ...uploadDocsFiles, equipment_photo: e.target.files[0] })} />
+              <TextField 
+                type="file" 
+                size="small" 
+                fullWidth 
+                inputProps={{ accept: 'image/*' }} 
+                onChange={e => setUploadDocsFiles({ ...uploadDocsFiles, equipment_photo: e.target.files[0] })}
+                InputProps={{
+                  endAdornment: uploadDocsDialog?.equipment_photo_url ? (
+                    <InputAdornment position="end">
+                      <Button size="small" color="success" startIcon={<PhotoCamera />} onClick={() => window.open(getFileUrl(uploadDocsDialog.equipment_photo_url), '_blank')} sx={{ textTransform: 'none', fontWeight: 600, mr: -1 }}>
+                        View Current
+                      </Button>
+                    </InputAdornment>
+                  ) : null
+                }}
+              />
             </Box>
             <Box>
               <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Serial Number Photo</Typography>
-              <TextField type="file" size="small" fullWidth inputProps={{ accept: 'image/*' }} onChange={e => setUploadDocsFiles({ ...uploadDocsFiles, serial_number_photo: e.target.files[0] })} />
+              <TextField 
+                type="file" 
+                size="small" 
+                fullWidth 
+                inputProps={{ accept: 'image/*' }} 
+                onChange={e => setUploadDocsFiles({ ...uploadDocsFiles, serial_number_photo: e.target.files[0] })}
+                InputProps={{
+                  endAdornment: uploadDocsDialog?.serial_number_photo_url ? (
+                    <InputAdornment position="end">
+                      <Button size="small" color="success" startIcon={<PhotoCamera />} onClick={() => window.open(getFileUrl(uploadDocsDialog.serial_number_photo_url), '_blank')} sx={{ textTransform: 'none', fontWeight: 600, mr: -1 }}>
+                        View Current
+                      </Button>
+                    </InputAdornment>
+                  ) : null
+                }}
+              />
             </Box>
           </Box>
         </DialogContent>

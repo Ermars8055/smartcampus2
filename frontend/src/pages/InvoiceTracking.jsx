@@ -563,10 +563,47 @@ export default function InvoiceTracking() {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total Taxable Value</Typography><Typography>₹{detailDialog?.total_taxable_amount?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Typography></Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total Taxes (GST)</Typography><Typography>₹{((detailDialog?.total_cgst||0) + (detailDialog?.total_sgst||0) + (detailDialog?.total_igst||0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Typography></Box>
                 <Divider sx={{ mb: 2 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="h6" sx={{ fontWeight: 700 }}>Grand Total</Typography><Typography variant="h6" sx={{ fontWeight: 700, color: '#059669' }}>₹{detailDialog?.total_amount?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Typography></Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography variant="h6" sx={{ fontWeight: 600 }}>Gross Total</Typography><Typography variant="h6" sx={{ fontWeight: 600 }}>₹{detailDialog?.total_amount?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Typography></Box>
+                {detailDialog?.credit_note_amount > 0 && (
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'error.main' }}>Less: Credit Notes</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'error.main' }}>-₹{detailDialog?.credit_note_amount?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Typography>
+                  </Box>
+                )}
+                <Divider sx={{ mb: 2 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="h5" sx={{ fontWeight: 800 }}>Net Payable</Typography><Typography variant="h5" sx={{ fontWeight: 800, color: '#059669' }}>₹{detailDialog?.net_payable?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Typography></Box>
               </Grid>
             </Grid>
           </Card>
+          
+          {/* Linked Credit Notes */}
+          {detailDialog?.linked_credit_notes?.length > 0 && (
+            <Card sx={{ p: 3, mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#0F172A' }}>Linked Credit Notes</Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead sx={{ backgroundColor: '#F8FAFC' }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 600 }}>Credit Note No.</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600 }}>Amount</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600 }}>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {detailDialog.linked_credit_notes.map((cn) => (
+                      <TableRow key={cn.id}>
+                        <TableCell sx={{ fontWeight: 500, color: '#2563EB' }}>{cn.credit_note_number}</TableCell>
+                        <TableCell>{formatDate(cn.date)}</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600 }}>₹{Number(cn.total_amount?.toFixed(2))}</TableCell>
+                        <TableCell align="right"><Chip label={cn.status} size="small" color={statusColor[cn.status] || 'default'} sx={{ fontSize: '0.7rem' }} /></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Card>
+          )}
         </DialogContent>
         <DialogActions sx={{ p: 2 }}><Button onClick={() => setDetailDialog(null)}>Close</Button></DialogActions>
       </Dialog>

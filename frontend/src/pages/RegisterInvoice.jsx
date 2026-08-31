@@ -485,8 +485,8 @@ export default function RegisterInvoice() {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControl id="field-institution_id" fullWidth required size="small" error={!!errors.institution_id}>
-                  <InputLabel>Institution</InputLabel>
-                  <Select value={form.institution_id} label="Institution" onChange={e => setForm({ ...form, institution_id: e.target.value })}>
+                  <InputLabel shrink>Institution</InputLabel>
+                  <Select displayEmpty value={form.institution_id} label="Institution" onChange={e => setForm({ ...form, institution_id: e.target.value })}>
                     <MenuItem value="">None</MenuItem>
                     {institutions.map(inst => <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>)}
                   </Select>
@@ -530,8 +530,8 @@ export default function RegisterInvoice() {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>PO Reference</InputLabel>
-                  <Select value={form.po_id} label="PO Reference" onChange={e => handlePOChange(e.target.value)}>
+                  <InputLabel shrink>PO Reference</InputLabel>
+                  <Select displayEmpty value={form.po_id} label="PO Reference" onChange={e => handlePOChange(e.target.value)}>
                     <MenuItem value="">None</MenuItem>
                     {pos.map(p => <MenuItem key={p.id} value={p.id}>{p.po_number}</MenuItem>)}
                   </Select>
@@ -542,8 +542,8 @@ export default function RegisterInvoice() {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Consignee (Ship-to)</InputLabel>
-                  <Select value={form.consignee_id} label="Consignee (Ship-to)" onChange={e => setForm({ ...form, consignee_id: e.target.value })}>
+                  <InputLabel shrink>Consignee (Ship-to)</InputLabel>
+                  <Select displayEmpty value={form.consignee_id} label="Consignee (Ship-to)" onChange={e => setForm({ ...form, consignee_id: e.target.value })}>
                     <MenuItem value="">None</MenuItem>
                     {companyAddresses.map(c => <MenuItem key={c.id} value={c.id}>{c.name} {c.state ? `(${c.state})` : ''}</MenuItem>)}
                   </Select>
@@ -551,8 +551,8 @@ export default function RegisterInvoice() {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Buyer (Bill-to)</InputLabel>
-                  <Select value={form.buyer_id} label="Buyer (Bill-to)" onChange={e => setForm({ ...form, buyer_id: e.target.value })}>
+                  <InputLabel shrink>Buyer (Bill-to)</InputLabel>
+                  <Select displayEmpty value={form.buyer_id} label="Buyer (Bill-to)" onChange={e => setForm({ ...form, buyer_id: e.target.value })}>
                     <MenuItem value="">None</MenuItem>
                     {companyAddresses.map(c => <MenuItem key={c.id} value={c.id}>{c.name} {c.state ? `(${c.state})` : ''}</MenuItem>)}
                   </Select>
@@ -676,8 +676,8 @@ export default function RegisterInvoice() {
               </Grid>
               <Grid item xs={12}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Mode/Terms of Payment</InputLabel>
-                  <Select value={form.payment_terms} label="Mode/Terms of Payment" onChange={e => setForm({ ...form, payment_terms: e.target.value })}>
+                  <InputLabel shrink>Mode/Terms of Payment</InputLabel>
+                  <Select displayEmpty value={form.payment_terms} label="Mode/Terms of Payment" onChange={e => setForm({ ...form, payment_terms: e.target.value })}>
                     <MenuItem value="">None</MenuItem>
                     <MenuItem value="Cash">Cash</MenuItem>
                     <MenuItem value="Cheque">Cheque</MenuItem>

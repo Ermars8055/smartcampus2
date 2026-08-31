@@ -327,8 +327,8 @@ export default function PendingGatepassReturnsReport() {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl size="small" fullWidth>
-              <InputLabel>Vendor</InputLabel>
-              <Select value={filters.vendorId} label="Vendor" onChange={e => setFilters({ ...filters, vendorId: e.target.value })}>
+              <InputLabel shrink>Vendor</InputLabel>
+              <Select displayEmpty value={filters.vendorId} label="Vendor" onChange={e => setFilters({ ...filters, vendorId: e.target.value })}>
                 <MenuItem value="">All Vendors</MenuItem>
                 {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
               </Select>

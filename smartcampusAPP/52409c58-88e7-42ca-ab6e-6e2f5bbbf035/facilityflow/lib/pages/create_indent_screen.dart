@@ -6,7 +6,9 @@ import 'package:facilityflow/services/api_service.dart';
 @NowaGenerated()
 class CreateIndentScreen extends StatefulWidget {
   @NowaGenerated({'loader': 'auto-constructor'})
-  const CreateIndentScreen({super.key});
+  const CreateIndentScreen({super.key, this.linkedComplaintId});
+
+  final int? linkedComplaintId;
 
   @override
   State<CreateIndentScreen> createState() => _CreateIndentScreenState();
@@ -153,6 +155,18 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
             'id': b['id'],
             'name': b['name']
           };
+        }
+      }
+
+      if (uniqueBuildings.isEmpty) {
+        // Fallback: If no buildings are mapped to this department, show all buildings for the selected institution
+        for (var b in _allBuildings) {
+          if (b['institution_id'].toString() == _selectedInstitutionId) {
+            uniqueBuildings[b['id'].toString()] = {
+              'id': b['id'],
+              'name': b['name']
+            };
+          }
         }
       }
 
@@ -316,6 +330,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
       'room_id':
           _selectedRoomId != null ? int.tryParse(_selectedRoomId!) : null,
       'remarks': _remarksController.text.trim(),
+      if (widget.linkedComplaintId != null) 'complaint_id': widget.linkedComplaintId,
       'items': validItems
           .map((item) => {
                 'material_id': item['material_id'],

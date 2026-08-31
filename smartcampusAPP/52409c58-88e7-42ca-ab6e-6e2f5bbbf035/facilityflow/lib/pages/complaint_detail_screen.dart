@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:facilityflow/models/complaint.dart';
@@ -5,6 +6,7 @@ import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:facilityflow/globals/app_state.dart';
 import 'package:intl/intl.dart';
 import 'package:facilityflow/services/api_service.dart';
+import 'package:facilityflow/pages/create_indent_screen.dart';
 
 @NowaGenerated()
 class ComplaintDetailScreen extends StatefulWidget {
@@ -206,70 +208,155 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
     }
   }
 
-  void _showResolveDialog() {
-    final controller = TextEditingController();
-    List<File> images = [];
-    final ImagePicker picker = ImagePicker();
+  void _navigateToCreateIndent() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateIndentScreen(
+          linkedComplaintId: widget.complaint.id,
+        ),
+      ),
+    );
+  }
 
+  void _showResolveDialog() {
     showDialog(
         context: context,
         builder: (ctx) {
+          final controller = TextEditingController();
+          final statusController = TextEditingController();
+          bool jobSatisfactory = true;
+          String completionDate = DateTime.now().toIso8601String().split('T')[0];
+          List<File> images = [];
           bool isSubmitting = false;
-          return StatefulBuilder(builder: (dialogContext, setStateDialog) {
+          
+          final isPm = widget.complaint.complaintType == 'Preventive Maintenance';
+          Map<String, dynamic> pmData = {};
+
+          return StatefulBuilder(builder: (dialogCtx, setStateDialog) {
+            Future<void> pickImage() async {
+              final picker = ImagePicker();
+              final picked =
+                  await picker.pickImage(source: ImageSource.gallery);
+              if (picked != null) {
+                setStateDialog(() => images.add(File(picked.path)));
+              }
+            }
+
             return AlertDialog(
               title: const Text('Resolve Complaint'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: controller,
-                      maxLines: 3,
-                      decoration: const InputDecoration(
-                          labelText: 'Resolution Remarks'),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        final picked =
-                            await picker.pickImage(source: ImageSource.camera, imageQuality: 50);
-                        if (picked != null) {
-                          setStateDialog(() => images.add(File(picked.path)));
-                        }
-                      },
-                      icon: const Icon(Icons.camera_alt),
-                      label: const Text('Add Photo'),
-                    ),
-                    if (images.isNotEmpty) ...[
+              content: SizedBox(
+                width: double.maxFinite,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: controller,
+                        decoration: const InputDecoration(
+                          labelText: 'Resolution Remarks',
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLines: 3,
+                      ),
                       const SizedBox(height: 16),
-                      Wrap(
-                        spacing: 8,
-                        children: images
-                            .map((img) => Stack(
-                                  children: [
-                                    Image.file(img,
-                                        width: 80,
-                                        height: 80,
-                                        fit: BoxFit.cover),
-                                    Positioned(
-                                      right: 0,
-                                      top: 0,
-                                      child: InkWell(
-                                        onTap: () => setStateDialog(
-                                            () => images.remove(img)),
-                                        child: Container(
-                                          color: Colors.white.withValues(alpha: 0.8),
-                                          child: const Icon(Icons.close,
-                                              color: Colors.red, size: 20),
-                                        ),
+                      TextField(
+                        controller: statusController,
+                        decoration: const InputDecoration(
+                          labelText: 'Status on Work Completion',
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLines: 2,
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Job Completed Satisfactorily?'),
+                          Switch(
+                            value: jobSatisfactory,
+                            onChanged: (val) => setStateDialog(() => jobSatisfactory = val),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Text('Completion Date: '),
+                          TextButton(
+                            onPressed: () async {
+                              final picked = await showDatePicker(
+                                context: dialogCtx,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              );
+                              if (picked != null) {
+                                setStateDialog(() => completionDate = picked.toIso8601String().split('T')[0]);
+                              }
+                            },
+                            child: Text(completionDate),
+                          ),
+                        ],
+                      ),
+                      if (isPm) ...[
+                         const SizedBox(height: 16),
+                         const Text('PM Checklist Data (JSON):', style: TextStyle(fontWeight: FontWeight.bold)),
+                         const SizedBox(height: 8),
+                         TextField(
+                           maxLines: 3,
+                           decoration: const InputDecoration(
+                             hintText: 'Enter PM JSON data...',
+                             border: OutlineInputBorder(),
+                           ),
+                           onChanged: (val) {
+                             try {
+                               pmData = jsonDecode(val);
+                             } catch (e) {}
+                           },
+                         ),
+                      ],
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Attach Images'),
+                          IconButton(
+                              onPressed: pickImage,
+                              icon: const Icon(Icons.add_a_photo)),
+                        ],
+                      ),
+                      if (images.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (var img in images)
+                              Stack(
+                                children: [
+                                  Image.file(img,
+                                      width: 80, height: 80, fit: BoxFit.cover),
+                                  Positioned(
+                                    right: 0,
+                                    top: 0,
+                                    child: GestureDetector(
+                                      onTap: () => setStateDialog(
+                                          () => images.remove(img)),
+                                      child: Container(
+                                        color: Colors.black54,
+                                        child: const Icon(Icons.close,
+                                            color: Colors.white, size: 16),
                                       ),
-                                    )
-                                  ],
-                                ))
-                            .toList(),
-                      )
-                    ]
-                  ],
+                                    ),
+                                  )
+                                ],
+                              )
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ),
               actions: [
@@ -280,6 +367,10 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                   onPressed: isSubmitting
                       ? null
                       : () async {
+                          if (statusController.text.trim().isEmpty) {
+                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Status on Work Completion is required.')));
+                             return;
+                          }
                           setStateDialog(() => isSubmitting = true);
                           try {
                             final api = ApiService();
@@ -288,14 +379,21 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                               final res = await api.uploadInvoice(img);
                               imageUrls.add(res.data['url']);
                             }
-                            await api.resolveComplaint(widget.complaint.id,
-                                controller.text, imageUrls);
+                            await api.resolveComplaint(
+                              widget.complaint.id,
+                              controller.text, 
+                              imageUrls,
+                              statusOnWorkCompletion: statusController.text,
+                              jobCompletedSatisfactorily: jobSatisfactory,
+                              completionDate: completionDate,
+                              pmChecklistData: pmData.isEmpty ? null : pmData,
+                            );
                             if (ctx.mounted) {
-                              Navigator.pop(ctx); // Pop dialog
+                              Navigator.pop(ctx); 
                             }
                             _refreshComplaints();
                             if (Navigator.canPop(context)) {
-                              Navigator.pop(context); // Pop detail screen
+                              Navigator.pop(context); 
                             }
                           } catch (e) {
                             if (!mounted) return;
@@ -568,45 +666,71 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
         ],
       ),
       child: SafeArea(
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            if (isRegistered)
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _showAssignDialog,
-                  icon: const Icon(Icons.assignment_ind),
-                  label: const Text('Assign Technician'),
+            Row(
+              children: [
+                if (isRegistered)
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _showAssignDialog,
+                      icon: const Icon(Icons.assignment_ind),
+                      label: const Text('Assign Technician'),
+                    ),
+                  ),
+                if (isAssigned) ...[
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _showInspectDialog,
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                      icon: const Icon(Icons.search),
+                      label: const Text('Start Inspection'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _showAssignDialog,
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
+                      icon: const Icon(Icons.assignment_ind),
+                      label: const Text('Reassign'),
+                    ),
+                  ),
+                ],
+                if (isMaterialPending)
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _startRepair,
+                      style:
+                          ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                      icon: const Icon(Icons.build),
+                      label: const Text('Start Repair (Mat. Procured)'),
+                    ),
+                  ),
+                if (isInProgress)
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _showResolveDialog,
+                      style:
+                          ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                      icon: const Icon(Icons.check_circle),
+                      label: const Text('Resolve & Close'),
+                    ),
+                  ),
+              ],
+            ),
+            if (isMaterialPending || isInProgress) ...[
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _navigateToCreateIndent(),
+                  icon: const Icon(Icons.add_shopping_cart),
+                  label: const Text('Create Material Indent'),
                 ),
               ),
-            if (isAssigned)
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _showInspectDialog,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                  icon: const Icon(Icons.search),
-                  label: const Text('Start Inspection'),
-                ),
-              ),
-            if (isMaterialPending)
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _startRepair,
-                  style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                  icon: const Icon(Icons.build),
-                  label: const Text('Start Repair (Mat. Procured)'),
-                ),
-              ),
-            if (isInProgress)
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _showResolveDialog,
-                  style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                  icon: const Icon(Icons.check_circle),
-                  label: const Text('Resolve & Close'),
-                ),
-              ),
+            ],
           ],
         ),
       ),

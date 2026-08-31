@@ -142,10 +142,17 @@ class ApiService {
     return await dio.get('/api/gate-entries');
   }
 
+  Future<Response> completeGateEntry(int id) async {
+    return await dio.post('/api/gate-entries/$id/complete');
+  }
+
   // --- Indent endpoints ---
   Future<Response> approveIndent(
-      int id, List<Map<String, dynamic>> items) async {
-    return await dio.post('/api/indents/$id/approve', data: {'items': items});
+      int id, List<Map<String, dynamic>> items, {String? remarks}) async {
+    return await dio.post('/api/indents/$id/approve', data: {
+      'items': items,
+      'remarks': remarks,
+    });
   }
 
   Future<Response> rejectIndent(int id) async {
@@ -179,10 +186,18 @@ class ApiService {
   }
 
   Future<Response> resolveComplaint(
-      int id, String remarks, List<String> imageUrls) async {
+      int id, String remarks, List<String> imageUrls,
+      {String? statusOnWorkCompletion,
+      bool jobCompletedSatisfactorily = true,
+      String? completionDate,
+      Map<String, dynamic>? pmChecklistData}) async {
     return await dio.post('/api/complaints/$id/resolve', data: {
       'resolution_remarks': remarks,
-      'resolution_image_urls': imageUrls
+      'resolution_image_urls': imageUrls,
+      if (statusOnWorkCompletion != null) 'status_on_work_completion': statusOnWorkCompletion,
+      'job_completed_satisfactorily': jobCompletedSatisfactorily,
+      if (completionDate != null) 'completion_date': completionDate,
+      if (pmChecklistData != null) 'pm_checklist_data': pmChecklistData,
     });
   }
 
@@ -196,5 +211,19 @@ class ApiService {
 
   Future<Response> getRwoDetail(int id) async {
     return await dio.get('/api/rwos/$id');
+  }
+
+  Future<Response> approveRwo(
+      int id, List<Map<String, dynamic>> items, {String? remarks}) async {
+    return await dio.post('/api/procurement/work-orders/$id/approve', data: {
+      'items': items,
+      'remarks': remarks,
+    });
+  }
+
+  Future<Response> rejectRwo(int id, {String? reason}) async {
+    return await dio.post('/api/procurement/work-orders/$id/reject', data: {
+      'reason': reason,
+    });
   }
 }

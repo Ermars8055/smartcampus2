@@ -18,6 +18,7 @@ class Indent {
     this.floor = '',
     this.roomName = '',
     this.currentApprovalLevel = 1,
+    this.canUserApprove = false,
   });
 
   factory Indent.fromJson(Map<String, dynamic> json) {
@@ -41,6 +42,7 @@ class Indent {
       floor: json['floor'] as String? ?? '',
       roomName: json['room_name'] as String? ?? '',
       currentApprovalLevel: json['current_approval_level'] as int? ?? 1,
+      canUserApprove: json['can_user_approve'] as bool? ?? false,
     );
   }
 
@@ -59,6 +61,7 @@ class Indent {
   final String floor;
   final String roomName;
   final int currentApprovalLevel;
+  final bool canUserApprove;
 
   Map<String, dynamic> toJson() {
     return {

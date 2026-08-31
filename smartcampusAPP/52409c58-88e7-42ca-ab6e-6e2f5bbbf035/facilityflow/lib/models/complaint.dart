@@ -13,6 +13,7 @@ class Complaint {
     required this.materialRequired,
     required this.resolutionRemarks,
     required this.images,
+    this.complaintType = '',
   });
 
   factory Complaint.fromJson(Map<String, dynamic> json) {
@@ -28,6 +29,7 @@ class Complaint {
       status: json['status'] as String? ?? 'Registered',
       materialRequired: json['material_required'] as bool? ?? false,
       resolutionRemarks: json['resolution_remarks'] as String? ?? '',
+      complaintType: json['complaint_type_name'] as String? ?? json['complaint_type'] as String? ?? '',
       images: (json['images'] as List<dynamic>?)
               ?.map((e) => (e is Map<String, dynamic>) ? (e['image_url'] as String? ?? '') : e as String)
               .toList() ??
@@ -55,6 +57,8 @@ class Complaint {
 
   final List<String> images;
 
+  final String complaintType;
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -67,6 +71,7 @@ class Complaint {
       'material_required': materialRequired,
       'resolution_remarks': resolutionRemarks,
       'images': images,
+      'complaint_type': complaintType,
     };
   }
 }

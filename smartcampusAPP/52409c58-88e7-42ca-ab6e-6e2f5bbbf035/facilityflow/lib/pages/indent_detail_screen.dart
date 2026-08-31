@@ -92,7 +92,165 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
         if (mounted) setState(() => _isLoading = false);
       }
     } else if (action == 'Approve') {
-      _showApprovalDialog();
+      final List<TextEditingController> controllers = widget.indent.items
+          .map((e) => TextEditingController(text: e.requestedQuantity.toString()))
+          .toList();
+      final List<TextEditingController> remarksControllers = widget.indent.items
+          .map((e) => TextEditingController())
+          .toList();
+      final TextEditingController globalRemarksController = TextEditingController();
+
+      showDialog(
+        context: context,
+        builder: (ctx) {
+          bool isSubmitting = false;
+          return StatefulBuilder(builder: (dialogContext, setStateDialog) {
+            return AlertDialog(
+              title: const Text('Approve Indent'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Adjust approved quantities if necessary:'),
+                    const SizedBox(height: 16),
+                    Flexible(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: widget.indent.items.length,
+                        itemBuilder: (itemContext, idx) {
+                          final item = widget.indent.items[idx];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(item.materialName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text('Req: ${_formatQty(item.requestedQuantity, item.uomName, item.uomAllowDecimal)} ${item.uomName}'),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: TextField(
+                                        controller: controllers[idx],
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(labelText: 'Approve Qty', isDense: true, border: OutlineInputBorder()),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                TextField(
+                                  controller: remarksControllers[idx],
+                                  decoration: const InputDecoration(labelText: 'Item Remarks (Optional)', isDense: true, border: OutlineInputBorder()),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: globalRemarksController,
+                      decoration: const InputDecoration(labelText: 'Approval Remarks (Optional)', isDense: true, border: OutlineInputBorder()),
+                      maxLines: 2,
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSubmitting ? null : () => Navigator.pop(ctx),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          // Validation
+                          bool hasLargerQuantity = false;
+                          bool allZero = true;
+                          List<Map<String, dynamic>> approvalPayload = [];
+
+                          for (int i = 0; i < widget.indent.items.length; i++) {
+                            double requestedQty = widget.indent.items[i].requestedQuantity;
+                            double approvedQty = double.tryParse(controllers[i].text) ?? 0;
+                            
+                            if (approvedQty > requestedQty) {
+                              hasLargerQuantity = true;
+                            }
+                            if (approvedQty > 0) {
+                              allZero = false;
+                            }
+                            approvalPayload.add({
+                              'indent_item_id': widget.indent.items[i].id,
+                              'approved_quantity': approvedQty,
+                              'remarks': remarksControllers[i].text.isEmpty ? null : remarksControllers[i].text,
+                            });
+                          }
+
+                          if (allZero && approvalPayload.isNotEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Cannot approve 0 quantity for all items. Use Reject instead.')),
+                            );
+                            return;
+                          }
+
+                          if (hasLargerQuantity) {
+                            bool? confirm = await showDialog<bool>(
+                              context: ctx,
+                              builder: (warningCtx) => AlertDialog(
+                                title: const Text('Warning'),
+                                content: const Text('You have entered an approved quantity larger than the requested quantity for some items. Proceed?'),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(warningCtx, false), child: const Text('Cancel')),
+                                  ElevatedButton(onPressed: () => Navigator.pop(warningCtx, true), child: const Text('Proceed')),
+                                ],
+                              ),
+                            );
+                            if (confirm != true) return;
+                          }
+
+                          setStateDialog(() => isSubmitting = true);
+                          try {
+                            final api = ApiService();
+                            await api.approveIndent(
+                                widget.indent.id, 
+                                approvalPayload, 
+                                remarks: globalRemarksController.text.isEmpty ? null : globalRemarksController.text
+                            );
+                            if (!mounted) return;
+                            final appState = AppState.of(context, listen: false);
+                            await appState.fetchIndents();
+                            if (!mounted) return;
+                            if (ctx.mounted) Navigator.pop(ctx); 
+                            if (Navigator.canPop(context)) Navigator.pop(context); 
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Indent approved successfully.')),
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to approve: $e')),
+                            );
+                          } finally {
+                            setStateDialog(() => isSubmitting = false);
+                          }
+                        },
+                  child: isSubmitting
+                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Text('Confirm Approve'),
+                ),
+              ],
+            );
+          });
+        },
+      );
     }
   }
 
@@ -101,145 +259,6 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
       return qty.toInt().toString();
     }
     return qty.toStringAsFixed(2);
-  }
-
-  void _showApprovalDialog() {
-    // We map requested items to controllers
-    final Map<int, TextEditingController> controllers = {};
-    for (int i = 0; i < widget.indent.items.length; i++) {
-      controllers[i] = TextEditingController(
-          text: _formatQty(widget.indent.items[i].requestedQuantity, widget.indent.items[i].uomName, widget.indent.items[i].uomAllowDecimal));
-    }
-
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        bool isSubmitting = false;
-        return StatefulBuilder(builder: (dialogContext, setStateDialog) {
-          return AlertDialog(
-            title: const Text('Approve Indent'),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                      'Adjust approved quantities for each item if necessary:'),
-                  const SizedBox(height: 16),
-                  Flexible(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: widget.indent.items.length,
-                      itemBuilder: (itemContext, idx) {
-                        final item = widget.indent.items[idx];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(item.materialName,
-                                  style: const TextStyle(fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text('Req: ${_formatQty(item.requestedQuantity, item.uomName, item.uomAllowDecimal)} ${item.uomName}'),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: TextField(
-                                      controller: controllers[idx],
-                                      keyboardType: TextInputType.number,
-                                      decoration: const InputDecoration(
-                                        labelText: 'Approve Qty',
-                                        isDense: true,
-                                        border: OutlineInputBorder(),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: isSubmitting ? null : () => Navigator.pop(ctx),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                onPressed: isSubmitting
-                    ? null
-                    : () async {
-                        setStateDialog(() => isSubmitting = true);
-                        try {
-                          // We need material_id. Since IndentItem model might not have materialId mapped, we can't reliably send it without it.
-                          // Wait! We need to check if IndentItem has materialId.
-                          // For now we will send a placeholder if it's missing, but wait, the API expects materialId.
-                          // Let's pass the item's material ID if it exists, but we don't have it in `IndentItem` model currently!
-                          // I'll send an empty list and fix the model later if needed, or I will use `id` if I modify the backend to use IndentItem ID.
-                          // Wait, I updated the backend to use `reqItem.MaterialId`. But the Flutter IndentItem might not have `materialId`.
-                          // Let's just create the payload assuming `materialId` is a field we will add to IndentItem.
-                          List<Map<String, dynamic>> approvalPayload = [];
-                          for (int i = 0; i < widget.indent.items.length; i++) {
-                            // Fallback to sending item ID as materialId, we'll fix the API or Model.
-                            // Actually, let's just parse the controllers.
-                            double approvedQty =
-                                double.tryParse(controllers[i]!.text) ?? 0;
-                            // Wait, since we don't have MaterialId in Flutter IndentItem, let's just send the item ID as an identifier and modify the backend to use it.
-                            // Wait, I already updated the backend to `FirstOrDefault(i => i.MaterialId == reqItem.MaterialId)`.
-                            // To avoid breaking, I will just send `material_id` based on whatever is available, but actually `IndentItem` doesn't have ID either in Flutter!
-                            // Oh! Let's check IndentItem.dart later. For now, I'll pass a dummy field `index` and fix it.
-                            approvalPayload.add({
-                              'indent_item_id':
-                                  widget.indent.items[i].id,
-                              'approved_quantity': approvedQty
-                            });
-                          }
-                          final api = ApiService();
-                          await api.approveIndent(
-                              widget.indent.id, approvalPayload);
-                          if (!mounted) return;
-                          final appState =
-                              AppState.of(context, listen: false);
-                          await appState.fetchIndents();
-                          if (!mounted) return;
-                          if (ctx.mounted) Navigator.pop(ctx); // Close dialog
-                          if (Navigator.canPop(context)) Navigator.pop(context); // Go back from details
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content:
-                                    Text('Indent approved successfully.')),
-                          );
-                        } catch (e) {
-                          if (!mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Failed to approve: $e')),
-                          );
-                        } finally {
-                          setStateDialog(() => isSubmitting = false);
-                        }
-                      },
-                child: isSubmitting
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2))
-                    : const Text('Confirm Approve'),
-              ),
-            ],
-          );
-        });
-      },
-    );
   }
 
   @override
@@ -444,7 +463,7 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
   }
 
   Widget? _buildBottomActionBar() {
-    if (widget.indent.status == 'Submitted') {
+    if (widget.indent.status == 'Submitted' && widget.indent.canUserApprove) {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: const BoxDecoration(

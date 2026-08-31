@@ -123,87 +123,114 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                 },
               ),
             ),
-            // Dropdown Filters
+            // Dropdown Filters - Row 1: Institution (full width)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Institution', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                        DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            value: uniqueInstitutions.contains(_selectedInstitution) ? _selectedInstitution : 'All',
-                            items: uniqueInstitutions.map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                _selectedInstitution = newValue!;
-                              });
-                            },
-                          ),
-                        ),
-                      ],
+                  const Text('Institution', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                  const SizedBox(height: 2),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        isDense: true,
+                        value: uniqueInstitutions.contains(_selectedInstitution) ? _selectedInstitution : 'All',
+                        items: uniqueInstitutions.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            _selectedInstitution = newValue!;
+                          });
+                        },
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Department', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                        DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            value: uniqueDepartments.contains(_selectedDepartment) ? _selectedDepartment : 'All',
-                            items: uniqueDepartments.map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                _selectedDepartment = newValue!;
-                              });
-                            },
-                          ),
+                  const SizedBox(height: 8),
+                  // Row 2: Department + Building side by side
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Department', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                            const SizedBox(height: 2),
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade400),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  isExpanded: true,
+                                  isDense: true,
+                                  value: uniqueDepartments.contains(_selectedDepartment) ? _selectedDepartment : 'All',
+                                  items: uniqueDepartments.map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                                    );
+                                  }).toList(),
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      _selectedDepartment = newValue!;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Building', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                        DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            value: uniqueBuildings.contains(_selectedBuilding) ? _selectedBuilding : 'All',
-                            items: uniqueBuildings.map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                _selectedBuilding = newValue!;
-                              });
-                            },
-                          ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Building', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                            const SizedBox(height: 2),
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade400),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  isExpanded: true,
+                                  isDense: true,
+                                  value: uniqueBuildings.contains(_selectedBuilding) ? _selectedBuilding : 'All',
+                                  items: uniqueBuildings.map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                                    );
+                                  }).toList(),
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      _selectedBuilding = newValue!;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),

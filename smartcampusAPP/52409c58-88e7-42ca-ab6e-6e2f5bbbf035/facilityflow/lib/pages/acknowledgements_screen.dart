@@ -4,16 +4,22 @@ import 'package:facilityflow/models/material_issue.dart';
 import 'package:facilityflow/globals/app_state.dart';
 
 @NowaGenerated()
-class AcknowledgementsScreen extends StatelessWidget {
+class AcknowledgementsScreen extends StatefulWidget {
   @NowaGenerated({'loader': 'auto-constructor'})
   const AcknowledgementsScreen({super.key});
 
-  void _showAcknowledgeDialog(BuildContext context, MaterialIssue issue) {
+  @override
+  State<AcknowledgementsScreen> createState() => _AcknowledgementsScreenState();
+}
+
+class _AcknowledgementsScreenState extends State<AcknowledgementsScreen> {
+  Future<void> _showAcknowledgeDialog(MaterialIssue issue) async {
     final theme = Theme.of(context);
     final appState = AppState.of(context, listen: false);
-    showDialog(
+
+    final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         title: const Text(
           'Confirm Acknowledgment',
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -54,58 +60,60 @@ class AcknowledgementsScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogCtx, false),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) => const Center(
-                  child: Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(),
-                          SizedBox(height: 16),
-                          Text('Confirming Receipt...'),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-              final success = await appState.acknowledgeReceipt(issue.id);
-              if (context.mounted) {
-                Navigator.pop(context);
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Materials for ${issue.issueNumber} acknowledged successfully!',
-                      ),
-                      backgroundColor: const Color(0xFF059669),
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Failed to acknowledge. Please try again.'),
-                      backgroundColor: Color(0xFFDC2626),
-                    ),
-                  );
-                }
-              }
-            },
+            onPressed: () => Navigator.pop(dialogCtx, true),
             child: const Text('Acknowledge Receipt'),
           ),
         ],
       ),
     );
+
+    if (confirmed != true || !mounted) return;
+
+    // Show loading dialog — capture its own context to dismiss it
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (loaderCtx) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Confirming Receipt...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final success = await appState.acknowledgeReceipt(issue.id);
+
+    // Now dismiss the loader using State.mounted (reliable)
+    if (mounted) {
+      Navigator.of(context).pop(); // dismisses the loader dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        success
+            ? SnackBar(
+                content: Text(
+                  'Materials for ${issue.issueNumber} acknowledged successfully!',
+                ),
+                backgroundColor: const Color(0xFF059669),
+              )
+            : const SnackBar(
+                content: Text('Failed to acknowledge. Please try again.'),
+                backgroundColor: Color(0xFFDC2626),
+              ),
+      );
+    }
   }
 
   @override
@@ -363,7 +371,7 @@ class AcknowledgementsScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 44,
                     child: ElevatedButton.icon(
-                      onPressed: () => _showAcknowledgeDialog(context, issue),
+                      onPressed: () => _showAcknowledgeDialog(issue),
                       icon: const Icon(Icons.assignment_turned_in),
                       label: const Text(
                         'Acknowledge Receipt',

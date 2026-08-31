@@ -53,7 +53,10 @@ class AppState extends ChangeNotifier {
       final response = await ApiService().dio.get('/api/indents');
       final List data = response.data;
       _indents.clear();
-      _indents.addAll(data.map((json) => Indent.fromJson(json)).toList());
+      _indents.addAll(data
+          .map((json) => Indent.fromJson(json))
+          .where((indent) => indent.status != 'Converted to PO')
+          .toList());
     } catch (e) {
       debugPrint('Error fetching indents: $e');
     } finally {

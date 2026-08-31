@@ -153,6 +153,30 @@ class _GateEntriesListScreenState extends State<GateEntriesListScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Close'),
           ),
+          if (entry.status == 'Awaiting GRN' || entry.status == 'Pending')
+            ElevatedButton.icon(
+              icon: const Icon(Icons.task_alt, size: 16),
+              label: const Text('Mark As Received'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              onPressed: () async {
+                Navigator.pop(context);
+                try {
+                  await ApiService().completeGateEntry(entry.id);
+                  if (context.mounted) {
+                    Provider.of<AppState>(context, listen: false).fetchGateEntries();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Gate entry marked as received.')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed: $e')),
+                    );
+                  }
+                }
+              },
+            ),
         ],
       ),
     );

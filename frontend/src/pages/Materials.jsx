@@ -517,8 +517,8 @@ export default function Materials() {
             }}
           />
           <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel>Filter by Store</InputLabel>
-            <Select
+            <InputLabel shrink>Filter by Store</InputLabel>
+            <Select displayEmpty
               value={storeFilter}
               label="Filter by Store"
               onChange={e => handleFilterChange(setStoreFilter, e.target.value)}
@@ -529,8 +529,8 @@ export default function Materials() {
             </Select>
           </FormControl>
           <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel>Filter by Category</InputLabel>
-            <Select
+            <InputLabel shrink>Filter by Category</InputLabel>
+            <Select displayEmpty
               value={catFilter}
               label="Filter by Category"
               onChange={e => handleFilterChange(setCatFilter, e.target.value)}
@@ -926,15 +926,15 @@ export default function Materials() {
             </FormControl>
 
             <FormControl fullWidth>
-              <InputLabel>Sub Category</InputLabel>
-              <Select
+              <InputLabel shrink>Sub Category</InputLabel>
+              <Select displayEmpty
                 value={form.subcategory_id}
                 onChange={e => setForm({ ...form, subcategory_id: e.target.value })}
                 disabled={viewOnly || !form.category_id}
                 label="Sub Category"
                 startAdornment={<InputAdornment position="start"><Category sx={{ color: '#94A3B8' }} /></InputAdornment>}
               >
-                <MenuItem value=""><em>None</em></MenuItem>
+                <MenuItem value="">None</MenuItem>
                 {form.category_id && subcategories.filter(s => s.category_id === form.category_id).map(s => (
                   <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>
                 ))}

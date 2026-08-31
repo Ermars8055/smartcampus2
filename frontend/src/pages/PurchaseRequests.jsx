@@ -1068,8 +1068,8 @@ export default function PurchaseRequests() {
             </FormControl>
 
             <FormControl fullWidth disabled={!form.department_name || buildings.length === 0}>
-              <InputLabel>Building</InputLabel>
-              <Select
+              <InputLabel shrink>Building</InputLabel>
+              <Select displayEmpty
                 value={form.building_id}
                 label="Building"
                 onChange={e => setForm({ ...form, building_id: e.target.value })}
@@ -1524,8 +1524,8 @@ export default function PurchaseRequests() {
               Terms and Conditions
             </Typography>
             <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
-              <InputLabel>Select Template</InputLabel>
-              <Select
+              <InputLabel shrink>Select Template</InputLabel>
+              <Select displayEmpty
                 label="Select Template"
                 onChange={e => {
                   const t = termsTemplates.find(x => x.id === e.target.value);
@@ -1534,7 +1534,7 @@ export default function PurchaseRequests() {
                 defaultValue=""
                 sx={{ bgcolor: '#fff' }}
               >
-                <MenuItem value=""><em>Select a Template</em></MenuItem>
+                <MenuItem value="">Select a Template</MenuItem>
                 {termsTemplates.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
               </Select>
             </FormControl>

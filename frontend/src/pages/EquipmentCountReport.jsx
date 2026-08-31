@@ -357,8 +357,8 @@ export default function EquipmentCountReport() {
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
-              <InputLabel>Institution</InputLabel>
-              <Select
+              <InputLabel shrink>Institution</InputLabel>
+              <Select displayEmpty
                 value={filters.institutionId}
                 label="Institution"
                 onChange={(e) => setFilters({ ...filters, institutionId: e.target.value })}
@@ -373,8 +373,8 @@ export default function EquipmentCountReport() {
 
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
-              <InputLabel>Category</InputLabel>
-              <Select
+              <InputLabel shrink>Category</InputLabel>
+              <Select displayEmpty
                 value={filters.categoryId}
                 label="Category"
                 onChange={(e) => setFilters({ ...filters, categoryId: e.target.value })}
@@ -389,8 +389,8 @@ export default function EquipmentCountReport() {
 
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth size="small">
-              <InputLabel>Status</InputLabel>
-              <Select
+              <InputLabel shrink>Status</InputLabel>
+              <Select displayEmpty
                 value={filters.status}
                 label="Status"
                 onChange={(e) => setFilters({ ...filters, status: e.target.value })}

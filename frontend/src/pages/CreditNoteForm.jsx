@@ -100,19 +100,58 @@ export default function CreditNoteForm() {
   }, [id]);
 
   const handleInvoiceChange = (invId) => {
-    setForm(prev => ({ ...prev, invoice_id: invId }));
-    if (!invId) return;
+    if (!invId) {
+      setForm(prev => ({ 
+        ...prev, 
+        invoice_id: '',
+        original_invoice_number: '',
+        original_invoice_date: '',
+        dispatch_doc_number: '',
+        dispatched_through: '',
+        destination: '',
+        reference_number: '',
+        reference_date: '',
+        buyer_order_number: '',
+        terms_of_delivery: '',
+        items: [] 
+      }));
+      return;
+    }
     
     const inv = invoices.find(i => i.id === invId);
     if (inv) {
+      const invoiceItems = inv.items ? inv.items.map(item => ({
+        material_id: item.material_id || '',
+        description: item.description || '',
+        hsn_sac: item.hsn_sac || '',
+        quantity: item.quantity || 1,
+        rate: item.rate || 0,
+        uom: item.uom || '',
+        cgst_rate: item.cgst_rate || 0,
+        sgst_rate: item.sgst_rate || 0,
+        igst_rate: item.igst_rate || 0,
+        remarks: item.remarks || ''
+      })) : [];
+
       setForm(prev => ({
         ...prev,
+        invoice_id: invId,
         vendor_id: inv.vendor_id || prev.vendor_id,
         consignee_id: inv.consignee_id || prev.consignee_id,
         buyer_id: inv.buyer_id || prev.buyer_id,
-        original_invoice_number: inv.invoice_number || prev.original_invoice_number,
-        original_invoice_date: inv.invoice_date || prev.original_invoice_date,
+        original_invoice_number: inv.invoice_number || '',
+        original_invoice_date: inv.invoice_date || '',
+        dispatch_doc_number: inv.dispatch_doc_number || '',
+        dispatched_through: inv.dispatched_through || '',
+        destination: inv.destination || '',
+        reference_number: inv.reference_number || '',
+        reference_date: inv.reference_date || '',
+        buyer_order_number: inv.po_number || '',
+        terms_of_delivery: inv.terms_of_delivery || '',
+        items: invoiceItems
       }));
+    } else {
+      setForm(prev => ({ ...prev, invoice_id: invId }));
     }
   };
 
@@ -219,7 +258,9 @@ export default function CreditNoteForm() {
     const newErrors = {};
     if (!form.date) newErrors.date = "Date is required.";
     if (!form.vendor_id) newErrors.vendor_id = "Vendor is required.";
-    if (form.items.length === 0) newErrors.items = "At least one item is required.";
+    
+    const validItems = form.items.filter(item => item.material_id);
+    if (validItems.length === 0) newErrors.items = "At least one valid item is required.";
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
@@ -228,6 +269,8 @@ export default function CreditNoteForm() {
     }
 
     const totals = calculateTotals();
+    const payloadItems = totals.items.filter(item => item.material_id).map(item => ({ ...item, material_id: item.material_id }));
+
     const payload = {
       ...form,
       ...totals,
@@ -237,7 +280,7 @@ export default function CreditNoteForm() {
       original_invoice_date: form.original_invoice_date || null,
       reference_date: form.reference_date || null,
       buyer_order_date: form.buyer_order_date || null,
-      items: totals.items.map(item => ({ ...item, material_id: item.material_id || null })),
+      items: payloadItems,
       status: submitStatus
     };
 
@@ -250,7 +293,7 @@ export default function CreditNoteForm() {
       showMessage(`Credit Note ${submitStatus === 'Submitted' ? 'submitted' : 'saved'} successfully`, 'Success', 'success');
       navigate('/credit-notes');
     } catch (err) {
-      showMessage(err.response?.data?.detail || "Failed to save credit note", 'Error', 'error');
+      showMessage(JSON.stringify(err.response?.data) || err.message || "Failed to save credit note", 'Error', 'error');
     }
   };
 
@@ -275,6 +318,7 @@ export default function CreditNoteForm() {
                 <DatePicker 
                   label="Date" format="DD-MMM-YYYY" value={form.date ? dayjs(form.date) : null}
                   onChange={(v) => setForm({ ...form, date: v ? v.format('YYYY-MM-DD') : '' })}
+                  disableFuture
                   slotProps={{ textField: { fullWidth: true, size: 'small', required: true, error: !!errors.date } }}
                 />
               </Grid>
@@ -288,8 +332,8 @@ export default function CreditNoteForm() {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Original Invoice Reference</InputLabel>
-                  <Select value={form.invoice_id} label="Original Invoice Reference" onChange={e => handleInvoiceChange(e.target.value)}>
+                  <InputLabel shrink>Original Invoice Reference</InputLabel>
+                  <Select displayEmpty value={form.invoice_id} label="Original Invoice Reference" onChange={e => handleInvoiceChange(e.target.value)}>
                     <MenuItem value="">None</MenuItem>
                     {invoices.map(i => <MenuItem key={i.id} value={i.id}>{i.invoice_number}</MenuItem>)}
                   </Select>
@@ -303,6 +347,7 @@ export default function CreditNoteForm() {
                   label="Original Invoice Date" format="DD-MMM-YYYY" value={form.original_invoice_date ? dayjs(form.original_invoice_date) : null}
                   onChange={(v) => setForm({ ...form, original_invoice_date: v ? v.format('YYYY-MM-DD') : '' })}
                   disabled={!!form.invoice_id}
+                  disableFuture
                   slotProps={{ textField: { fullWidth: true, size: 'small' } }}
                 />
               </Grid>
@@ -325,7 +370,7 @@ export default function CreditNoteForm() {
             <Grid container spacing={2}>
               <Grid item xs={12}><TextField fullWidth label="Reference No" value={form.reference_number} onChange={e => setForm({ ...form, reference_number: e.target.value })} size="small" /></Grid>
               <Grid item xs={12}>
-                <DatePicker label="Reference Date" format="DD-MMM-YYYY" value={form.reference_date ? dayjs(form.reference_date) : null} onChange={(v) => setForm({ ...form, reference_date: v ? v.format('YYYY-MM-DD') : '' })} slotProps={{ textField: { fullWidth: true, size: 'small' } }} />
+                <DatePicker label="Reference Date" format="DD-MMM-YYYY" value={form.reference_date ? dayjs(form.reference_date) : null} onChange={(v) => setForm({ ...form, reference_date: v ? v.format('YYYY-MM-DD') : '' })} disableFuture slotProps={{ textField: { fullWidth: true, size: 'small' } }} />
               </Grid>
             </Grid>
           </Card>

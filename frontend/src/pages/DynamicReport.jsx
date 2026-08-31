@@ -59,8 +59,8 @@ export default function DynamicReport({ title, description, endpoint, hasWarehou
       {hasWarehouseFilter && (
         <Card sx={{ mb: 2, p: 2 }}>
           <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel>Store</InputLabel>
-            <Select value={whFilter} label="Store" onChange={e => setWhFilter(e.target.value)}>
+            <InputLabel shrink>Store</InputLabel>
+            <Select displayEmpty value={whFilter} label="Store" onChange={e => setWhFilter(e.target.value)}>
               <MenuItem value="">All</MenuItem>
               {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
             </Select>

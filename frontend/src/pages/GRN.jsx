@@ -606,8 +606,8 @@ export default function GRNPage() {
                 {form.receipt_type === 'PO-Based' && (
                   <>
                     <Grid item xs={12} sm={6}>
-                      <FormControl id="field-po_id" fullWidth required size="small" error={!!errors.po_id}><InputLabel>Purchase Order</InputLabel>
-                        <Select value={form.po_id} size="small" label="Purchase Order" onChange={e => selectPO(e.target.value)}>
+                      <FormControl id="field-po_id" fullWidth required size="small" error={!!errors.po_id}><InputLabel shrink>Purchase Order</InputLabel>
+                        <Select displayEmpty value={form.po_id} size="small" label="Purchase Order" onChange={e => selectPO(e.target.value)}>
                           <MenuItem value="">None</MenuItem>
                           {pos.filter(p => p.status !== 'Closed' && p.status !== 'Draft').map(p => <MenuItem key={p.id} value={p.id}>{p.po_number} - {p.vendor_name}</MenuItem>)}
                         </Select>

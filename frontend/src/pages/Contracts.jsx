@@ -427,7 +427,7 @@ export default function Contracts() {
             onChange={e => { setSelectedInstitution(e.target.value); setSelectedDepartment(''); }}
             sx={{ minWidth: 200 }}
           >
-            <MenuItem value=""><em>All Institutions</em></MenuItem>
+            <MenuItem value="">All Institutions</MenuItem>
             {institutions.map(i => <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>)}
           </TextField>
           <TextField
@@ -439,7 +439,7 @@ export default function Contracts() {
             disabled={!selectedInstitution}
             sx={{ minWidth: 200 }}
           >
-            <MenuItem value=""><em>All Departments</em></MenuItem>
+            <MenuItem value="">All Departments</MenuItem>
             {departments.map(d => <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>)}
           </TextField>
         </Box>

@@ -9,6 +9,7 @@ import { Add, Search, AttachFile, OpenInNew, ReceiptLong, Edit, CheckCircle, Can
 import api, { getFileUrl } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
+import { numberToWords } from '../utils/numberUtils';
 import { useAuth } from '../context/AuthContext';
 import { useMessage } from '../context/MessageContext';
 
@@ -49,112 +50,178 @@ export default function Invoices() {
         <head>
           <title>Invoice - ${inv.invoice_number}</title>
           <style>
-            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.5; padding: 20px; background: #f9f9f9; }
-            .print-wrapper { max-width: 800px; margin: 0 auto; background: white; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; }
+            body { font-family: 'Arial', sans-serif; color: #000; line-height: 1.4; padding: 20px; font-size: 12px; }
+            .print-wrapper { max-width: 800px; margin: 0 auto; border: 1px solid #000; }
             @media print {
-              body { background: white; padding: 0; }
-              .print-wrapper { box-shadow: none; padding: 0; max-width: 100%; border-radius: 0; }
+              body { padding: 0; }
+              .print-wrapper { max-width: 100%; border: 1px solid #000; }
               .no-print { display: none !important; }
             }
-            .header { text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
-            .header h1 { margin: 0; color: #1e293b; font-size: 24px; }
-            .header p { margin: 5px 0 0; color: #64748b; font-size: 14px; }
-            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-            .info-box { border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; }
-            .info-box h3 { margin-top: 0; margin-bottom: 10px; font-size: 14px; color: #2563eb; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
-            .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
-            .info-label { color: #64748b; font-weight: 600; }
-            .info-value { font-weight: 500; text-align: right; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13px; }
-            th { background: #f8fafc; text-align: left; padding: 10px; border: 1px solid #e2e8f0; color: #475569; font-weight: 600; }
-            td { padding: 10px; border: 1px solid #e2e8f0; }
+            .header-title { text-align: center; font-size: 16px; font-weight: bold; border-bottom: 1px solid #000; padding: 5px; }
+            .top-grid { display: grid; grid-template-columns: 50% 50%; }
+            .left-col { border-right: 1px solid #000; display: flex; flex-direction: column; }
+            .right-col { display: flex; flex-direction: column; }
+            .box { padding: 5px 10px; border-bottom: 1px solid #000; flex: 1; }
+            .box:last-child { border-bottom: none; }
+            .box-title { font-size: 10px; color: #555; margin-bottom: 2px; }
+            .box-value { font-weight: bold; font-size: 12px; }
+            .grid-2 { display: grid; grid-template-columns: 50% 50%; border-bottom: 1px solid #000; }
+            .grid-2 > div { padding: 5px 10px; border-right: 1px solid #000; }
+            .grid-2 > div:last-child { border-right: none; }
+            table { width: 100%; border-collapse: collapse; border-top: 1px solid #000; border-bottom: 1px solid #000; }
+            th { border-bottom: 1px solid #000; border-right: 1px solid #000; padding: 5px; text-align: left; }
+            th:last-child, td:last-child { border-right: none; }
+            td { border-right: 1px solid #000; padding: 5px; vertical-align: top; }
             .text-right { text-align: right; }
             .text-center { text-align: center; }
-            .summary-box { float: right; width: 350px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; }
-            .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
-            .summary-row.total { font-weight: bold; font-size: 16px; border-top: 2px solid #e2e8f0; padding-top: 10px; margin-top: 5px; color: #059669; }
-            .clear { clear: both; }
-            .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+            .bottom-section { display: flex; border-bottom: 1px solid #000; }
+            .bottom-left { flex: 1; border-right: 1px solid #000; padding: 10px; }
+            .bottom-right { width: 300px; padding: 10px; text-align: right; display: flex; flex-direction: column; justify-content: space-between; }
+            .amount-words { font-weight: bold; font-style: italic; margin-top: 10px; }
             .action-bar { text-align: right; margin-bottom: 20px; }
             .btn-print { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: 600; }
-            .btn-print:hover { background: #1d4ed8; }
+            .totals-table { width: 100%; border-collapse: collapse; }
+            .totals-table td { border: none; padding: 2px 5px; }
+            .totals-table td:last-child { text-align: right; font-weight: bold; }
           </style>
         </head>
         <body>
+          <div class="action-bar no-print">
+            <button class="btn-print" onclick="window.print()">Print Document</button>
+          </div>
           <div class="print-wrapper">
-            <div class="action-bar no-print">
-              <button class="btn-print" onclick="window.print()">Print Document</button>
-            </div>
-            <div class="header">
-              <h1>INVOICE</h1>
-              <p>Invoice No: ${inv.invoice_number} | Date: ${formatDate(inv.invoice_date)}</p>
-              <p>Status: ${inv.status}</p>
-            </div>
+            <div class="header-title">TAX INVOICE</div>
             
-            <div class="info-grid">
-              <div class="info-box">
-                <h3>General Details</h3>
-                <div class="info-row"><span class="info-label">Vendor:</span> <span class="info-value">${inv.vendor_name || '-'}</span></div>
-                <div class="info-row"><span class="info-label">PO Ref:</span> <span class="info-value">${inv.po_number || '-'}</span></div>
-                <div class="info-row"><span class="info-label">Gate Entry:</span> <span class="info-value">${inv.gate_entry_number || '-'}</span></div>
+            <div class="top-grid">
+              <div class="left-col">
+                <div class="box">
+                  <div class="box-title">Vendor / Seller</div>
+                  <div class="box-value">${inv.vendor_name || '-'}</div>
+                </div>
+                <div class="box">
+                  <div class="box-title">Consignee (Ship to) / Buyer (Bill to)</div>
+                  <div class="box-value">SmartCampus Construction LLP</div>
+                  <div>Site No 92, Bangalore Urban</div>
+                  <div>Karnataka, India</div>
+                </div>
               </div>
-              <div class="info-box">
-                <h3>Dispatch & Transport</h3>
-                <div class="info-row"><span class="info-label">e-Way Bill No:</span> <span class="info-value">${inv.eway_bill_number || '-'}</span></div>
-                <div class="info-row"><span class="info-label">Vehicle No:</span> <span class="info-value">${inv.vehicle_number || '-'}</span></div>
-                <div class="info-row"><span class="info-label">Delivery Note:</span> <span class="info-value">${inv.delivery_note || '-'}</span></div>
-                <div class="info-row"><span class="info-label">Destination:</span> <span class="info-value">${inv.destination || '-'}</span></div>
+              
+              <div class="right-col">
+                <div class="grid-2">
+                  <div>
+                    <div class="box-title">Invoice No.</div>
+                    <div class="box-value">${inv.invoice_number || '-'}</div>
+                  </div>
+                  <div>
+                    <div class="box-title">Dated</div>
+                    <div class="box-value">${formatDate(inv.invoice_date) || '-'}</div>
+                  </div>
+                </div>
+                <div class="grid-2">
+                  <div>
+                    <div class="box-title">Delivery Note</div>
+                    <div class="box-value">${inv.delivery_note || '-'}</div>
+                  </div>
+                  <div>
+                    <div class="box-title">Mode/Terms of Payment</div>
+                    <div class="box-value">${inv.payment_terms || '-'}</div>
+                  </div>
+                </div>
+                <div class="grid-2">
+                  <div>
+                    <div class="box-title">Buyer's Order No. (PO Ref)</div>
+                    <div class="box-value">${inv.po_number || '-'}</div>
+                  </div>
+                  <div>
+                    <div class="box-title">Gate Entry</div>
+                    <div class="box-value">${inv.gate_entry_number || '-'}</div>
+                  </div>
+                </div>
+                <div class="grid-2">
+                  <div>
+                    <div class="box-title">Dispatch Doc No.</div>
+                    <div class="box-value">${inv.dispatch_doc_number || '-'}</div>
+                  </div>
+                  <div>
+                    <div class="box-title">Dispatched through</div>
+                    <div class="box-value">${inv.dispatched_through || '-'}</div>
+                  </div>
+                </div>
+                <div class="grid-2" style="border-bottom: none;">
+                  <div>
+                    <div class="box-title">Destination</div>
+                    <div class="box-value">${inv.destination || '-'}</div>
+                  </div>
+                  <div>
+                    <div class="box-title">Motor Vehicle No.</div>
+                    <div class="box-value">${inv.vehicle_number || '-'}</div>
+                  </div>
+                </div>
               </div>
             </div>
 
             <table>
               <thead>
                 <tr>
-                  <th>Material</th>
-                  <th>HSN</th>
+                  <th>Sl No</th>
+                  <th>Description of Goods</th>
+                  <th>HSN/SAC</th>
                   <th class="text-right">Qty</th>
                   <th class="text-right">Rate</th>
-                  <th class="text-right">Disc%</th>
                   <th class="text-right">CGST%</th>
                   <th class="text-right">SGST%</th>
                   <th class="text-right">IGST%</th>
                   <th class="text-right">Amount</th>
                 </tr>
               </thead>
-              <tbody>
-                ${(inv.items || []).map(item => `
+              <tbody style="min-height: 200px;">
+                ${(inv.items || []).map((item, idx) => `
                   <tr>
+                    <td>${idx + 1}</td>
                     <td>
-                      <strong>${item.material_code}</strong><br/>
-                      <small style="color: #64748b;">${item.material_name}</small>
+                      <strong>${item.material_code || '-'}</strong><br/>
+                      <span>${item.material_name || item.description || ''}</span>
                     </td>
                     <td>${item.hsn_sac || '-'}</td>
-                    <td class="text-right">${item.quantity} ${item.uom}</td>
-                    <td class="text-right">₹${Number(item.rate?.toFixed(2)) || '0.00'}</td>
-                    <td class="text-right">${Number(item.discount_percent?.toFixed(2)) || '0.00'}%</td>
+                    <td class="text-right">${item.quantity} ${item.uom || ''}</td>
+                    <td class="text-right">${Number(item.rate?.toFixed(2)) || '0.00'}</td>
                     <td class="text-right">${Number(item.cgst_rate?.toFixed(2)) || '0.00'}%</td>
                     <td class="text-right">${Number(item.sgst_rate?.toFixed(2)) || '0.00'}%</td>
                     <td class="text-right">${Number(item.igst_rate?.toFixed(2)) || '0.00'}%</td>
-                    <td class="text-right">₹${Number(item.amount?.toFixed(2)) || '0.00'}</td>
+                    <td class="text-right">${Number(item.amount?.toFixed(2)) || '0.00'}</td>
                   </tr>
                 `).join('')}
                 ${(!inv.items || inv.items.length === 0) ? '<tr><td colspan="9" class="text-center">No line items found.</td></tr>' : ''}
               </tbody>
             </table>
-
-            <div class="summary-box">
-              <div class="summary-row"><span class="info-label">Total Taxable Value</span> <span>₹${Number(inv.total_taxable_amount?.toFixed(2)) || '0.00'}</span></div>
-              <div class="summary-row"><span class="info-label">Total CGST</span> <span>₹${Number(inv.total_cgst?.toFixed(2)) || '0.00'}</span></div>
-              <div class="summary-row"><span class="info-label">Total SGST</span> <span>₹${Number(inv.total_sgst?.toFixed(2)) || '0.00'}</span></div>
-              <div class="summary-row"><span class="info-label">Total IGST</span> <span>₹${Number(inv.total_igst?.toFixed(2)) || '0.00'}</span></div>
-              <div class="summary-row"><span class="info-label">Transport Charges</span> <span>₹${Number(inv.transport_charges?.toFixed(2)) || '0.00'}</span></div>
-              <div class="summary-row total"><span class="info-label" style="color: #059669;">Grand Total</span> <span>₹${Number(inv.total_amount?.toFixed(2)) || '0.00'}</span></div>
+            
+            <div class="bottom-section">
+              <div class="bottom-left">
+                <div class="box-title">Amount Chargeable (in words)</div>
+                <div class="amount-words">${numberToWords(inv.total_amount)}</div>
+                
+                <div style="margin-top: 30px;">
+                  <div class="box-title">Company's Bank Details</div>
+                  <div>A/c Holder's Name : SmartCampus</div>
+                  <div>Bank Name : HDFC BANK</div>
+                </div>
+              </div>
+              <div class="bottom-right">
+                <table class="totals-table">
+                  <tr><td>Total Taxable Value</td><td>₹${Number(inv.total_taxable_amount?.toFixed(2)) || '0.00'}</td></tr>
+                  <tr><td>Total CGST</td><td>₹${Number(inv.total_cgst?.toFixed(2)) || '0.00'}</td></tr>
+                  <tr><td>Total SGST</td><td>₹${Number(inv.total_sgst?.toFixed(2)) || '0.00'}</td></tr>
+                  <tr><td>Total IGST</td><td>₹${Number(inv.total_igst?.toFixed(2)) || '0.00'}</td></tr>
+                  <tr><td>Transport Charges</td><td>₹${Number(inv.transport_charges?.toFixed(2)) || '0.00'}</td></tr>
+                  <tr><td style="font-size: 14px; font-weight: bold; border-top: 1px solid #000; padding-top: 5px;">Grand Total</td><td style="font-size: 14px; border-top: 1px solid #000; padding-top: 5px;">₹${Number(inv.total_amount?.toFixed(2)) || '0.00'}</td></tr>
+                </table>
+                <div style="margin-top: 40px; font-weight: bold;">Authorised Signatory</div>
+              </div>
             </div>
             
-            <div class="clear"></div>
-            
-            <div class="footer">
-              <p>Generated by SmartCampus on ${formatDateTime(new Date())}</p>
+            <div style="text-align: center; font-size: 10px; padding: 5px;">
+              SUBJECT TO BANGALORE JURISDICTION<br/>
+              This is a Computer Generated Document
             </div>
           </div>
         </body>
@@ -400,10 +467,47 @@ export default function Invoices() {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}><Typography color="textSecondary">Total IGST</Typography><Typography>₹{Number(detailDialog?.total_igst?.toFixed(2))}</Typography></Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}><Typography color="textSecondary">Transport Charges</Typography><Typography>₹{Number(detailDialog?.transport_charges?.toFixed(2)) || '0.00'}</Typography></Box>
                 <Divider sx={{ mb: 2 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="h6" sx={{ fontWeight: 700 }}>Grand Total</Typography><Typography variant="h6" sx={{ fontWeight: 700, color: '#059669' }}>₹{Number(detailDialog?.total_amount?.toFixed(2))}</Typography></Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography variant="h6" sx={{ fontWeight: 600 }}>Gross Total</Typography><Typography variant="h6" sx={{ fontWeight: 600 }}>₹{Number(detailDialog?.total_amount?.toFixed(2))}</Typography></Box>
+                {detailDialog?.credit_note_amount > 0 && (
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'error.main' }}>Less: Credit Notes</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'error.main' }}>-₹{Number(detailDialog?.credit_note_amount?.toFixed(2))}</Typography>
+                  </Box>
+                )}
+                <Divider sx={{ mb: 2 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="h5" sx={{ fontWeight: 800 }}>Net Payable</Typography><Typography variant="h5" sx={{ fontWeight: 800, color: '#059669' }}>₹{Number(detailDialog?.net_payable?.toFixed(2))}</Typography></Box>
               </Grid>
             </Grid>
           </Card>
+          
+          {/* Linked Credit Notes */}
+          {detailDialog?.linked_credit_notes?.length > 0 && (
+            <Card sx={{ p: 3, mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#0F172A' }}>Linked Credit Notes</Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead sx={{ backgroundColor: '#F8FAFC' }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 600 }}>Credit Note No.</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600 }}>Amount</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600 }}>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {detailDialog.linked_credit_notes.map((cn) => (
+                      <TableRow key={cn.id}>
+                        <TableCell sx={{ fontWeight: 500, color: '#2563EB' }}>{cn.credit_note_number}</TableCell>
+                        <TableCell>{formatDate(cn.date)}</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600 }}>₹{Number(cn.total_amount?.toFixed(2))}</TableCell>
+                        <TableCell align="right"><Chip label={cn.status} size="small" color={statusColor[cn.status] || 'default'} sx={{ fontSize: '0.7rem' }} /></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Card>
+          )}
         </DialogContent>
         <DialogActions sx={{ p: 2, justifyContent: 'flex-end' }}>
           <Box sx={{ display: 'flex', gap: 1 }}>

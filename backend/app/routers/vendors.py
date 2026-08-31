@@ -212,7 +212,10 @@ def update_vendor(
             new_cat_names = [c.name for c in db.query(Category).filter(Category.id.in_(data.category_ids)).all()]
             changes["categories"] = {"old": old_cat_names, "new": new_cat_names}
 
-    if changes and vendor.status in [VendorStatus.APPROVED.value, VendorStatus.REJECTED.value] and "status" not in update_data:
+    # Check if changes warrant re-approval (exclude is_active and rating)
+    trigger_approval = any(k for k in changes.keys() if k not in ["is_active", "rating"])
+
+    if trigger_approval and vendor.status in [VendorStatus.APPROVED.value, VendorStatus.REJECTED.value] and "status" not in update_data:
         vendor.previous_status = vendor.status
         if vendor.status == VendorStatus.APPROVED.value:
             vendor.previous_status_by_id = vendor.approved_by_id

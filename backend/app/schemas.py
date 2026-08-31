@@ -3,6 +3,7 @@
 from pydantic import BaseModel, Field, EmailStr, field_validator, model_validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime, date
+import datetime as dt
 
 # ── Auth & Users ─────────────────────────────────────────────────────────
 
@@ -1120,6 +1121,12 @@ class InvoiceOut(InvoiceBase):
     payment_completed_by_name: Optional[str] = None
     payment_reference: Optional[str] = None
     items: List[InvoiceItemOut] = []
+    
+    # Financial Balancing
+    credit_note_amount: float = 0
+    net_payable: float = 0
+    linked_credit_notes: List[dict] = []
+    
     class Config:
         from_attributes = True
 
@@ -1202,17 +1209,17 @@ class CreditNoteCreate(CreditNoteBase):
     status: Optional[str] = "Draft"
 
 class CreditNoteUpdate(BaseModel):
-    date: Optional[date] = None
+    date: Optional[dt.date] = None
     vendor_id: Optional[int] = None
     invoice_id: Optional[int] = None
     consignee_id: Optional[int] = None
     buyer_id: Optional[int] = None
     original_invoice_number: Optional[str] = None
-    original_invoice_date: Optional[date] = None
+    original_invoice_date: Optional[dt.date] = None
     reference_number: Optional[str] = None
-    reference_date: Optional[date] = None
+    reference_date: Optional[dt.date] = None
     buyer_order_number: Optional[str] = None
-    buyer_order_date: Optional[date] = None
+    buyer_order_date: Optional[dt.date] = None
     dispatch_doc_number: Optional[str] = None
     dispatched_through: Optional[str] = None
     destination: Optional[str] = None

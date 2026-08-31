@@ -28,6 +28,7 @@ const DOCUMENT_TYPES = [
   { value: 'CONTRACT', label: 'Contract' },
   { value: 'VENDOR', label: 'Vendor' },
   { value: 'WRITE_OFF', label: 'Write Off' },
+  { value: 'CreditNote', label: 'Credit Note' },
 ];
 
 // ── Helper: Build a flat map of resource → { can_read, can_create, ... } ──

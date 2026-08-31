@@ -14,8 +14,30 @@ from app.utils.tz import get_now_ist
 router = APIRouter(prefix="/api/invoices", tags=["Invoices"])
 
 
-def _build_invoice_out(inv):
+def _build_invoice_out(inv, db: Session = None):
     """Helper to build InvoiceOut from an Invoice ORM instance."""
+    credit_note_amount = 0
+    net_payable = inv.total_amount
+    linked_cns = []
+    
+    if db:
+        from app.models import CreditNote
+        cns = db.query(CreditNote).filter(
+            CreditNote.invoice_id == inv.id,
+            CreditNote.is_deleted == False,
+            CreditNote.status == "Approved"
+        ).all()
+        for cn in cns:
+            credit_note_amount += cn.total_amount
+            linked_cns.append({
+                "id": cn.id,
+                "credit_note_number": cn.credit_note_number,
+                "date": cn.date,
+                "total_amount": cn.total_amount,
+                "status": cn.status
+            })
+        net_payable = inv.total_amount - credit_note_amount
+
     return InvoiceOut(
         id=inv.id,
         code=inv.code,
@@ -80,6 +102,9 @@ def _build_invoice_out(inv):
         payment_completed_at=inv.payment_completed_at,
         payment_completed_by_name=inv.payment_completed_by.full_name if inv.payment_completed_by else None,
         payment_reference=inv.payment_reference,
+        credit_note_amount=credit_note_amount,
+        net_payable=net_payable,
+        linked_credit_notes=linked_cns,
         items=[{
             "id": i.id, "material_id": i.material_id, "description": i.description,
             "hsn_sac": i.hsn_sac, "quantity": i.quantity, "rate": i.rate, "uom": i.uom,
@@ -127,7 +152,7 @@ def list_invoices(
         q = q.filter(Invoice.gate_entry_id == gate_entry_id)
         
     invoices = q.order_by(Invoice.created_at.desc()).all()
-    return [_build_invoice_out(inv) for inv in invoices]
+    return [_build_invoice_out(inv, db) for inv in invoices]
 
 
 @router.post("", response_model=InvoiceOut)
@@ -220,7 +245,7 @@ def create_invoice(
     db.commit()
     db.refresh(invoice)
     
-    return _build_invoice_out(invoice)
+    return _build_invoice_out(invoice, db)
 
 
 @router.put("/{id}", response_model=InvoiceOut)
@@ -272,4 +297,4 @@ def update_invoice(
     db.commit()
     db.refresh(invoice)
     
-    return _build_invoice_out(invoice)
+    return _build_invoice_out(invoice, db)

@@ -181,6 +181,7 @@ export default function ApprovalFlows() {
                   <MenuItem value="PURCHASE_ORDER">Purchase Order</MenuItem>
                   <MenuItem value="VENDOR">Vendor Registration</MenuItem>
                   <MenuItem value="CONTRACT">Contract</MenuItem>
+                  <MenuItem value="CreditNote">Credit Note</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

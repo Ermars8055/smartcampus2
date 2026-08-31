@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict dqEhap6OuXp5avUrZB7F66pZR02ZNXFzYtkR62kRSiMLAcMUf7YcuIPjocMT2xK
+\restrict HNZbhGmNaqcev7YA84Oe7tVrG5wf2DNI7cxthGfaAuvKikjr2h5QIGfmcs32g01
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -723,7 +723,13 @@ CREATE TABLE public.credit_note_items (
     igst_amount double precision,
     taxable_amount double precision,
     amount double precision NOT NULL,
-    remarks text
+    remarks text,
+    invoice_item_id integer,
+    po_item_id integer,
+    grn_item_id integer,
+    invoice_quantity double precision,
+    received_quantity double precision,
+    previously_credited_quantity double precision
 );
 
 
@@ -790,7 +796,11 @@ CREATE TABLE public.credit_notes (
     approved_at timestamp without time zone,
     is_deleted boolean,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    purchase_order_id integer,
+    grn_id integer,
+    credit_note_type character varying(100),
+    inventory_impact boolean
 );
 
 
@@ -4938,26 +4948,16 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 17	2	2	PURCHASE_REQUEST	2	CEO	0	\N	\N	t
 18	2	2	PURCHASE_ORDER	2	CEO	0	\N	\N	t
 19	2	2	PURCHASE_REQUEST	1	Store Manager	0	\N	\N	t
-22	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
-24	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
+95	2	2	VENDOR	2	Admin	0	\N	\N	f
+103	2	2	VENDOR	2	Admin	0	\N	\N	f
+139	2	2	CreditNote	1	Admin	0	\N	\N	t
+111	2	2	VENDOR	2	Admin	0	\N	\N	f
 45	2	2	INDENT	1	Department Head	0	\N	\N	t
 44	2	2	INDENT	1	Institution Head	0	\N	19	t
 46	2	2	INDENT	1	Institution Head	0	\N	\N	t
-95	2	2	VENDOR	2	Admin	0	\N	\N	f
-103	2	2	VENDOR	2	Admin	0	\N	\N	f
-111	2	2	VENDOR	2	Admin	0	\N	\N	f
-28	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-30	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
-10	2	2	INDENT	1	Admin	0	\N	\N	f
-11	2	2	INDENT	2	Admin	0	\N	\N	f
-12	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 49	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-96	2	2	INDENT	1	Admin	0	\N	\N	f
 98	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-99	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
-100	2	2	INDENT	2	Admin	0	\N	\N	f
 101	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
-102	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 104	2	2	INDENT	1	Admin	0	\N	\N	f
 106	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 107	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
@@ -4965,15 +4965,27 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 109	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 13	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 14	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-15	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 20	2	2	INDENT	1	Admin	0	\N	\N	f
 21	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 23	2	2	INDENT	2	Admin	0	\N	\N	f
-25	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
-26	2	2	INDENT	1	Admin	0	\N	\N	t
-27	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
-29	2	2	INDENT	2	Admin	0	\N	\N	t
+25	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+26	2	2	INDENT	1	Admin	0	\N	\N	f
+27	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
+29	2	2	INDENT	2	Admin	0	\N	\N	f
+10	2	2	INDENT	1	Admin	0	\N	\N	f
+11	2	2	INDENT	2	Admin	0	\N	\N	f
+12	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
+22	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
+24	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
+102	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+15	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
+28	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
+30	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
+96	2	2	INDENT	1	Admin	0	\N	\N	t
+99	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
+100	2	2	INDENT	2	Admin	0	\N	\N	t
 105	2	2	CONTRACT	1	Admin	0	\N	\N	t
+87	2	2	PURCHASE_ORDER	1	Technician	5000	123456789	\N	f
 74	2	2	INDENT	1	Admin	0	\N	\N	f
 54	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 56	2	2	INDENT	2	Admin	0	\N	\N	f
@@ -4994,7 +5006,6 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 75	2	2	INDENT	2	Admin	0	\N	\N	f
 76	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 77	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
-87	2	2	PURCHASE_ORDER	1	Technician	5000	123456789	\N	f
 85	2	2	INDENT	2	Admin	0	\N	\N	f
 88	2	2	INDENT	1	Admin	0	\N	\N	f
 90	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
@@ -6656,6 +6667,7 @@ COPY public.contracts (id, tenant_id, site_id, contract_number, contract_type, v
 --
 
 COPY public.credit_note_approvals (id, credit_note_id, approval_flow_id, approver_id, remarks, approved_at) FROM stdin;
+1	1	139	3	Approved	2026-08-31 11:44:13.756272
 \.
 
 
@@ -6663,7 +6675,13 @@ COPY public.credit_note_approvals (id, credit_note_id, approval_flow_id, approve
 -- Data for Name: credit_note_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.credit_note_items (id, credit_note_id, material_id, description, hsn_sac, quantity, rate, uom, discount_percent, cgst_rate, sgst_rate, igst_rate, cgst_amount, sgst_amount, igst_amount, taxable_amount, amount, remarks) FROM stdin;
+COPY public.credit_note_items (id, credit_note_id, material_id, description, hsn_sac, quantity, rate, uom, discount_percent, cgst_rate, sgst_rate, igst_rate, cgst_amount, sgst_amount, igst_amount, taxable_amount, amount, remarks, invoice_item_id, po_item_id, grn_item_id, invoice_quantity, received_quantity, previously_credited_quantity) FROM stdin;
+8	8	2565	0.035X150CM TEFLON WIRE J.TIP		21	10	Numbers	0	6	6	0	12.6	12.6	0	210	235.2		\N	\N	\N	\N	\N	\N
+9	8	2564	0.032 X 150 TERUMO GUIDE WIRE		5	16526.16	Numbers	0	6	6	0	4957.848	4957.848	0	82630.8	92546.496		\N	\N	\N	\N	\N	\N
+10	8	3505	110mmx75mm Bush		30	761.41	Numbers	0	9	9	0	2055.807	2055.807	0	22842.3	26953.914		\N	\N	\N	\N	\N	\N
+11	8	2352	1 1/2 Cpvc NRV		20	726.57	Numbers	0	9	9	0	1307.826	1307.826	0	14531.400000000001	17147.052000000003		\N	\N	\N	\N	\N	\N
+12	8	3492	110mmx75mm Multi trap PVC		10	3477.26	Numbers	0	9	9	0	3129.5340000000006	3129.5340000000006	0	34772.600000000006	41031.668000000005		\N	\N	\N	\N	\N	\N
+15	1	3474	110 Door Bend PVC		2	3262.58	NOS	0	9	9	0	587.2643999999999	587.2643999999999	0	6525.16	7699.6888		\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -6671,7 +6689,9 @@ COPY public.credit_note_items (id, credit_note_id, material_id, description, hsn
 -- Data for Name: credit_notes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.credit_notes (id, tenant_id, site_id, credit_note_number, date, vendor_id, invoice_id, consignee_id, buyer_id, original_invoice_number, original_invoice_date, reference_number, reference_date, buyer_order_number, buyer_order_date, dispatch_doc_number, dispatched_through, destination, terms_of_delivery, total_taxable_amount, total_cgst, total_sgst, total_igst, total_discount, total_amount, status, current_approval_level, remarks, scan_url, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at) FROM stdin;
+COPY public.credit_notes (id, tenant_id, site_id, credit_note_number, date, vendor_id, invoice_id, consignee_id, buyer_id, original_invoice_number, original_invoice_date, reference_number, reference_date, buyer_order_number, buyer_order_date, dispatch_doc_number, dispatched_through, destination, terms_of_delivery, total_taxable_amount, total_cgst, total_sgst, total_igst, total_discount, total_amount, status, current_approval_level, remarks, scan_url, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, purchase_order_id, grn_id, credit_note_type, inventory_impact) FROM stdin;
+8	2	2	CN-00008	2026-08-26	64	12	6	4	INV2001	2026-06-30		\N	PO-00016	\N					154987.1	11463.615000000002	11463.615000000002	0	0	177914.33000000002	Draft	1			3	\N	\N	f	2026-08-28 21:14:27.769954	2026-08-28 21:14:27.769971	\N	\N	\N	\N
+1	2	2	CN-00001	2026-08-28	70	15	\N	\N	VJ2398Y845	2026-08-10		\N	EPCN/PO-00001	\N					6525.16	587.2643999999999	587.2643999999999	0	0	7699.6888	Approved	1			3	3	2026-08-31 11:44:13.744027	f	2026-08-28 19:30:19.58144	2026-08-31 11:44:13.745678	\N	\N	\N	\N
 \.
 
 
@@ -10520,6 +10540,7 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 68	2	2	PURCHASE_REQUEST	PR	19
 69	2	2	PURCHASE_ORDER	PO	39
 66	2	2	INDENT	IND	41
+152	2	2	CREDIT_NOTE	CN	8
 96	2	2	CONTRACT	CNT	17
 94	2	2	PURCHASE_ORDER_11	EPAHS/PO	8
 102	2	2	PURCHASE_ORDER_9	NRCN/PO	4
@@ -15949,11 +15970,11 @@ COPY public.menu_items (id, text, icon_name, path, resource, platform_only, pare
 25	Write Off	\N	/write-offs	write_offs	f	18	7	t	["read", "create", "update", "delete"]	[{"key": "can_submit", "label": "Submit", "color": "#3B82F6"}, {"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}]	2026-08-12 10:42:10.014672	2026-08-27 16:17:01.887434
 26	Gate Pass	\N	/gate-passes	gate_passes	f	18	8	t	["read", "create", "update", "delete"]	[{"key": "can_create", "label": "Create", "color": "#3B82F6"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-08-12 10:42:10.014678	2026-08-27 16:17:01.887437
 27	Issue Acknowledgement	\N	/pending-acknowledgments	acknowledgements	f	18	9	t	["read", "create", "update", "delete"]	[{"key": "can_acknowledge", "label": "Acknowledge Receipt", "color": "#F59E0B"}]	2026-08-12 10:42:10.014684	2026-08-27 16:17:01.88744
-65	Credit Notes	ReceiptLong	/credit-notes	\N	f	18	2	t	[]	[]	2026-08-27 16:11:10.3453	2026-08-27 16:17:01.887443
 66	Stock Report	\N	/reports/stock	reports	f	40	11	t	["read"]	[]	2026-08-27 16:37:24.85691	2026-08-28 14:24:10.718061
 67	Consumption Report	\N	/reports/consumption	reports	f	40	12	t	["read"]	[]	2026-08-27 16:37:24.856929	2026-08-28 14:24:10.71945
 68	PR Status	\N	/reports/pr-status	reports	f	40	13	t	["read"]	[]	2026-08-27 16:37:24.856937	2026-08-28 14:24:10.721037
 69	PO Status	\N	/reports/po-status	reports	f	40	14	t	["read"]	[]	2026-08-27 16:37:24.856943	2026-08-28 14:24:10.72237
+65	Credit Notes	ReceiptLong	/credit-notes	credit_note	f	18	2	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-08-27 16:11:10.3453	2026-08-31 11:27:35.039566
 10	Equipment	\N	/equipment	equipment	f	3	6	t	["read", "create", "update", "delete"]	[{"key": "create_po", "label": "Create PO", "color": "#10B981"}, {"key": "print_qr", "label": "Print QR", "color": "#64748B"}, {"key": "update_serial", "label": "Update Serial", "color": "#F59E0B"}, {"key": "complete_install", "label": "Complete Install", "color": "#10B981"}, {"key": "request_install", "label": "Request Install", "color": "#3B82F6"}, {"key": "upload_docs", "label": "Upload Docs", "color": "#8B5CF6"}, {"key": "log_usage", "label": "Log Usage", "color": "#EC4899"}, {"key": "relocate", "label": "Relocate", "color": "#6366F1"}]	2026-08-12 10:42:10.010107	2026-08-28 14:24:10.682016
 70	Material Movement	\N	/reports/movement	reports	f	40	15	t	["read"]	[]	2026-08-27 16:37:24.85695	2026-08-28 14:24:10.723499
 71	Return Summary	\N	/reports/return-summary	reports	f	40	16	t	["read"]	[]	2026-08-27 16:37:24.856956	2026-08-28 14:24:10.724702
@@ -20904,15 +20925,41 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1957	17	uom	t	f	f	f	{}
 1958	17	warehouses	t	f	f	f	{}
 1959	17	vendors	t	f	f	f	{}
+2008	11	dashboard	t	f	f	f	{}
+2009	11	materials	t	t	t	t	{}
+2010	11	categories	t	t	t	t	{}
+2011	11	subcategories	t	t	t	t	{}
+2012	11	uom	t	t	t	t	{}
+2013	11	vendors	t	t	t	t	{"can_approve": true, "can_reject": true}
+2014	11	warehouses	t	t	t	t	{}
+2015	11	equipment	t	t	t	t	{"create_po": true, "print_qr": true, "update_serial": true, "complete_install": true, "request_install": true, "upload_docs": true, "log_usage": true, "relocate": true}
+2016	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
+2017	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
+2018	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
+2019	11	contracts	t	t	t	t	{"can_approve": true, "can_reject": true}
+2020	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
+2021	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
+2022	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
+2023	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
+2024	11	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
+2025	11	returns	t	t	t	t	{"can_return": true, "receive": true}
+2026	11	transfers	t	t	t	t	{"can_transfer": true}
+2027	11	write_offs	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true}
+2028	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
 934	19	indents	t	t	t	t	{"can_acknowledge": false, "can_approve": false, "can_reject": false, "can_convert_to_po": false}
 935	19	acknowledgements	t	t	t	t	{"can_acknowledge": true}
 936	19	complaints	t	t	t	t	{}
 1104	23	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
 1105	23	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
 1106	23	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
+2029	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+2030	11	inventory	t	t	t	t	{}
+2031	11	complaints	t	t	t	t	{"can_assign": true, "can_approve_level1": true, "can_approve_level2": true}
 1107	23	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
 1108	23	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
 1109	23	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
+2032	11	pm_schedule	t	t	t	t	{"generate_calls": true}
+2033	11	calibration_schedule	t	t	t	t	{"generate_calls": true}
 1110	23	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
 1111	23	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
 1112	23	returns	t	t	t	t	{"can_return": true, "receive": true}
@@ -20952,12 +20999,8 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1228	10	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1230	14	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1231	15	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
-1818	11	dashboard	t	f	f	f	{}
 1233	18	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
-1819	11	materials	t	t	t	t	{}
-1820	11	categories	t	t	t	t	{}
 1236	23	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
-1821	11	subcategories	t	t	t	t	{}
 1472	7	vendor_work_orders	t	t	t	t	{}
 1473	3	vendor_work_orders	t	t	t	t	{}
 1474	8	vendor_work_orders	t	t	t	t	{}
@@ -20969,57 +21012,14 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1480	14	vendor_work_orders	t	t	t	t	{}
 1481	15	vendor_work_orders	t	t	t	t	{}
 1482	16	vendor_work_orders	t	t	t	t	{}
-1822	11	uom	t	t	t	t	{}
 1484	18	vendor_work_orders	t	t	t	t	{}
 1485	19	vendor_work_orders	t	t	t	t	{}
-1823	11	vendors	t	t	t	t	{"can_approve": true, "can_reject": true}
-1824	11	warehouses	t	t	t	t	{}
-1825	11	equipment	t	t	t	t	{"create_po": true, "print_qr": true, "update_serial": true, "complete_install": true, "request_install": true, "upload_docs": true, "log_usage": true, "relocate": true}
-1826	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
 1490	23	vendor_work_orders	t	t	t	t	{}
-1827	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
-1828	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
-1829	11	contracts	t	t	t	t	{"can_approve": true, "can_reject": true}
 1775	13	indents	t	f	f	f	{"can_approve": true, "can_reject": true, "can_convert_to_po": false, "can_acknowledge": false}
 1776	13	purchase_requests	t	f	f	f	{"can_submit": false, "can_approve": true, "can_reject": true, "can_convert_to_po": false, "can_hold": true, "can_short_close": true}
 1777	13	acknowledgements	t	t	t	t	{"can_acknowledge": true}
 1778	13	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1779	13	vendor_work_orders	t	t	t	t	{}
-1830	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
-1831	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
-1832	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
-1833	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
-1834	11	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
-1835	11	returns	t	t	t	t	{"can_return": true, "receive": true}
-1836	11	transfers	t	t	t	t	{"can_transfer": true}
-1837	11	write_offs	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true}
-1838	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
-1839	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
-1840	11	inventory	t	t	t	t	{}
-1841	11	complaints	t	t	t	t	{"can_assign": true, "can_approve_level1": true, "can_approve_level2": true}
-1842	11	pm_schedule	t	t	t	t	{"generate_calls": true}
-1843	11	calibration_schedule	t	t	t	t	{"generate_calls": true}
-1844	11	intelligence	t	f	f	f	{}
-1845	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
-1846	11	report_finance	t	f	f	f	{}
-1847	11	reports	t	f	f	f	{}
-1848	11	report_issue_summary	t	f	f	f	{}
-1849	11	report_rate_analysis	t	f	f	f	{}
-1850	11	report_equipment_count	t	f	f	f	{}
-1851	11	report_receipt_summary	t	f	f	f	{}
-1852	11	report_dept_inventory	t	t	t	t	{}
-1853	11	report_pending_gatepass	t	f	f	f	{}
-1854	11	report_equipment	t	f	f	f	{}
-1855	11	admin_users	t	t	t	t	{}
-1856	11	admin_roles	t	t	t	t	{}
-1857	11	audit_logs	t	f	f	f	{}
-1858	11	approval_flows	t	t	t	t	{}
-1859	11	material_allowances	t	t	t	t	{}
-1860	11	configurations	t	t	t	t	{}
-1861	11	locations	t	t	t	t	{}
-1862	11	projects	t	t	t	t	{}
-1863	11	terms	t	t	t	t	{}
-1864	11	company_addresses	t	t	t	t	{}
 1542	20	finance_invoices	t	t	t	t	{"can_send_hard_copy": false, "can_send_for_payment": true, "can_receive_hard_copy": true, "can_mark_paid": true}
 1543	20	vendor_work_orders	t	t	t	t	{}
 1544	22	complaints	t	t	t	f	{}
@@ -21060,6 +21060,28 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1579	21	terms	t	t	t	t	{}
 1580	21	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1581	21	vendor_work_orders	t	t	t	t	{}
+2034	11	intelligence	t	f	f	f	{}
+2035	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
+2036	11	report_finance	t	f	f	f	{}
+2037	11	reports	t	f	f	f	{}
+2038	11	report_issue_summary	t	f	f	f	{}
+2039	11	report_rate_analysis	t	f	f	f	{}
+2040	11	report_equipment_count	t	f	f	f	{}
+2041	11	report_receipt_summary	t	f	f	f	{}
+2042	11	report_dept_inventory	t	t	t	t	{}
+2043	11	report_pending_gatepass	t	f	f	f	{}
+2044	11	report_equipment	t	f	f	f	{}
+2045	11	admin_users	t	t	t	t	{}
+2046	11	admin_roles	t	t	t	t	{}
+2047	11	audit_logs	t	f	f	f	{}
+2048	11	approval_flows	t	t	t	t	{}
+2049	11	material_allowances	t	t	t	t	{}
+2050	11	configurations	t	t	t	t	{}
+2051	11	locations	t	t	t	t	{}
+2052	11	projects	t	t	t	t	{}
+2053	11	terms	t	t	t	t	{}
+2054	11	company_addresses	t	t	t	t	{}
+2055	11	credit_note	t	t	t	t	{"can_approve": true, "can_reject": true, "can_print": true}
 \.
 
 
@@ -27188,7 +27210,7 @@ SELECT pg_catalog.setval('public.alerts_id_seq', 130, true);
 -- Name: approval_flows_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.approval_flows_id_seq', 138, true);
+SELECT pg_catalog.setval('public.approval_flows_id_seq', 139, true);
 
 
 --
@@ -27272,21 +27294,21 @@ SELECT pg_catalog.setval('public.contracts_id_seq', 17, true);
 -- Name: credit_note_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.credit_note_approvals_id_seq', 1, false);
+SELECT pg_catalog.setval('public.credit_note_approvals_id_seq', 1, true);
 
 
 --
 -- Name: credit_note_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.credit_note_items_id_seq', 1, false);
+SELECT pg_catalog.setval('public.credit_note_items_id_seq', 15, true);
 
 
 --
 -- Name: credit_notes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.credit_notes_id_seq', 1, false);
+SELECT pg_catalog.setval('public.credit_notes_id_seq', 8, true);
 
 
 --
@@ -27314,7 +27336,7 @@ SELECT pg_catalog.setval('public.departments_id_seq', 335, true);
 -- Name: document_sequences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.document_sequences_id_seq', 151, true);
+SELECT pg_catalog.setval('public.document_sequences_id_seq', 152, true);
 
 
 --
@@ -27608,7 +27630,7 @@ SELECT pg_catalog.setval('public.repair_work_orders_id_seq', 1, false);
 -- Name: role_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.role_permissions_id_seq', 1959, true);
+SELECT pg_catalog.setval('public.role_permissions_id_seq', 2055, true);
 
 
 --
@@ -30087,11 +30109,35 @@ ALTER TABLE ONLY public.credit_note_items
 
 
 --
+-- Name: credit_note_items credit_note_items_grn_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_note_items
+    ADD CONSTRAINT credit_note_items_grn_item_id_fkey FOREIGN KEY (grn_item_id) REFERENCES public.grn_items(id);
+
+
+--
+-- Name: credit_note_items credit_note_items_invoice_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_note_items
+    ADD CONSTRAINT credit_note_items_invoice_item_id_fkey FOREIGN KEY (invoice_item_id) REFERENCES public.invoice_items(id);
+
+
+--
 -- Name: credit_note_items credit_note_items_material_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.credit_note_items
     ADD CONSTRAINT credit_note_items_material_id_fkey FOREIGN KEY (material_id) REFERENCES public.materials(id);
+
+
+--
+-- Name: credit_note_items credit_note_items_po_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_note_items
+    ADD CONSTRAINT credit_note_items_po_item_id_fkey FOREIGN KEY (po_item_id) REFERENCES public.purchase_order_items(id);
 
 
 --
@@ -30127,11 +30173,27 @@ ALTER TABLE ONLY public.credit_notes
 
 
 --
+-- Name: credit_notes credit_notes_grn_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_notes
+    ADD CONSTRAINT credit_notes_grn_id_fkey FOREIGN KEY (grn_id) REFERENCES public.grn(id);
+
+
+--
 -- Name: credit_notes credit_notes_invoice_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.credit_notes
     ADD CONSTRAINT credit_notes_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id);
+
+
+--
+-- Name: credit_notes credit_notes_purchase_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.credit_notes
+    ADD CONSTRAINT credit_notes_purchase_order_id_fkey FOREIGN KEY (purchase_order_id) REFERENCES public.purchase_orders(id);
 
 
 --
@@ -32394,5 +32456,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict dqEhap6OuXp5avUrZB7F66pZR02ZNXFzYtkR62kRSiMLAcMUf7YcuIPjocMT2xK
+\unrestrict HNZbhGmNaqcev7YA84Oe7tVrG5wf2DNI7cxthGfaAuvKikjr2h5QIGfmcs32g01
 

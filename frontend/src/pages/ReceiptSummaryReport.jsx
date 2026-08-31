@@ -434,8 +434,8 @@ export default function ReceiptSummaryReport() {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl size="small" fullWidth>
-              <InputLabel>Store</InputLabel>
-              <Select value={filters.warehouseId} label="Store" onChange={e => setFilters({ ...filters, warehouseId: e.target.value })}>
+              <InputLabel shrink>Store</InputLabel>
+              <Select displayEmpty value={filters.warehouseId} label="Store" onChange={e => setFilters({ ...filters, warehouseId: e.target.value })}>
                 <MenuItem value="">All Stores</MenuItem>
                 {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
               </Select>
@@ -443,8 +443,8 @@ export default function ReceiptSummaryReport() {
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
             <FormControl size="small" fullWidth>
-              <InputLabel>Vendor</InputLabel>
-              <Select value={filters.vendorId} label="Vendor" onChange={e => setFilters({ ...filters, vendorId: e.target.value })}>
+              <InputLabel shrink>Vendor</InputLabel>
+              <Select displayEmpty value={filters.vendorId} label="Vendor" onChange={e => setFilters({ ...filters, vendorId: e.target.value })}>
                 <MenuItem value="">All Vendors</MenuItem>
                 {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
               </Select>
@@ -452,8 +452,8 @@ export default function ReceiptSummaryReport() {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl size="small" fullWidth>
-              <InputLabel>Category</InputLabel>
-              <Select value={filters.categoryId} label="Category" onChange={e => setFilters({ ...filters, categoryId: e.target.value, subcategoryId: '' })}>
+              <InputLabel shrink>Category</InputLabel>
+              <Select displayEmpty value={filters.categoryId} label="Category" onChange={e => setFilters({ ...filters, categoryId: e.target.value, subcategoryId: '' })}>
                 <MenuItem value="">All Categories</MenuItem>
                 {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
               </Select>
@@ -462,8 +462,8 @@ export default function ReceiptSummaryReport() {
 
           <Grid item xs={12} sm={6} md={2}>
             <FormControl size="small" fullWidth disabled={!filters.categoryId}>
-              <InputLabel>Subcategory</InputLabel>
-              <Select value={filters.subcategoryId} label="Subcategory" onChange={e => setFilters({ ...filters, subcategoryId: e.target.value })}>
+              <InputLabel shrink>Subcategory</InputLabel>
+              <Select displayEmpty value={filters.subcategoryId} label="Subcategory" onChange={e => setFilters({ ...filters, subcategoryId: e.target.value })}>
                 <MenuItem value="">All Subcategories</MenuItem>
                 {subcategories.map(s => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
               </Select>

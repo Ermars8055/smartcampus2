@@ -1009,8 +1009,7 @@ export default function WorkOrders() {
             isOptionEqualToValue={(option, value) => option.id === value.id}
           />
           <FormControl size="small" sx={{ minWidth: 200 }}>
-            <Select
-              displayEmpty
+            <Select displayEmpty
               value={filterProcurementType}
               onChange={e => setFilterProcurementType(e.target.value)}
               renderValue={(selected) => {
@@ -1551,8 +1550,8 @@ export default function WorkOrders() {
           <Divider sx={{ my: 2 }} />
           <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1.5 }}>Terms & Conditions *</Typography>
           <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-            <InputLabel>Select Template</InputLabel>
-            <Select
+            <InputLabel shrink>Select Template</InputLabel>
+            <Select displayEmpty
               label="Select Template"
               value={termsTemplates.find(t => (t.content || '').replace(/\r\n/g, '\n').trim() === (form.terms || '').replace(/\r\n/g, '\n').trim())?.id || ""}
               onChange={e => {
@@ -1561,7 +1560,7 @@ export default function WorkOrders() {
                 else if (e.target.value === "") setForm({ ...form, terms: "" });
               }}
             >
-              <MenuItem value=""><em>Select a Template</em></MenuItem>
+              <MenuItem value="">Select a Template</MenuItem>
               {termsTemplates.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
             </Select>
           </FormControl>

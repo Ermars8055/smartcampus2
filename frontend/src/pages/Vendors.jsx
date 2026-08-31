@@ -753,7 +753,7 @@ export default function Vendors() {
                 ))}
               </TextField>
               <FormControlLabel
-                control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} disabled={viewOnly || !editing} color="success" />}
+                control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} disabled={viewOnly || !editing || form.status !== 'Approved'} color="success" />}
                 label="Active Status"
                 sx={{ gridColumn: { xs: '1fr', sm: 'span 3' }, ml: 1, mt: 1 }}
               />

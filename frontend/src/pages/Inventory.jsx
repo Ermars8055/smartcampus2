@@ -146,8 +146,8 @@ export default function Inventory() {
             onChange={e => setSearch(e.target.value)} sx={{ minWidth: 250 }}
             InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
           <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Store</InputLabel>
-            <Select value={whFilter} label="Store" onChange={e => setWhFilter(e.target.value)}>
+            <InputLabel shrink>Store</InputLabel>
+            <Select displayEmpty value={whFilter} label="Store" onChange={e => setWhFilter(e.target.value)}>
               <MenuItem value="">All Stores</MenuItem>
               {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
             </Select>

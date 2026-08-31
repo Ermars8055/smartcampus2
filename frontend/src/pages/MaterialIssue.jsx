@@ -138,25 +138,16 @@ export default function MaterialIssue() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [issueModal.open, issueModal.isDirect, materials]);
 
-  const load = async () => {
-    try {
-      const indRes = await api.get('/api/indents');
-      setIndents(indRes.data);
-      const issRes = await api.get('/api/issues');
-      setIssues(issRes.data);
-      const stRes = await api.get('/api/inventory');
-      setStocks(stRes.data);
-      const wRes = await api.get('/api/warehouses');
-      setWarehouses(wRes.data);
-      const pRes = await api.get('/api/projects');
-      setProjects(pRes.data);
-      const instRes = await api.get('/api/institutions');
-      setInstitutions(instRes.data);
-      const mRes = await api.get('/api/materials', { params: { limit: 10000 } });
-      setMaterials(mRes.data.items || []);
-      api.get('/api/departments/names').then(r => setDepartmentsList(r.data)).catch(() => setDepartmentsList([]));
-      api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
-    } catch (e) { console.error(e); }
+  const load = () => {
+    api.get('/api/indents').then(r => setIndents(r.data)).catch(e => console.error("Failed to load indents", e));
+    api.get('/api/issues').then(r => setIssues(r.data)).catch(e => console.error("Failed to load issues", e));
+    api.get('/api/inventory').then(r => setStocks(r.data)).catch(e => console.error("Failed to load inventory", e));
+    api.get('/api/warehouses').then(r => setWarehouses(r.data)).catch(e => console.error("Failed to load warehouses", e));
+    api.get('/api/projects').then(r => setProjects(r.data)).catch(e => console.error("Failed to load projects", e));
+    api.get('/api/institutions').then(r => setInstitutions(r.data)).catch(e => console.error("Failed to load institutions", e));
+    api.get('/api/materials', { params: { limit: 10000 } }).then(r => setMaterials(r.data.items || [])).catch(e => console.error("Failed to load materials", e));
+    api.get('/api/departments/names').then(r => setDepartmentsList(r.data)).catch(() => setDepartmentsList([]));
+    api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
   };
 
   useEffect(() => {
@@ -838,7 +829,7 @@ export default function MaterialIssue() {
                   if (issueModal.isDirect) {
                     inStock = Math.round(stocks.find(s => s.warehouse_id === issueModal.warehouse_id && s.material_id === it.material_id)?.quantity || 0);
                   } else {
-                    inStock = Math.round(stocks.find(s => s.warehouse_id === it.warehouse_id && s.material_id === it.material_id)?.quantity || 0);
+                    inStock = Math.round(it.in_stock || 0);
                   }
                   const maxQty = issueModal.isDirect ? inStock : Math.min(it.remaining, inStock);
 

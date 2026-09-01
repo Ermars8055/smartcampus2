@@ -255,23 +255,23 @@ export default function Indents() {
 
   useEffect(() => {
     load();
-    api.get('/api/materials', { params: { limit: 10000 } }).then(r => setMaterials(r.data.items || []));
-    api.get('/api/vendors').then(r => setVendors(r.data));
-    api.get('/api/terms').then(r => setTermsTemplates(r.data));
-    api.get('/api/departments/names').then(r => {
-      setAllDepartmentsList(r.data);
-      setDepartmentsList(r.data);
-      if (r.data.length === 1) setFilterDepartment(r.data[0]);
-    }).catch(() => {
-      setAllDepartmentsList([]);
-      setDepartmentsList([]);
+    Promise.allSettled([
+      api.get('/api/vendors').then(r => setVendors(r.data)),
+      api.get('/api/terms').then(r => setTermsTemplates(r.data)),
+      api.get('/api/departments/names').then(r => {
+        setAllDepartmentsList(r.data);
+        setDepartmentsList(r.data);
+        if (r.data.length === 1) setFilterDepartment(r.data[0]);
+      }),
+      api.get('/api/departments').then(r => setAllDepartments(r.data)),
+      api.get('/api/buildings').then(r => setAllBuildings(r.data)),
+      api.get('/api/institutions').then(r => {
+        setInstitutions(r.data);
+        if (r.data.length === 1) setFilterInstitution(r.data[0]);
+      })
+    ]).then(results => {
+      // Handle failures if necessary, but Promise.allSettled guarantees it won't crash the chain.
     });
-    api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
-    api.get('/api/buildings').then(r => setAllBuildings(r.data)).catch(() => setAllBuildings([]));
-    api.get('/api/institutions').then(r => {
-      setInstitutions(r.data);
-      if (r.data.length === 1) setFilterInstitution(r.data[0]);
-    }).catch(() => setInstitutions([]));
   }, []);
 
   const handleInstitutionChange = (instId) => {
@@ -390,16 +390,18 @@ export default function Indents() {
     setForm({ ...form, items: [...form.items, { material_id: '', requested_quantity: '' }] });
   };
   const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
-  const updateItem = (i, field, val) => {
+  const updateItem = (i, field, val, fullObj = null) => {
     const items = [...form.items];
     items[i] = { ...items[i], [field]: val };
+    if (field === 'material_id') {
+      items[i]._material = fullObj || null;
+    }
     setForm({ ...form, items });
   };
 
   // Get UOM name for a selected material
-  const getUomForMaterial = (materialId) => {
-    const mat = materials.find(m => m.id === materialId);
-    return mat?.uom_name || mat?.uom || '—';
+  const getUomForMaterial = (item) => {
+    return item._material?.uom_name || item._material?.uom || '—';
   };
 
   const handleRowClick = (ind) => {
@@ -800,9 +802,8 @@ export default function Indents() {
                   <TableRow key={i} id={`item-row-${i}`} sx={{ '&:last-child td': { borderBottom: 0 } }}>
                     <TableCell sx={{ py: 1.5, verticalAlign: 'top' }}>
                       <MaterialSelect
-                        materials={materials.filter(m => !form.items.some((it, idx) => idx !== i && it.material_id === m.id))}
                         value={item.material_id}
-                        onChange={val => updateItem(i, 'material_id', val)}
+                        onChange={(val, obj) => updateItem(i, 'material_id', val, obj)}
                         label="Select Material"
                         size="small"
                         error={!!itemErrors[i]?.material_id}
@@ -811,7 +812,7 @@ export default function Indents() {
                     </TableCell>
                     <TableCell align="center" sx={{ py: 1.5, verticalAlign: 'top', pt: 3 }}>
                       <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 500 }}>
-                        {item.material_id ? getUomForMaterial(item.material_id) : '—'}
+                        {item.material_id ? getUomForMaterial(item) : '—'}
                       </Typography>
                     </TableCell>
                     <TableCell align="center" sx={{ py: 1.5, verticalAlign: 'top' }}>
@@ -820,16 +821,14 @@ export default function Indents() {
                         type="number"
                         placeholder="0"
                         onKeyDown={e => {
-                          const mat = item.material_id ? materials.find(m => m.id === item.material_id) : null;
-                          const allowDec = mat ? mat.uom_allow_decimal : false;
+                          const allowDec = item._material ? item._material.uom_allow_decimal : false;
                           const blockList = ['-', '+', 'e', 'E'];
                           if (!allowDec) blockList.push('.');
                           if (blockList.includes(e.key)) e.preventDefault();
                         }}
                         value={item.requested_quantity}
                         onChange={e => {
-                          const mat = item.material_id ? materials.find(m => m.id === item.material_id) : null;
-                          const allowDec = mat ? mat.uom_allow_decimal : false;
+                          const allowDec = item._material ? item._material.uom_allow_decimal : false;
                           let val = e.target.value.replace(/-/g, '');
                           if (!allowDec) val = val.replace(/\./g, '');
                           updateItem(i, 'requested_quantity', val);
@@ -837,7 +836,7 @@ export default function Indents() {
                         inputProps={{ 
                           min: 0, 
                           style: { textAlign: 'center' }, 
-                          step: (item.material_id && materials.find(m => m.id === item.material_id)?.uom_allow_decimal) ? "any" : "1" 
+                          step: (item._material?.uom_allow_decimal) ? "any" : "1" 
                         }}
                         error={!!itemErrors[i]?.quantity}
                         helperText={itemErrors[i]?.quantity}

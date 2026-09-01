@@ -1,3 +1,6 @@
+import 'package:flutter/foundation.dart';
+import 'package:facilityflow/globals/parse_indents.dart';
+
 import 'package:flutter/material.dart';
 import 'package:facilityflow/globals/themes.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
@@ -44,14 +47,28 @@ class AppState extends ChangeNotifier {
   Future<void> fetchIndents() async {
     _isLoadingIndents = true;
     notifyListeners();
+    
+    final box = Hive.box('offline_cache');
+    if (box.containsKey('indents')) {
+      try {
+        final cachedData = box.get('indents') as List<dynamic>;
+        final List<Indent> parsedIndents = await compute(parseIndents, cachedData);
+        _indents.clear();
+        _indents.addAll(parsedIndents);
+        _isLoadingIndents = false;
+        notifyListeners();
+      } catch (e) {
+        debugPrint('Error loading cached indents: $e');
+      }
+    }
+    
     try {
       final response = await ApiService().dio.get('/api/indents');
       final List data = response.data;
+      final List<Indent> parsedIndents = await compute(parseIndents, data);
       _indents.clear();
-      _indents.addAll(data
-          .map((json) => Indent.fromJson(json))
-          .where((indent) => indent.status != 'Converted to PO')
-          .toList());
+      _indents.addAll(parsedIndents);
+      box.put('indents', data);
     } catch (e) {
       debugPrint('Error fetching indents: $e');
     } finally {

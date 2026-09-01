@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:facilityflow/widgets/forms/app_dropdown_field.dart';
 import 'package:facilityflow/widgets/forms/bottom_picker_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:facilityflow/globals/app_state.dart';
 import 'package:facilityflow/services/api_service.dart';
@@ -103,6 +104,19 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
           _allBuildings = bldgRes.data ?? [];
           _materialsList = (matRes.data['items'] ?? []) as List<dynamic>;
           _storesList = fetchedStores;
+          
+          // Backfill uom_allow_decimal for items that were passed via cloneFrom
+          for (var item in _addedItems) {
+            if (item['material_id'] != null) {
+              final m = _materialsList.firstWhere(
+                (mat) => mat['id'].toString() == item['material_id'].toString(),
+                orElse: () => null,
+              );
+              if (m != null) {
+                item['uom_allow_decimal'] = m['uom_allow_decimal'] ?? true;
+              }
+            }
+          }
 
           if (_institutions.length == 1) {
             _selectedInstitutionId = _institutions[0]['id'].toString();
@@ -241,11 +255,33 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _attachment = File(pickedFile.path);
-      });
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Camera'),
+              onTap: () => Navigator.of(context).pop(ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Gallery'),
+              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source != null) {
+      final pickedFile = await picker.pickImage(source: source);
+      if (pickedFile != null) {
+        setState(() {
+          _attachment = File(pickedFile.path);
+        });
+      }
     }
   }
 
@@ -717,6 +753,8 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                                           m['code'] ?? '';
                                       _addedItems[index]['uom'] =
                                           m['uom_name'] ?? m['uom'] ?? '';
+                                      _addedItems[index]['uom_allow_decimal'] =
+                                          m['uom_allow_decimal'] ?? true;
                                     });
                                   },
                                 );
@@ -734,9 +772,15 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                               ),
                             ),
                             TextFormField(
-                              initialValue:
-                                  item['requestedQuantity'].toString(),
-                              keyboardType: TextInputType.number,
+                              initialValue: item['uom_allow_decimal'] == false 
+                                  ? (item['requestedQuantity'] as num).toInt().toString()
+                                  : item['requestedQuantity'].toString(),
+                              keyboardType: TextInputType.numberWithOptions(
+                                decimal: item['uom_allow_decimal'] ?? true,
+                              ),
+                              inputFormatters: (item['uom_allow_decimal'] ?? true) 
+                                  ? [] 
+                                  : [FilteringTextInputFormatter.digitsOnly],
                               decoration: const InputDecoration(
                                 labelText: 'Quantity',
                                 filled: true,

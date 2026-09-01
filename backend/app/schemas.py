@@ -1728,6 +1728,9 @@ class IndentBase(BaseModel):
     floor: Optional[str] = None
     location: Optional[str] = None
     remarks: Optional[str] = Field(None, max_length=255)
+    priority: Optional[str] = "Normal"
+    cost_center: Optional[str] = None
+    attachment_url: Optional[str] = None
     total_amount: float = 0
     items: List[IndentItemBase] = []
 
@@ -1752,6 +1755,9 @@ class IndentOut(BaseModel):
     building_name: Optional[str] = None
     institution_name: Optional[str] = None
     remarks: Optional[str] = Field(None, max_length=255)
+    priority: Optional[str] = "Normal"
+    cost_center: Optional[str] = None
+    attachment_url: Optional[str] = None
     status: str
     current_approval_level: int
     approved_by_id: Optional[int] = None

@@ -15,11 +15,13 @@ import 'package:dio/dio.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:facilityflow/services/api_service.dart';
+import 'package:facilityflow/services/websocket_service.dart';
 
 @NowaGenerated()
 class AppState extends ChangeNotifier {
   AppState() {
     // Lazy loading: endpoints will be hit when their respective screens are opened
+    WebSocketService().connect(this);
   }
 
   Future<void> fetchAllData() async {
@@ -44,9 +46,11 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchIndents() async {
-    _isLoadingIndents = true;
-    notifyListeners();
+  Future<void> fetchIndents({bool isSilentUpdate = false}) async {
+    if (!isSilentUpdate) {
+      _isLoadingIndents = true;
+      notifyListeners();
+    }
     
     final box = Hive.box('offline_cache');
     if (box.containsKey('indents')) {
@@ -97,7 +101,7 @@ class AppState extends ChangeNotifier {
     }
 
     try {
-      final queryParams = {
+      final Map<String, dynamic> queryParams = {
         'skip': skip,
         'limit': limit,
       };
@@ -177,9 +181,6 @@ class AppState extends ChangeNotifier {
     return List.unmodifiable(_complaints);
   }
 
-  bool get isLoadingComplaints {
-    return _isLoadingComplaints;
-  }
 
   final List<RepairWorkOrder> _rwos = [];
 

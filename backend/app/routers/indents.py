@@ -14,7 +14,7 @@ from app.auth import get_current_user, require_permission, get_tenant_id, get_si
 from app.utils.sequences import get_next_number
 from pydantic import BaseModel
 from typing import Optional
-
+from app.ws_manager import manager
 router = APIRouter(prefix="/api/indents", tags=["Indents"])
 
 def generate_indent_number(db: Session, tenant_id: int, site_id: int) -> str:
@@ -218,6 +218,7 @@ def create_indent(
         
         db.commit()
         db.refresh(indent)
+        manager.broadcast_sync({'event': 'INDENTS_UPDATED'})
     except HTTPException:
         db.rollback()
         raise
@@ -382,6 +383,7 @@ def handle_next_level(db, indent, tenant_id, site_id, user_id=None):
     if has_more:
         indent.current_approval_level = next_level
         db.commit()
+        manager.broadcast_sync({'event': 'INDENTS_UPDATED'})
         return {"message": f"Moved to level {next_level}", "status": indent.status, "current_level": indent.current_approval_level}
     else:
         indent.status = IndentStatus.APPROVED.value
@@ -407,6 +409,7 @@ def handle_next_level(db, indent, tenant_id, site_id, user_id=None):
         db.add(alert)
         
         db.commit()
+        manager.broadcast_sync({'event': 'INDENTS_UPDATED'})
         return {"message": "Fully Approved", "status": indent.status, "current_level": indent.current_approval_level}
 
 @router.get("/{id}/approval-history")
@@ -512,6 +515,7 @@ def reject_indent(
     if data and data.remarks:
         indent.remarks = (indent.remarks or '') + f'\n[Rejected: {data.remarks}]'
     db.commit()
+    manager.broadcast_sync({'event': 'INDENTS_UPDATED'})
     return {"message": "Rejected", "status": indent.status}
 
 @router.post("/{id}/acknowledge")
@@ -634,7 +638,7 @@ def update_draft_indent(
 
     db.commit()
     db.refresh(indent)
-    
+    manager.broadcast_sync({'event': 'INDENTS_UPDATED'})
     indent.requester_name = current_user.full_name
     indent.room_name = indent.room.name if indent.room else None
     for item in indent.items:

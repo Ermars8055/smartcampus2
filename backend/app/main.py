@@ -1,7 +1,7 @@
 """Eastpoint Smart Campus - FastAPI main application."""
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os, logging
@@ -9,6 +9,7 @@ import os, logging
 from app.config import APP_TITLE, APP_SUBTITLE, APP_VERSION, CORS_ORIGINS
 from app.database import engine, SessionLocal, Base
 from app.models import *  # noqa: F401 — import all models so tables are created
+from app.ws_manager import manager  # Import WebSocket manager
 
 # Import routers
 from app.routers import (
@@ -127,3 +128,12 @@ def get_app_config():
         "subtitle": APP_SUBTITLE,
         "version": APP_VERSION
     }
+
+@app.websocket("/api/ws/indents")
+async def websocket_indents(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)

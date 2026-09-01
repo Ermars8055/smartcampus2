@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
@@ -221,7 +221,11 @@ def create_complaint(
 
 @router.get("", response_model=List[ComplaintOut])
 def get_complaints(
+    response: Response,
     status: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    skip: Optional[int] = Query(None),
+    limit: Optional[int] = Query(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("complaints", "read")),
     tenant_id: int = Depends(get_tenant_id),
@@ -250,29 +254,43 @@ def get_complaints(
                 else:
                     query = query.filter(Complaint.created_by_id == current_user.id)
             elif scope == "Institution":
-                if not current_user.institution:
+                if current_user.institution:
+                    query = query.outerjoin(Building, Complaint.building_id == Building.id).outerjoin(Institution, Building.institution_id == Institution.id).filter(
+                        (Institution.name == current_user.institution) | (Complaint.created_by_id == current_user.id)
+                    )
+                else:
                     query = query.filter(Complaint.created_by_id == current_user.id)
             else:
                 query = query.filter(Complaint.created_by_id == current_user.id)
+                
     if status:
-        query = query.filter(Complaint.status == status)
+        status_list = [s.strip() for s in status.split(',')]
+        query = query.filter(Complaint.status.in_(status_list))
         
+    if search:
+        search_term = f"%{search}%"
+        query = query.outerjoin(Building, Complaint.building_id == Building.id).outerjoin(Room, Complaint.room_id == Room.id).filter(
+            (Complaint.docket_no.ilike(search_term)) |
+            (Complaint.nature_of_complaint.ilike(search_term)) |
+            (Room.name.ilike(search_term)) |
+            (Building.name.ilike(search_term))
+        )
+
+    total_count = query.count()
+    response.headers["X-Total-Count"] = str(total_count)
+    response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
+
+    if skip is not None:
+        query = query.offset(skip)
+    if limit is not None:
+        query = query.limit(limit)
+
     complaints = query.order_by(Complaint.created_at.desc()).all()
     
-    result_complaints = []
     for c in complaints:
         _enrich(c, db)
         
-        # Post-enrichment filtering for Institution scope
-        if not getattr(current_user, "_is_platform_admin", False) and not any('technician' in r.lower() for r in getattr(current_user, "_roles", [])):
-            scope = getattr(current_user, "_data_access_scope", "Self Only")
-            if scope == "Institution" and current_user.institution:
-                if c.institution_name != current_user.institution and c.created_by_id != current_user.id:
-                    continue
-                    
-        result_complaints.append(c)
-        
-    return result_complaints
+    return complaints
 
 @router.get("/{complaint_id}", response_model=ComplaintOut)
 def get_complaint(

@@ -611,7 +611,7 @@ export default function PurchaseOrders() {
     }
     setForm({ ...form, items });
   };
-
+  
   const handleSave = async (isDraft = false) => {
     const newErrors = {};
     if (!form.vendor_id) newErrors.vendor_id = "Please select a Vendor.";

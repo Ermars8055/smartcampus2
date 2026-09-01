@@ -280,12 +280,14 @@ def get_complaints(
     response.headers["X-Total-Count"] = str(total_count)
     response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
 
+    query = query.order_by(Complaint.created_at.desc())
+
     if skip is not None:
         query = query.offset(skip)
     if limit is not None:
         query = query.limit(limit)
 
-    complaints = query.order_by(Complaint.created_at.desc()).all()
+    complaints = query.all()
     
     for c in complaints:
         _enrich(c, db)

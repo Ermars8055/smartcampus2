@@ -86,7 +86,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
       final instRes = await api.getInstitutions();
       final deptRes = await api.getDepartments();
       final bldgRes = await api.getBuildings();
-      final matRes = await api.getMaterials();
+      
 
       // Fetch Stores if available
       List<dynamic> fetchedStores = [];
@@ -102,21 +102,10 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
           _institutions = instRes.data ?? [];
           _allDepartments = deptRes.data ?? [];
           _allBuildings = bldgRes.data ?? [];
-          _materialsList = (matRes.data['items'] ?? []) as List<dynamic>;
+          
           _storesList = fetchedStores;
           
-          // Backfill uom_allow_decimal for items that were passed via cloneFrom
-          for (var item in _addedItems) {
-            if (item['material_id'] != null) {
-              final m = _materialsList.firstWhere(
-                (mat) => mat['id'].toString() == item['material_id'].toString(),
-                orElse: () => null,
-              );
-              if (m != null) {
-                item['uom_allow_decimal'] = m['uom_allow_decimal'] ?? true;
-              }
-            }
-          }
+
 
           if (_institutions.length == 1) {
             _selectedInstitutionId = _institutions[0]['id'].toString();
@@ -135,6 +124,96 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
         const SnackBar(content: Text('Failed to load form data')),
       );
     }
+  }
+
+
+  Future<void> _showMaterialSearchDialog(int index) async {
+    final api = ApiService();
+    List<dynamic> results = [];
+    bool isSearching = false;
+    
+    // Initial fetch
+    try {
+      final res = await api.getMaterials(limit: 50);
+      results = res.data['items'] ?? [];
+    } catch (_) {}
+
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Search Material'),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 400,
+                child: Column(
+                  children: [
+                    TextField(
+                      decoration: const InputDecoration(
+                        hintText: 'Search...',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                      onChanged: (val) async {
+                        setDialogState(() => isSearching = true);
+                        try {
+                          final res = await api.getMaterials(limit: 50, search: val);
+                          setDialogState(() {
+                            results = res.data['items'] ?? [];
+                            isSearching = false;
+                          });
+                        } catch (_) {
+                          setDialogState(() => isSearching = false);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: isSearching 
+                        ? const Center(child: CircularProgressIndicator())
+                        : ListView.builder(
+                            itemCount: results.length,
+                            itemBuilder: (context, i) {
+                              final m = results[i];
+                              return ListTile(
+                                title: Text('[${m['code'] ?? ''}] ${m['name']}'),
+                                subtitle: Text('Unit: ${m['uom_name'] ?? m['uom'] ?? ''}'),
+                                onTap: () {
+                                  Navigator.pop(context, m);
+                                },
+                              );
+                            },
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    ).then((selected) {
+      if (selected != null && mounted) {
+        setState(() {
+          _addedItems[index]['material_id'] = selected['id'];
+          _addedItems[index]['materialName'] = selected['name'];
+          _addedItems[index]['materialCode'] = selected['code'] ?? '';
+          _addedItems[index]['uom'] = selected['uom_name'] ?? selected['uom'] ?? '';
+          _addedItems[index]['uom_allow_decimal'] = selected['uom_allow_decimal'] ?? true;
+        });
+      }
+    });
   }
 
   void _handleInstitutionChange(String instId) {
@@ -724,41 +803,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                               selectedName: item['material_id'] != null
                                   ? '[${item['materialCode'] ?? ''}] ${item['materialName']}'
                                   : null,
-                              onTap: () {
-                                final displayItems = _materialsList
-                                    .map((m) => {
-                                          'id': m['id'],
-                                          'display_name':
-                                              '[${m['code'] ?? ''}] ${m['name']} (${m['uom_name'] ?? m['uom'] ?? ''})'
-                                        })
-                                    .toList();
-
-                                showBottomPicker(
-                    context: context,
-                                  title: 'Select Material',
-                                  items: displayItems,
-                                  selectedValue:
-                                      item['material_id']?.toString(),
-                                  idField: 'id',
-                                  nameField: 'display_name',
-                                  onSelect: (val) {
-                                    final m = _materialsList.firstWhere(
-                                        (mat) => mat['id'].toString() == val);
-                                    setState(() {
-                                      _addedItems[index]['material_id'] =
-                                          m['id'];
-                                      _addedItems[index]['materialName'] =
-                                          m['name'];
-                                      _addedItems[index]['materialCode'] =
-                                          m['code'] ?? '';
-                                      _addedItems[index]['uom'] =
-                                          m['uom_name'] ?? m['uom'] ?? '';
-                                      _addedItems[index]['uom_allow_decimal'] =
-                                          m['uom_allow_decimal'] ?? true;
-                                    });
-                                  },
-                                );
-                              },
+                              onTap: () => _showMaterialSearchDialog(index),
                             ),
                             Padding(
                               padding:

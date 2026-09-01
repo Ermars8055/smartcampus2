@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:facilityflow/globals/app_state.dart';
+import 'package:provider/provider.dart';
 
 class MaterialIssuesScreen extends StatefulWidget {
   const MaterialIssuesScreen({super.key});

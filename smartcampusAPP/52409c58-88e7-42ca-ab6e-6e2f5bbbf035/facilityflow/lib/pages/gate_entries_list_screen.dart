@@ -23,6 +23,18 @@ class _GateEntriesListScreenState extends State<GateEntriesListScreen> {
   String _selectedStatus = 'All';
   final List<String> _statusOptions = ['All', 'Awaiting GRN', 'Completed'];
 
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final appState = context.read<AppState>();
+      if (appState.gateEntries.isEmpty) {
+        appState.fetchGateEntries();
+      }
+    });
+  }
+
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Completed':

@@ -28,10 +28,8 @@ class _GateEntriesListScreenState extends State<GateEntriesListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final appState = context.read<AppState>();
-      if (appState.gateEntries.isEmpty) {
-        appState.fetchGateEntries();
-      }
+      final appState = Provider.of<AppState>(context, listen: false);
+      appState.fetchGateEntries();
     });
   }
 

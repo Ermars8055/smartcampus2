@@ -4,6 +4,10 @@ import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:intl/intl.dart';
 import 'package:facilityflow/services/api_service.dart';
 import 'package:facilityflow/globals/app_state.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:facilityflow/pages/create_indent_screen.dart';
+import 'package:facilityflow/pages/issue_material_screen.dart';
 
 @NowaGenerated()
 class IndentDetailScreen extends StatefulWidget {
@@ -80,8 +84,7 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
         Navigator.pop(context); // Go back
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-                  Text('Indent ${action.toLowerCase()}ed successfully.')),
+              content: Text('Indent ${action.toLowerCase()}ed successfully.')),
         );
       } catch (e) {
         if (!mounted) return;
@@ -93,12 +96,13 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
       }
     } else if (action == 'Approve') {
       final List<TextEditingController> controllers = widget.indent.items
-          .map((e) => TextEditingController(text: e.requestedQuantity.toString()))
+          .map((e) =>
+              TextEditingController(text: e.requestedQuantity.toString()))
           .toList();
-      final List<TextEditingController> remarksControllers = widget.indent.items
-          .map((e) => TextEditingController())
-          .toList();
-      final TextEditingController globalRemarksController = TextEditingController();
+      final List<TextEditingController> remarksControllers =
+          widget.indent.items.map((e) => TextEditingController()).toList();
+      final TextEditingController globalRemarksController =
+          TextEditingController();
 
       showDialog(
         context: context,
@@ -125,19 +129,25 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(item.materialName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                Text(item.materialName,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 8),
                                 Row(
                                   children: [
                                     Expanded(
-                                      child: Text('Req: ${_formatQty(item.requestedQuantity, item.uomName, item.uomAllowDecimal)} ${item.uomName}'),
+                                      child: Text(
+                                          'Req: ${_formatQty(item.requestedQuantity, item.uomName, item.uomAllowDecimal)} ${item.uomName}'),
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: TextField(
                                         controller: controllers[idx],
                                         keyboardType: TextInputType.number,
-                                        decoration: const InputDecoration(labelText: 'Approve Qty', isDense: true, border: OutlineInputBorder()),
+                                        decoration: const InputDecoration(
+                                            labelText: 'Approve Qty',
+                                            isDense: true,
+                                            border: OutlineInputBorder()),
                                       ),
                                     ),
                                   ],
@@ -145,7 +155,10 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                                 const SizedBox(height: 8),
                                 TextField(
                                   controller: remarksControllers[idx],
-                                  decoration: const InputDecoration(labelText: 'Item Remarks (Optional)', isDense: true, border: OutlineInputBorder()),
+                                  decoration: const InputDecoration(
+                                      labelText: 'Item Remarks (Optional)',
+                                      isDense: true,
+                                      border: OutlineInputBorder()),
                                 ),
                               ],
                             ),
@@ -156,7 +169,10 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                     const SizedBox(height: 16),
                     TextField(
                       controller: globalRemarksController,
-                      decoration: const InputDecoration(labelText: 'Approval Remarks (Optional)', isDense: true, border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                          labelText: 'Approval Remarks (Optional)',
+                          isDense: true,
+                          border: OutlineInputBorder()),
                       maxLines: 2,
                     ),
                   ],
@@ -168,7 +184,8 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                   child: const Text('Cancel'),
                 ),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
                   onPressed: isSubmitting
                       ? null
                       : () async {
@@ -178,9 +195,11 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                           List<Map<String, dynamic>> approvalPayload = [];
 
                           for (int i = 0; i < widget.indent.items.length; i++) {
-                            double requestedQty = widget.indent.items[i].requestedQuantity;
-                            double approvedQty = double.tryParse(controllers[i].text) ?? 0;
-                            
+                            double requestedQty =
+                                widget.indent.items[i].requestedQuantity;
+                            double approvedQty =
+                                double.tryParse(controllers[i].text) ?? 0;
+
                             if (approvedQty > requestedQty) {
                               hasLargerQuantity = true;
                             }
@@ -190,13 +209,17 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                             approvalPayload.add({
                               'indent_item_id': widget.indent.items[i].id,
                               'approved_quantity': approvedQty,
-                              'remarks': remarksControllers[i].text.isEmpty ? null : remarksControllers[i].text,
+                              'remarks': remarksControllers[i].text.isEmpty
+                                  ? null
+                                  : remarksControllers[i].text,
                             });
                           }
 
                           if (allZero && approvalPayload.isNotEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Cannot approve 0 quantity for all items. Use Reject instead.')),
+                              const SnackBar(
+                                  content: Text(
+                                      'Cannot approve 0 quantity for all items. Use Reject instead.')),
                             );
                             return;
                           }
@@ -206,10 +229,17 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                               context: ctx,
                               builder: (warningCtx) => AlertDialog(
                                 title: const Text('Warning'),
-                                content: const Text('You have entered an approved quantity larger than the requested quantity for some items. Proceed?'),
+                                content: const Text(
+                                    'You have entered an approved quantity larger than the requested quantity for some items. Proceed?'),
                                 actions: [
-                                  TextButton(onPressed: () => Navigator.pop(warningCtx, false), child: const Text('Cancel')),
-                                  ElevatedButton(onPressed: () => Navigator.pop(warningCtx, true), child: const Text('Proceed')),
+                                  TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(warningCtx, false),
+                                      child: const Text('Cancel')),
+                                  ElevatedButton(
+                                      onPressed: () =>
+                                          Navigator.pop(warningCtx, true),
+                                      child: const Text('Proceed')),
                                 ],
                               ),
                             );
@@ -220,18 +250,22 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                           try {
                             final api = ApiService();
                             await api.approveIndent(
-                                widget.indent.id, 
-                                approvalPayload, 
-                                remarks: globalRemarksController.text.isEmpty ? null : globalRemarksController.text
-                            );
+                                widget.indent.id, approvalPayload,
+                                remarks: globalRemarksController.text.isEmpty
+                                    ? null
+                                    : globalRemarksController.text);
                             if (!mounted) return;
-                            final appState = AppState.of(context, listen: false);
+                            final appState =
+                                AppState.of(context, listen: false);
                             await appState.fetchIndents();
                             if (!mounted) return;
-                            if (ctx.mounted) Navigator.pop(ctx); 
-                            if (Navigator.canPop(context)) Navigator.pop(context); 
+                            if (ctx.mounted) Navigator.pop(ctx);
+                            if (Navigator.canPop(context))
+                              Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Indent approved successfully.')),
+                              const SnackBar(
+                                  content:
+                                      Text('Indent approved successfully.')),
                             );
                           } catch (e) {
                             if (!mounted) return;
@@ -243,7 +277,11 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                           }
                         },
                   child: isSubmitting
-                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2))
                       : const Text('Confirm Approve'),
                 ),
               ],
@@ -274,6 +312,39 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
           widget.indent.indentNumber,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.content_copy),
+            tooltip: 'Duplicate Indent',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      CreateIndentScreen(cloneFrom: widget.indent),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            tooltip: 'Download PDF',
+            onPressed: () async {
+              final baseUrl = dotenv.env['API_URL'] ?? '';
+              final url =
+                  Uri.parse('$baseUrl/api/indents/${widget.indent.id}/pdf');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              } else {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Could not generate PDF')),
+                  );
+                }
+              }
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: _isLoading
@@ -292,50 +363,84 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(child: _buildDetailItem('Requester', widget.indent.requesterName, theme.textTheme)),
+                                Expanded(
+                                    child: _buildDetailItem(
+                                        'Requester',
+                                        widget.indent.requesterName,
+                                        theme.textTheme)),
                                 const SizedBox(width: 16),
-                                Expanded(child: _buildDetailItem('Institution', widget.indent.institutionName, theme.textTheme)),
+                                Expanded(
+                                    child: _buildDetailItem(
+                                        'Institution',
+                                        widget.indent.institutionName,
+                                        theme.textTheme)),
                               ],
                             ),
                             const SizedBox(height: 16),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(child: _buildDetailItem('Department', widget.indent.department, theme.textTheme)),
+                                Expanded(
+                                    child: _buildDetailItem(
+                                        'Department',
+                                        widget.indent.department,
+                                        theme.textTheme)),
                                 const SizedBox(width: 16),
-                                Expanded(child: _buildDetailItem('Building', widget.indent.buildingName, theme.textTheme)),
+                                Expanded(
+                                    child: _buildDetailItem(
+                                        'Building',
+                                        widget.indent.buildingName,
+                                        theme.textTheme)),
                               ],
                             ),
                             const SizedBox(height: 16),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(child: _buildDetailItem('Floor', widget.indent.floor, theme.textTheme)),
+                                Expanded(
+                                    child: _buildDetailItem('Floor',
+                                        widget.indent.floor, theme.textTheme)),
                                 const SizedBox(width: 16),
-                                Expanded(child: _buildDetailItem('Room', widget.indent.roomName, theme.textTheme)),
+                                Expanded(
+                                    child: _buildDetailItem(
+                                        'Room',
+                                        widget.indent.roomName,
+                                        theme.textTheme)),
                               ],
                             ),
                             const SizedBox(height: 16),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(child: _buildDetailItem('Indent Date', formattedDate, theme.textTheme)),
+                                Expanded(
+                                    child: _buildDetailItem('Indent Date',
+                                        formattedDate, theme.textTheme)),
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text('Status', style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600], fontWeight: FontWeight.bold)),
+                                      Text('Status',
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                  color: Colors.grey[600],
+                                                  fontWeight: FontWeight.bold)),
                                       const SizedBox(height: 4),
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
                                         decoration: BoxDecoration(
                                           color: statusColor,
-                                          borderRadius: BorderRadius.circular(4),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
                                         ),
                                         child: Text(
                                           widget.indent.status,
-                                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold),
                                         ),
                                       ),
                                     ],
@@ -358,12 +463,12 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text.rich(
-                          TextSpan(
-                            children: [
-                              const TextSpan(text: 'Remarks: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                              TextSpan(text: widget.indent.remarks),
-                            ]
-                          ),
+                          TextSpan(children: [
+                            const TextSpan(
+                                text: 'Remarks: ',
+                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            TextSpan(text: widget.indent.remarks),
+                          ]),
                           style: theme.textTheme.bodyMedium,
                         ),
                       ),
@@ -399,28 +504,38 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                                   children: [
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(item.materialName,
                                               style: theme.textTheme.titleMedium
-                                                  ?.copyWith(fontWeight: FontWeight.bold)),
+                                                  ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold)),
                                           if (item.materialCode.isNotEmpty) ...[
                                             const SizedBox(height: 4),
                                             Text(item.materialCode,
-                                                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                                                style: theme.textTheme.bodySmall
+                                                    ?.copyWith(
+                                                        color: Colors.grey)),
                                           ],
                                         ],
                                       ),
                                     ),
                                     if (item.uomName.isNotEmpty) ...[
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
                                         decoration: BoxDecoration(
                                           color: Colors.blue[50],
-                                          borderRadius: BorderRadius.circular(4),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
                                         ),
                                         child: Text(item.uomName,
-                                            style: TextStyle(color: Colors.blue[900], fontSize: 12, fontWeight: FontWeight.bold)),
+                                            style: TextStyle(
+                                                color: Colors.blue[900],
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold)),
                                       ),
                                     ],
                                   ],
@@ -428,19 +543,32 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                                 const SizedBox(height: 16),
                                 Row(
                                   children: [
-                                    _buildQtyColumn(context, 'Req',
-                                        _formatQty(item.requestedQuantity, item.uomName, item.uomAllowDecimal), Colors.blue),
+                                    _buildQtyColumn(
+                                        context,
+                                        'Req',
+                                        _formatQty(item.requestedQuantity,
+                                            item.uomName, item.uomAllowDecimal),
+                                        Colors.blue),
                                     _buildDivider(),
-                                    _buildQtyColumn(context, 'Appr',
-                                        _formatQty(item.approvedQuantity, item.uomName, item.uomAllowDecimal), Colors.amber),
+                                    _buildQtyColumn(
+                                        context,
+                                        'Appr',
+                                        _formatQty(item.approvedQuantity,
+                                            item.uomName, item.uomAllowDecimal),
+                                        Colors.amber),
                                     _buildDivider(),
-                                    _buildQtyColumn(context, 'Issued',
-                                        _formatQty(item.issuedQuantity, item.uomName, item.uomAllowDecimal), Colors.purple),
+                                    _buildQtyColumn(
+                                        context,
+                                        'Issued',
+                                        _formatQty(item.issuedQuantity,
+                                            item.uomName, item.uomAllowDecimal),
+                                        Colors.purple),
                                     _buildDivider(),
                                     _buildQtyColumn(
                                         context,
                                         'Recd',
-                                        _formatQty(item.acknowledgedQuantity, item.uomName, item.uomAllowDecimal),
+                                        _formatQty(item.acknowledgedQuantity,
+                                            item.uomName, item.uomAllowDecimal),
                                         item.acknowledgedQuantity ==
                                                     item.issuedQuantity &&
                                                 item.issuedQuantity > 0
@@ -454,6 +582,48 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                         );
                       },
                     ),
+                    // No extra closing brackets needed, just closing the ListView.builder
+                    if (widget.indent.approvalHistory.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
+                        child: Text(
+                          'Approval History',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      ...widget.indent.approvalHistory.map((history) {
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 4),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: _getStatusColor(history.status)
+                                  .withOpacity(0.1),
+                              child: Icon(
+                                history.status == 'Approved'
+                                    ? Icons.check
+                                    : Icons.close,
+                                color: _getStatusColor(history.status),
+                              ),
+                            ),
+                            title: Text(history.approverName),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                    '${history.status} on ${DateFormat('MMM dd, yyyy').format(history.date)}'),
+                                if (history.remarks.isNotEmpty)
+                                  Text('Remarks: ${history.remarks}',
+                                      style: const TextStyle(
+                                          fontStyle: FontStyle.italic)),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
@@ -496,7 +666,12 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
           ],
         ),
       );
-    } else if (widget.indent.status == 'Approved') {
+    } else if (widget.indent.status == 'Approved' ||
+        widget.indent.status == 'Submitted' ||
+        widget.indent.status == 'Draft' ||
+        widget.indent.status == 'Pending' ||
+        widget.indent.status == 'Issued' ||
+        widget.indent.status == 'Partially Issued') {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: const BoxDecoration(
@@ -506,17 +681,71 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                 color: Colors.black12, blurRadius: 4, offset: Offset(0, -2))
           ],
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.grey,
-                    side: const BorderSide(color: Colors.grey)),
-                onPressed: _isLoading ? null : () => _handleAction('Cancel'),
-                child: const Text('Cancel Request'),
+            if (widget.indent.status == 'Approved' ||
+                widget.indent.status == 'Partially Issued')
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.outbox),
+                  label: const Text('Dispatch Materials'),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[900]),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => IssueMaterialScreen(
+                            indent: widget.indent, isReturn: false),
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
+            if (widget.indent.status == 'Issued' ||
+                widget.indent.status == 'Partially Issued')
+              SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.keyboard_return),
+                    label: const Text('Return Materials'),
+                    style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.orange[800],
+                        side: BorderSide(color: Colors.orange[800]!)),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => IssueMaterialScreen(
+                              indent: widget.indent, isReturn: true),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            if (widget.indent.status == 'Approved' ||
+                widget.indent.status == 'Submitted' ||
+                widget.indent.status == 'Draft' ||
+                widget.indent.status == 'Pending')
+              SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.grey,
+                        side: const BorderSide(color: Colors.grey)),
+                    onPressed:
+                        _isLoading ? null : () => _handleAction('Cancel'),
+                    child: const Text('Cancel Request'),
+                  ),
+                ),
+              ),
           ],
         ),
       );
@@ -556,9 +785,12 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: textTheme.bodySmall?.copyWith(color: Colors.grey[600], fontWeight: FontWeight.bold)),
+        Text(label,
+            style: textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600], fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(value.isEmpty ? '—' : value, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+        Text(value.isEmpty ? '—' : value,
+            style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
       ],
     );
   }

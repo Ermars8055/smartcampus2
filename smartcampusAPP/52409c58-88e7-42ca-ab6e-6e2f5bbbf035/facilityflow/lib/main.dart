@@ -6,6 +6,8 @@ import 'package:facilityflow/globals/app_state.dart';
 import 'package:facilityflow/globals/router.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'package:hive_flutter/hive_flutter.dart';
+
 @NowaGenerated()
 late final SharedPreferences sharedPrefs;
 
@@ -13,6 +15,9 @@ late final SharedPreferences sharedPrefs;
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  
+  await Hive.initFlutter();
+  await Hive.openBox('offline_cache');
 
   // Firebase is completely removed
   // await Firebase.initializeApp(...);

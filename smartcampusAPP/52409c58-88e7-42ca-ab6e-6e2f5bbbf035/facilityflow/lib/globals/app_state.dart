@@ -9,23 +9,18 @@ import 'package:facilityflow/models/gate_entry.dart';
 import 'package:facilityflow/models/repair_work_order.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:facilityflow/services/api_service.dart';
 
 @NowaGenerated()
 class AppState extends ChangeNotifier {
   AppState() {
-    fetchAllData();
+    // Lazy loading: endpoints will be hit when their respective screens are opened
   }
 
   Future<void> fetchAllData() async {
-    await Future.wait([
-      fetchIndents(),
-      fetchComplaints(),
-      fetchIssues(),
-      fetchGateEntries(),
-      fetchRwos(),
-    ]);
+    // Kept for backward compatibility if called manually, but empty to prevent stampede
   }
 
   Future<void> fetchIssues() async {
@@ -65,12 +60,47 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchComplaints() async {
+  Future<void> fetchComplaints({int skip = 0, int limit = 10, String? status, String? search}) async {
     _isLoadingComplaints = true;
     notifyListeners();
+    
+    final cacheKey = 'complaints_${status ?? "all"}_${skip}_$limit';
+    final box = Hive.box('offline_cache');
+
+    if (box.containsKey(cacheKey)) {
+      try {
+        final cachedData = box.get(cacheKey) as List<dynamic>;
+        _complaints.clear();
+        _complaints.addAll(cachedData.map((json) => Complaint.fromJson(Map<String, dynamic>.from(json))).toList());
+        _totalComplaintsCount = box.get('${cacheKey}_count', defaultValue: cachedData.length);
+        notifyListeners();
+      } catch (e) {
+        debugPrint('Cache read error: $e');
+      }
+    }
+
     try {
-      final response = await ApiService().dio.get('/api/complaints');
+      final queryParams = {
+        'skip': skip,
+        'limit': limit,
+      };
+      if (status != null && status != 'All') queryParams['status'] = status;
+      if (search != null && search.isNotEmpty) queryParams['search'] = search;
+
+      final response = await ApiService().dio.get('/api/complaints', queryParameters: queryParams);
+      
+      final countHeader = response.headers.value('x-total-count');
+      if (countHeader != null) {
+        _totalComplaintsCount = int.tryParse(countHeader) ?? 0;
+      } else {
+        _totalComplaintsCount = 0;
+      }
+
       final List data = response.data;
+      
+      box.put(cacheKey, data);
+      box.put('${cacheKey}_count', _totalComplaintsCount);
+      
       _complaints.clear();
       _complaints.addAll(data.map((json) => Complaint.fromJson(json)).toList());
     } catch (e) {
@@ -120,8 +150,11 @@ class AppState extends ChangeNotifier {
   }
 
   final List<Complaint> _complaints = [];
-
   bool _isLoadingComplaints = false;
+  int _totalComplaintsCount = 0;
+  int get totalComplaintsCount => _totalComplaintsCount;
+  
+  bool get isLoadingComplaints => _isLoadingComplaints;
 
   List<Complaint> get complaints {
     return List.unmodifiable(_complaints);
@@ -187,7 +220,8 @@ class AppState extends ChangeNotifier {
       if (e is DioException && e.response?.statusCode == 403) {
         _gateEntriesError = 'You do not have permission to view Gate Entries.';
       } else {
-        _gateEntriesError = 'An error occurred while loading. Please try again.';
+        _gateEntriesError =
+            'An error occurred while loading. Please try again.';
       }
     } finally {
       _isLoadingGateEntries = false;

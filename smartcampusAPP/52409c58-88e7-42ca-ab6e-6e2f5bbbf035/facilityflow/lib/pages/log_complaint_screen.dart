@@ -34,9 +34,12 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
   String? _selectedBuildingId;
   String? _selectedFloorId;
   String? _selectedRoomId;
-  
+
   String? _selectedComplaintType;
-  List<String> _complaintTypes = [];  // Loaded dynamically from API
+  List<String> _complaintTypes = []; // Loaded dynamically from API
+  List<dynamic> _equipmentList = [];
+  String? _selectedEquipmentId;
+  Map<String, dynamic>? _selectedEquipment;
 
   final List<File> _attachedImages = [];
   final ImagePicker _picker = ImagePicker();
@@ -57,17 +60,25 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
         api.getDepartments(),
         api.getBuildings(),
         api.getComplaintTypes(),
+        api.getEquipment(),
       ]);
 
       if (mounted) {
         setState(() {
-          _institutions = results[0].data ?? [];
-          _allDepartments = results[1].data ?? [];
-          _allBuildings = results[2].data ?? [];
-          _complaintTypes = ((results[3].data ?? []) as List)
+          List<dynamic> extractList(dynamic data) {
+            if (data is Map && data.containsKey('data')) return data['data'];
+            return data ?? [];
+          }
+
+          _institutions = extractList(results[0].data);
+          _allDepartments = extractList(results[1].data);
+          _allBuildings = extractList(results[2].data);
+          _complaintTypes = extractList(results[3].data)
               .map((e) => e['lookup_value']?.toString() ?? '')
               .where((v) => v.isNotEmpty)
               .toList();
+
+          _equipmentList = extractList(results[4].data);
 
           if (_institutions.length == 1) {
             _selectedInstitutionId = _institutions[0]['id'].toString();
@@ -83,7 +94,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
       if (!mounted) return;
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to load form data')),
+        SnackBar(content: Text('Failed to load form data: $e')),
       );
     }
   }
@@ -225,7 +236,8 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     try {
-      final XFile? image = await _picker.pickImage(source: source, imageQuality: 50);
+      final XFile? image =
+          await _picker.pickImage(source: source, imageQuality: 50);
       if (image != null) {
         setState(() {
           _attachedImages.add(File(image.path));
@@ -367,7 +379,8 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
 
     if (_selectedComplaintType == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a Call Type / Complaint Type')),
+        const SnackBar(
+            content: Text('Please select a Call Type / Complaint Type')),
       );
       return;
     }
@@ -396,6 +409,8 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
       'individual_detailed': description,
       'name_and_trade': _nameTradeController.text.trim(),
       'complaint_type': _selectedComplaintType,
+      if (_selectedEquipmentId != null)
+        'equipment_id': int.tryParse(_selectedEquipmentId!),
     };
 
     showDialog(
@@ -645,17 +660,109 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
+                Autocomplete<Map<String, dynamic>>(
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    if (textEditingValue.text.isEmpty) {
+                      return const Iterable<Map<String, dynamic>>.empty();
+                    }
+                    return _equipmentList.where((equipment) {
+                      final code = equipment['equipment_code']
+                              ?.toString()
+                              .toLowerCase() ??
+                          '';
+                      final name =
+                          equipment['name']?.toString().toLowerCase() ?? '';
+                      final make =
+                          equipment['make']?.toString().toLowerCase() ?? '';
+                      final searchStr = textEditingValue.text.toLowerCase();
+                      return code.contains(searchStr) ||
+                          name.contains(searchStr) ||
+                          make.contains(searchStr);
+                    }).cast<Map<String, dynamic>>();
+                  },
+                  displayStringForOption: (Map<String, dynamic> option) {
+                    final code = option['equipment_code'] ?? '';
+                    final name = option['name'] ?? option['make'] ?? '';
+                    return '$code - $name';
+                  },
+                  onSelected: (Map<String, dynamic> selection) {
+                    setState(() {
+                      _selectedEquipment = selection;
+                      _selectedEquipmentId = selection['id']?.toString();
+                    });
+                  },
+                  fieldViewBuilder: (context, textEditingController, focusNode,
+                      onFieldSubmitted) {
+                    return TextFormField(
+                      controller: textEditingController,
+                      focusNode: focusNode,
+                      decoration: InputDecoration(
+                        labelText: 'Equipment (Optional)',
+                        prefixIcon:
+                            const Icon(Icons.precision_manufacturing_outlined),
+                        suffixIcon: _selectedEquipment != null
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  textEditingController.clear();
+                                  setState(() {
+                                    _selectedEquipment = null;
+                                    _selectedEquipmentId = null;
+                                  });
+                                },
+                              )
+                            : null,
+                      ),
+                    );
+                  },
+                ),
+                if (_selectedEquipment != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color:
+                          _selectedEquipment!['warranty_status'] == 'Warranty'
+                              ? Colors.green.withValues(alpha: 0.1)
+                              : Colors.orange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color:
+                            _selectedEquipment!['warranty_status'] == 'Warranty'
+                                ? Colors.green
+                                : Colors.orange,
+                      ),
+                    ),
+                    child: Text(
+                      _selectedEquipment!['warranty_status'] ??
+                          'No Warranty Info',
+                      style: TextStyle(
+                        color:
+                            _selectedEquipment!['warranty_status'] == 'Warranty'
+                                ? Colors.green[700]
+                                : Colors.orange[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 16),
                 _buildDropdownField(
                   label: 'Call Type / Complaint Type *',
                   icon: Icons.assignment_outlined,
                   selectedName: _selectedComplaintType,
                   onTap: () => _showBottomPicker(
                     title: 'Select Call Type',
-                    items: _complaintTypes.map((type) => {'id': type, 'name': type}).toList(),
+                    items: _complaintTypes
+                        .map((type) => {'id': type, 'name': type})
+                        .toList(),
                     selectedValue: _selectedComplaintType,
                     idField: 'id',
                     nameField: 'name',
-                    onSelect: (val) => setState(() => _selectedComplaintType = val),
+                    onSelect: (val) =>
+                        setState(() => _selectedComplaintType = val),
                   ),
                 ),
                 TextFormField(

@@ -28,7 +28,7 @@ class MaintenanceHomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Complaints Card
               _buildModuleCard(
                 context,
@@ -52,7 +52,8 @@ class MaintenanceHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildModuleCard(BuildContext context, {
+  Widget _buildModuleCard(
+    BuildContext context, {
     required String title,
     required String description,
     required IconData icon,
@@ -60,7 +61,7 @@ class MaintenanceHomeScreen extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(

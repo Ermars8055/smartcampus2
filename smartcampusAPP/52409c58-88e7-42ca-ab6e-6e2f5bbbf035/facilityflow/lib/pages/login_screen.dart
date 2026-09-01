@@ -29,7 +29,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _initVideo() async {
-    _videoController = VideoPlayerController.asset('assets/videos/login_bg.mp4');
+    _videoController =
+        VideoPlayerController.asset('assets/videos/login_bg.mp4');
     await _videoController!.initialize();
     _videoController!.setLooping(true);
     _videoController!.setVolume(0.0);
@@ -112,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-            
+
           // Dark Overlay to ensure the card stands out
           Container(
             color: Colors.black.withValues(alpha: 0.3),
@@ -127,11 +128,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: Container(
                     width: 350,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 30),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.85),
                       borderRadius: BorderRadius.circular(15),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.5),
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.5),
+                          width: 1.5),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.2),
@@ -171,15 +175,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                 horizontal: 15, vertical: 12),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
-                              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFFE2E8F0)),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
-                              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFFE2E8F0)),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
-                              borderSide: const BorderSide(color: Colors.teal, width: 2),
+                              borderSide: const BorderSide(
+                                  color: Colors.teal, width: 2),
                             ),
                           ),
                         ),
@@ -195,15 +202,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                 horizontal: 15, vertical: 12),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
-                              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFFE2E8F0)),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
-                              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFFE2E8F0)),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
-                              borderSide: const BorderSide(color: Colors.teal, width: 2),
+                              borderSide: const BorderSide(
+                                  color: Colors.teal, width: 2),
                             ),
                           ),
                         ),
@@ -219,15 +229,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                 horizontal: 15, vertical: 12),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
-                              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFFE2E8F0)),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
-                              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFFE2E8F0)),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
-                              borderSide: const BorderSide(color: Colors.teal, width: 2),
+                              borderSide: const BorderSide(
+                                  color: Colors.teal, width: 2),
                             ),
                           ),
                           obscureText: true,
@@ -238,7 +251,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             padding: const EdgeInsets.only(bottom: 15),
                             child: Text(
                               _errorMessage!,
-                              style: const TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center,
                             ),
                           ),

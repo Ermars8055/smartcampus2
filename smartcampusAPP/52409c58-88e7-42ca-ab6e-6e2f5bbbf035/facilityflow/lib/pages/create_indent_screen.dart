@@ -1,14 +1,21 @@
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:facilityflow/widgets/forms/app_dropdown_field.dart';
+import 'package:facilityflow/widgets/forms/bottom_picker_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:facilityflow/globals/app_state.dart';
 import 'package:facilityflow/services/api_service.dart';
 
+import 'package:facilityflow/models/indent.dart';
+
 @NowaGenerated()
 class CreateIndentScreen extends StatefulWidget {
   @NowaGenerated({'loader': 'auto-constructor'})
-  const CreateIndentScreen({super.key, this.linkedComplaintId});
+  const CreateIndentScreen({super.key, this.linkedComplaintId, this.cloneFrom});
 
   final int? linkedComplaintId;
+  final Indent? cloneFrom;
 
   @override
   State<CreateIndentScreen> createState() => _CreateIndentScreenState();
@@ -19,6 +26,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _remarksController = TextEditingController();
+  final _costCenterController = TextEditingController();
 
   List<dynamic> _institutions = [];
   List<dynamic> _allDepartments = [];
@@ -28,28 +36,46 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   List<dynamic> _floorsList = [];
   List<dynamic> _roomsList = [];
   List<dynamic> _materialsList = [];
+  List<dynamic> _storesList = [];
 
   String? _selectedInstitutionId;
   String? _selectedDepartmentName;
   String? _selectedBuildingId;
   String? _selectedFloorId;
   String? _selectedRoomId;
+  String? _selectedStoreId;
+  String? _selectedStoreName;
+  String _selectedPriority = 'Routine';
+  File? _attachment;
 
-  final List<Map<String, dynamic>> _addedItems = [
-    {
-      'material_id': null,
-      'requestedQuantity': 1.0,
-      'materialName': null,
-      'materialCode': null,
-      'uom': null
-    }
-  ];
+  final List<Map<String, dynamic>> _addedItems = [];
 
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    if (widget.cloneFrom != null) {
+      _remarksController.text = widget.cloneFrom!.remarks;
+      for (var item in widget.cloneFrom!.items) {
+        _addedItems.add({
+          'material_id': item.materialId,
+          'requestedQuantity': item.requestedQuantity,
+          'materialName': item.materialName,
+          'materialCode': item.materialCode,
+          'uom': item.uomName,
+        });
+      }
+    }
+    if (_addedItems.isEmpty) {
+      _addedItems.add({
+        'material_id': null,
+        'requestedQuantity': 1.0,
+        'materialName': null,
+        'materialCode': null,
+        'uom': null
+      });
+    }
     _fetchLookups();
   }
 
@@ -61,12 +87,22 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
       final bldgRes = await api.getBuildings();
       final matRes = await api.getMaterials();
 
+      // Fetch Stores if available
+      List<dynamic> fetchedStores = [];
+      try {
+        final storeRes = await api.getStores();
+        fetchedStores = storeRes.data ?? [];
+      } catch (_) {
+        // Ignore if endpoint doesn't exist
+      }
+
       if (mounted) {
         setState(() {
           _institutions = instRes.data ?? [];
           _allDepartments = deptRes.data ?? [];
           _allBuildings = bldgRes.data ?? [];
           _materialsList = (matRes.data['items'] ?? []) as List<dynamic>;
+          _storesList = fetchedStores;
 
           if (_institutions.length == 1) {
             _selectedInstitutionId = _institutions[0]['id'].toString();
@@ -203,9 +239,20 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     });
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _attachment = File(pickedFile.path);
+      });
+    }
+  }
+
   @override
   void dispose() {
     _remarksController.dispose();
+    _costCenterController.dispose();
     super.dispose();
   }
 
@@ -230,58 +277,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     });
   }
 
-  void _showBottomPicker({
-    required String title,
-    required List<dynamic> items,
-    required String? selectedValue,
-    required String idField,
-    required String nameField,
-    required Function(String) onSelect,
-  }) {
-    final theme = Theme.of(context);
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: ListView(
-                children: items.map((item) {
-                  final id = item[idField]?.toString();
-                  final name = item[nameField]?.toString();
-                  final isSelected = selectedValue == id;
-                  return ListTile(
-                    title: Text(name ?? ''),
-                    trailing: isSelected
-                        ? Icon(Icons.check, color: theme.colorScheme.primary)
-                        : null,
-                    onTap: () {
-                      if (id != null) onSelect(id);
-                      Navigator.pop(context);
-                    },
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   Future<void> _submitIndent() async {
     if (!_formKey.currentState!.validate()) {
@@ -329,8 +325,14 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
       'location': selectedRoom != null ? selectedRoom['name'] : '',
       'room_id':
           _selectedRoomId != null ? int.tryParse(_selectedRoomId!) : null,
+      'store_id':
+          _selectedStoreId != null ? int.tryParse(_selectedStoreId!) : null,
       'remarks': _remarksController.text.trim(),
-      if (widget.linkedComplaintId != null) 'complaint_id': widget.linkedComplaintId,
+      'priority': _selectedPriority,
+      if (_costCenterController.text.trim().isNotEmpty)
+        'cost_center': _costCenterController.text.trim(),
+      if (widget.linkedComplaintId != null)
+        'complaint_id': widget.linkedComplaintId,
       'items': validItems
           .map((item) => {
                 'material_id': item['material_id'],
@@ -361,6 +363,14 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
 
     try {
       final api = ApiService();
+
+      if (_attachment != null) {
+        final uploadRes = await api.uploadComplaintImage(_attachment!);
+        if (uploadRes.data != null && uploadRes.data['path'] != null) {
+          payload['attachment_url'] = uploadRes.data['path'];
+        }
+      }
+
       await api.dio.post('/api/indents', data: payload);
 
       if (!mounted) return;
@@ -390,46 +400,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     }
   }
 
-  Widget _buildDropdownField({
-    required String label,
-    required String? selectedName,
-    required VoidCallback onTap,
-    required IconData icon,
-    bool disabled = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: InkWell(
-        onTap: disabled ? null : onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: disabled ? const Color(0xFFF8FAFC) : const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: Colors.grey),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  selectedName ?? 'Select $label',
-                  style: TextStyle(
-                    color:
-                        selectedName == null ? Colors.grey[600] : Colors.black,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-              const Icon(Icons.arrow_drop_down, color: Colors.grey),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -465,13 +436,14 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                _buildDropdownField(
+                AppDropdownField(
                   label: 'Institution *',
                   icon: Icons.business,
                   selectedName: _institutions.firstWhere(
                       (i) => i['id'].toString() == _selectedInstitutionId,
                       orElse: () => null)?['name'],
-                  onTap: () => _showBottomPicker(
+                  onTap: () => showBottomPicker(
+                    context: context,
                     title: 'Select Institution',
                     items: _institutions,
                     selectedValue: _selectedInstitutionId,
@@ -480,12 +452,13 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                     onSelect: _handleInstitutionChange,
                   ),
                 ),
-                _buildDropdownField(
+                AppDropdownField(
                   label: 'Department *',
                   icon: Icons.account_tree,
                   selectedName: _selectedDepartmentName,
                   disabled: _selectedInstitutionId == null,
-                  onTap: () => _showBottomPicker(
+                  onTap: () => showBottomPicker(
+                    context: context,
                     title: 'Select Department',
                     items: _departmentsList
                         .map((d) => {'id': d, 'name': d})
@@ -499,7 +472,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: _buildDropdownField(
+                      child: AppDropdownField(
                         label: 'Building',
                         icon: Icons.apartment,
                         selectedName: _buildingsList.firstWhere(
@@ -507,7 +480,8 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                             orElse: () => null)?['name'],
                         disabled: _selectedDepartmentName == null ||
                             _buildingsList.isEmpty,
-                        onTap: () => _showBottomPicker(
+                        onTap: () => showBottomPicker(
+                    context: context,
                           title: 'Select Building',
                           items: _buildingsList,
                           selectedValue: _selectedBuildingId,
@@ -519,7 +493,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: _buildDropdownField(
+                      child: AppDropdownField(
                         label: 'Floor',
                         icon: Icons.layers,
                         selectedName: _floorsList.firstWhere(
@@ -527,7 +501,8 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                             orElse: () => null)?['name'],
                         disabled:
                             _selectedBuildingId == null || _floorsList.isEmpty,
-                        onTap: () => _showBottomPicker(
+                        onTap: () => showBottomPicker(
+                    context: context,
                           title: 'Select Floor',
                           items: _floorsList
                               .where((f) =>
@@ -543,14 +518,15 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                     ),
                   ],
                 ),
-                _buildDropdownField(
+                AppDropdownField(
                   label: 'Room',
                   icon: Icons.meeting_room,
                   selectedName: _roomsList.firstWhere(
                       (r) => r['id'].toString() == _selectedRoomId,
                       orElse: () => null)?['name'],
                   disabled: _selectedFloorId == null || _roomsList.isEmpty,
-                  onTap: () => _showBottomPicker(
+                  onTap: () => showBottomPicker(
+                    context: context,
                     title: 'Select Room',
                     items: _roomsList
                         .where(
@@ -562,7 +538,92 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                     onSelect: (val) => setState(() => _selectedRoomId = val),
                   ),
                 ),
-                const SizedBox(height: 8),
+                if (_storesList.isNotEmpty) ...[
+                  AppDropdownField(
+                    label: 'Store / Warehouse',
+                    icon: Icons.store,
+                    selectedName: _selectedStoreName,
+                    disabled: false,
+                    onTap: () => showBottomPicker(
+                    context: context,
+                      title: 'Select Store',
+                      items: _storesList,
+                      selectedValue: _selectedStoreId,
+                      idField: 'id',
+                      nameField: 'name',
+                      onSelect: (val) {
+                        setState(() {
+                          _selectedStoreId = val;
+                          _selectedStoreName = _storesList.firstWhere(
+                              (s) => s['id'].toString() == val,
+                              orElse: () => null)?['name'];
+                        });
+                      },
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _selectedPriority,
+                  decoration: const InputDecoration(
+                    labelText: 'Priority',
+                    prefixIcon: Icon(Icons.priority_high),
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  items: ['Routine', 'High', 'Urgent'].map((String priority) {
+                    return DropdownMenuItem<String>(
+                      value: priority,
+                      child: Text(priority),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedPriority = newValue!;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _costCenterController,
+                  decoration: const InputDecoration(
+                    labelText: 'Cost Center / Project Code (Optional)',
+                    prefixIcon: Icon(Icons.account_balance_wallet_outlined),
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: _pickImage,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                          color: Colors.grey.shade400,
+                          style: BorderStyle.solid),
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey.shade50,
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.camera_alt_outlined,
+                            color: Colors.grey.shade600, size: 32),
+                        const SizedBox(height: 8),
+                        Text(
+                          _attachment != null
+                              ? 'Image Attached: ${_attachment!.path.split('/').last}'
+                              : 'Attach Photo (Optional)',
+                          style: TextStyle(
+                              color: Colors.grey.shade700, fontSize: 14),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _remarksController,
                   maxLines: 3,
@@ -621,7 +682,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                               ],
                             ),
                             const SizedBox(height: 12),
-                            _buildDropdownField(
+                            AppDropdownField(
                               label: 'Select Material',
                               icon: Icons.inventory_2_outlined,
                               selectedName: item['material_id'] != null
@@ -636,7 +697,8 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                                         })
                                     .toList();
 
-                                _showBottomPicker(
+                                showBottomPicker(
+                    context: context,
                                   title: 'Select Material',
                                   items: displayItems,
                                   selectedValue:

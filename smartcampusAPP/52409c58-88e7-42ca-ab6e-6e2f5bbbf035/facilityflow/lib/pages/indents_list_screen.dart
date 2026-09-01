@@ -4,6 +4,7 @@ import 'package:facilityflow/globals/app_state.dart';
 import 'package:intl/intl.dart';
 import 'package:facilityflow/pages/indent_detail_screen.dart';
 import 'package:facilityflow/pages/create_indent_screen.dart';
+import 'package:facilityflow/pages/material_issues_screen.dart';
 
 @NowaGenerated()
 class IndentsListScreen extends StatefulWidget {
@@ -31,6 +32,9 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
     'Rejected'
   ];
 
+  DateTime? _startDate;
+  DateTime? _endDate;
+
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Draft':
@@ -54,14 +58,52 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
     }
   }
 
+  Future<void> _selectDate(BuildContext context, bool isStart) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: isStart
+          ? (_startDate ?? DateTime.now())
+          : (_endDate ?? DateTime.now()),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _startDate = picked;
+        } else {
+          _endDate = picked;
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final appState = AppState.of(context, listen: true);
     final theme = Theme.of(context);
 
-    final uniqueInstitutions = ['All', ...appState.indents.map((e) => e.institutionName).where((e) => e.isNotEmpty).toSet()];
-    final uniqueDepartments = ['All', ...appState.indents.map((e) => e.department).where((e) => e.isNotEmpty).toSet()];
-    final uniqueBuildings = ['All', ...appState.indents.map((e) => e.buildingName).where((e) => e.isNotEmpty).toSet()];
+    final uniqueInstitutions = [
+      'All',
+      ...appState.indents
+          .map((e) => e.institutionName)
+          .where((e) => e.isNotEmpty)
+          .toSet()
+    ];
+    final uniqueDepartments = [
+      'All',
+      ...appState.indents
+          .map((e) => e.department)
+          .where((e) => e.isNotEmpty)
+          .toSet()
+    ];
+    final uniqueBuildings = [
+      'All',
+      ...appState.indents
+          .map((e) => e.buildingName)
+          .where((e) => e.isNotEmpty)
+          .toSet()
+    ];
 
     // Filter logic
     final filteredIndents = appState.indents.where((indent) {
@@ -69,13 +111,42 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
           indent.indentNumber
               .toLowerCase()
               .contains(_searchQuery.toLowerCase()) ||
-          indent.department.toLowerCase().contains(_searchQuery.toLowerCase());
+          indent.department
+              .toLowerCase()
+              .contains(_searchQuery.toLowerCase()) ||
+          indent.items.any((item) => item.materialName
+              .toLowerCase()
+              .contains(_searchQuery.toLowerCase()));
       final matchesStatus =
           _selectedStatus == 'All' || indent.status == _selectedStatus;
-      final matchesInst = _selectedInstitution == 'All' || indent.institutionName == _selectedInstitution;
-      final matchesDept = _selectedDepartment == 'All' || indent.department == _selectedDepartment;
-      final matchesBldg = _selectedBuilding == 'All' || indent.buildingName == _selectedBuilding;
-      return matchesSearch && matchesStatus && matchesInst && matchesDept && matchesBldg;
+      final matchesInst = _selectedInstitution == 'All' ||
+          indent.institutionName == _selectedInstitution;
+      final matchesDept = _selectedDepartment == 'All' ||
+          indent.department == _selectedDepartment;
+      final matchesBldg = _selectedBuilding == 'All' ||
+          indent.buildingName == _selectedBuilding;
+
+      bool matchesDate = true;
+      if (_startDate != null) {
+        final start =
+            DateTime(_startDate!.year, _startDate!.month, _startDate!.day);
+        final indentDate =
+            DateTime(indent.date.year, indent.date.month, indent.date.day);
+        if (indentDate.isBefore(start)) matchesDate = false;
+      }
+      if (_endDate != null) {
+        final end = DateTime(_endDate!.year, _endDate!.month, _endDate!.day);
+        final indentDate =
+            DateTime(indent.date.year, indent.date.month, indent.date.day);
+        if (indentDate.isAfter(end)) matchesDate = false;
+      }
+
+      return matchesSearch &&
+          matchesStatus &&
+          matchesInst &&
+          matchesDept &&
+          matchesBldg &&
+          matchesDate;
     }).toList();
 
     return Scaffold(
@@ -85,6 +156,36 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.receipt_long),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MaterialIssuesScreen(),
+                    ),
+                  );
+                },
+              ),
+              if (appState.materialIssues.any((issue) => !issue.isAcknowledged))
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    constraints:
+                        const BoxConstraints(minWidth: 12, minHeight: 12),
+                  ),
+                ),
+            ],
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
@@ -92,6 +193,7 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                 const SnackBar(content: Text('Syncing with .NET API...')),
               );
               appState.fetchIndents();
+              appState.fetchIssues();
             },
           ),
         ],
@@ -104,7 +206,7 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
               padding: const EdgeInsets.all(16.0),
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Search by Indent # or Department',
+                  hintText: 'Search by Indent #, Dept, or Material',
                   prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -123,13 +225,95 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                 },
               ),
             ),
+            // Date Filters Row
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => _selectDate(context, true),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade400),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              _startDate == null
+                                  ? 'From Date'
+                                  : '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: _startDate == null
+                                      ? Colors.grey
+                                      : Colors.black),
+                            ),
+                            const Icon(Icons.calendar_today,
+                                size: 14, color: Colors.grey),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => _selectDate(context, false),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade400),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              _endDate == null
+                                  ? 'To Date'
+                                  : '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: _endDate == null
+                                      ? Colors.grey
+                                      : Colors.black),
+                            ),
+                            const Icon(Icons.calendar_today,
+                                size: 14, color: Colors.grey),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (_startDate != null || _endDate != null)
+                    IconButton(
+                      icon: const Icon(Icons.clear, size: 16),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () {
+                        setState(() {
+                          _startDate = null;
+                          _endDate = null;
+                        });
+                      },
+                    ),
+                ],
+              ),
+            ),
             // Dropdown Filters - Row 1: Institution (full width)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Institution', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                  const Text('Institution',
+                      style: TextStyle(fontSize: 11, color: Colors.grey)),
                   const SizedBox(height: 2),
                   Container(
                     decoration: BoxDecoration(
@@ -141,11 +325,15 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                       child: DropdownButton<String>(
                         isExpanded: true,
                         isDense: true,
-                        value: uniqueInstitutions.contains(_selectedInstitution) ? _selectedInstitution : 'All',
+                        value: uniqueInstitutions.contains(_selectedInstitution)
+                            ? _selectedInstitution
+                            : 'All',
                         items: uniqueInstitutions.map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
-                            child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                            child: Text(value,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 12)),
                           );
                         }).toList(),
                         onChanged: (newValue) {
@@ -165,23 +353,31 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Department', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                            const Text('Department',
+                                style: TextStyle(
+                                    fontSize: 11, color: Colors.grey)),
                             const SizedBox(height: 2),
                             Container(
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.grey.shade400),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
                               child: DropdownButtonHideUnderline(
                                 child: DropdownButton<String>(
                                   isExpanded: true,
                                   isDense: true,
-                                  value: uniqueDepartments.contains(_selectedDepartment) ? _selectedDepartment : 'All',
+                                  value: uniqueDepartments
+                                          .contains(_selectedDepartment)
+                                      ? _selectedDepartment
+                                      : 'All',
                                   items: uniqueDepartments.map((String value) {
                                     return DropdownMenuItem<String>(
                                       value: value,
-                                      child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                                      child: Text(value,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontSize: 12)),
                                     );
                                   }).toList(),
                                   onChanged: (newValue) {
@@ -200,23 +396,31 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Building', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                            const Text('Building',
+                                style: TextStyle(
+                                    fontSize: 11, color: Colors.grey)),
                             const SizedBox(height: 2),
                             Container(
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.grey.shade400),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
                               child: DropdownButtonHideUnderline(
                                 child: DropdownButton<String>(
                                   isExpanded: true,
                                   isDense: true,
-                                  value: uniqueBuildings.contains(_selectedBuilding) ? _selectedBuilding : 'All',
+                                  value: uniqueBuildings
+                                          .contains(_selectedBuilding)
+                                      ? _selectedBuilding
+                                      : 'All',
                                   items: uniqueBuildings.map((String value) {
                                     return DropdownMenuItem<String>(
                                       value: value,
-                                      child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                                      child: Text(value,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontSize: 12)),
                                     );
                                   }).toList(),
                                   onChanged: (newValue) {
@@ -292,7 +496,9 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                           'dd MMM yyyy, hh:mm a',
                         ).format(indent.date);
                         final statusColor = _getStatusColor(indent.status);
-                        final displayStatus = indent.status == 'Submitted' ? 'Pending L${indent.currentApprovalLevel} Approval' : indent.status;
+                        final displayStatus = indent.status == 'Submitted'
+                            ? 'Pending L${indent.currentApprovalLevel} Approval'
+                            : indent.status;
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           child: InkWell(

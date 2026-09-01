@@ -57,7 +57,10 @@ class _RwoListScreenState extends State<RwoListScreen> {
     }).toList();
 
     final assignedRwos = rwos.where((r) => r.status == 'Assigned').toList();
-    final inProgressRwos = rwos.where((r) => r.status == 'In Progress' || r.status == 'Awaiting Spare Parts').toList();
+    final inProgressRwos = rwos
+        .where((r) =>
+            r.status == 'In Progress' || r.status == 'Awaiting Spare Parts')
+        .toList();
     final closedRwos = rwos.where((r) => r.status == 'Closed').toList();
 
     return DefaultTabController(
@@ -105,8 +108,10 @@ class _RwoListScreenState extends State<RwoListScreen> {
                       borderSide: BorderSide.none,
                     ),
                     filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                    fillColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -118,9 +123,12 @@ class _RwoListScreenState extends State<RwoListScreen> {
               Expanded(
                 child: TabBarView(
                   children: [
-                    _buildRwoList(context, assignedRwos, 'No assigned RWOs match your search.'),
-                    _buildRwoList(context, inProgressRwos, 'No in-progress RWOs match your search.'),
-                    _buildRwoList(context, closedRwos, 'No closed RWOs match your search.'),
+                    _buildRwoList(context, assignedRwos,
+                        'No assigned RWOs match your search.'),
+                    _buildRwoList(context, inProgressRwos,
+                        'No in-progress RWOs match your search.'),
+                    _buildRwoList(context, closedRwos,
+                        'No closed RWOs match your search.'),
                   ],
                 ),
               ),
@@ -131,9 +139,10 @@ class _RwoListScreenState extends State<RwoListScreen> {
     );
   }
 
-  Widget _buildRwoList(BuildContext context, List<RepairWorkOrder> list, String emptyMessage) {
+  Widget _buildRwoList(
+      BuildContext context, List<RepairWorkOrder> list, String emptyMessage) {
     final theme = Theme.of(context);
-    
+
     if (list.isEmpty) {
       return Center(
         child: Padding(
@@ -146,7 +155,8 @@ class _RwoListScreenState extends State<RwoListScreen> {
               Text(
                 emptyMessage,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
+                style: theme.textTheme.titleMedium
+                    ?.copyWith(color: Colors.grey[600]),
               ),
             ],
           ),
@@ -169,7 +179,8 @@ class _RwoListScreenState extends State<RwoListScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => RwoDetailScreen(rwo: rwo)),
+                MaterialPageRoute(
+                    builder: (context) => RwoDetailScreen(rwo: rwo)),
               );
             },
             child: Padding(
@@ -188,7 +199,8 @@ class _RwoListScreenState extends State<RwoListScreen> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: statusColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(100),
@@ -208,12 +220,14 @@ class _RwoListScreenState extends State<RwoListScreen> {
                   const SizedBox(height: 12),
                   Text(
                     rwo.equipmentName ?? 'Unknown Equipment',
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.person_outline, size: 16, color: Colors.grey),
+                      const Icon(Icons.person_outline,
+                          size: 16, color: Colors.grey),
                       const SizedBox(width: 8),
                       Text(
                         rwo.technicianName ?? 'Unassigned',
@@ -225,7 +239,8 @@ class _RwoListScreenState extends State<RwoListScreen> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.inventory_2_outlined, size: 16, color: theme.colorScheme.tertiary),
+                        Icon(Icons.inventory_2_outlined,
+                            size: 16, color: theme.colorScheme.tertiary),
                         const SizedBox(width: 8),
                         Text(
                           'Requires Materials',
@@ -237,13 +252,17 @@ class _RwoListScreenState extends State<RwoListScreen> {
                       ],
                     ),
                   ],
-                  const Divider(height: 24, thickness: 1, color: Color(0xFFF1F5F9)),
+                  const Divider(
+                      height: 24, thickness: 1, color: Color(0xFFF1F5F9)),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        rwo.complaintDocket != null ? 'Linked: ${rwo.complaintDocket}' : 'No Link',
-                        style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+                        rwo.complaintDocket != null
+                            ? 'Linked: ${rwo.complaintDocket}'
+                            : 'No Link',
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: Colors.grey.shade600),
                       ),
                       Text(formattedDate, style: theme.textTheme.bodySmall),
                     ],

@@ -68,7 +68,8 @@ class _RwoDetailScreenState extends State<RwoDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(item.materialName,
-                                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 8),
                                 Row(
                                   children: [
@@ -128,7 +129,8 @@ class _RwoDetailScreenState extends State<RwoDetailScreen> {
                           double requestedQty = widget.rwo.items[i].quantity;
                           double approvedQty =
                               double.tryParse(controllers[i].text) ?? 0;
-                          if (approvedQty > requestedQty) hasLargerQuantity = true;
+                          if (approvedQty > requestedQty)
+                            hasLargerQuantity = true;
                           if (approvedQty > 0) allZero = false;
                           payload.add({
                             'wo_item_id': widget.rwo.items[i].id,
@@ -181,7 +183,8 @@ class _RwoDetailScreenState extends State<RwoDetailScreen> {
                           if (Navigator.canPop(context)) Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text('Work order approved successfully.')),
+                                content:
+                                    Text('Work order approved successfully.')),
                           );
                         } catch (e) {
                           if (!mounted) return;
@@ -237,14 +240,15 @@ class _RwoDetailScreenState extends State<RwoDetailScreen> {
                         if (controller.text.trim().isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text('Please enter a reason for rejection.')),
+                                content: Text(
+                                    'Please enter a reason for rejection.')),
                           );
                           return;
                         }
                         setStateDialog(() => isSubmitting = true);
                         try {
-                          await ApiService()
-                              .rejectRwo(widget.rwo.id, reason: controller.text);
+                          await ApiService().rejectRwo(widget.rwo.id,
+                              reason: controller.text);
                           if (!mounted) return;
                           if (ctx.mounted) Navigator.pop(ctx);
                           if (Navigator.canPop(context)) Navigator.pop(context);
@@ -366,8 +370,7 @@ class _RwoDetailScreenState extends State<RwoDetailScreen> {
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                          content:
-                              Text('Navigate to complaint (Coming Soon)')),
+                          content: Text('Navigate to complaint (Coming Soon)')),
                     );
                   },
                 ),
@@ -432,8 +435,7 @@ class _RwoDetailScreenState extends State<RwoDetailScreen> {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border:
-                      Border.all(color: theme.colorScheme.outlineVariant),
+                  border: Border.all(color: theme.colorScheme.outlineVariant),
                 ),
                 child: Text(
                   widget.rwo.problemDescription!,
@@ -496,8 +498,7 @@ class _RwoDetailScreenState extends State<RwoDetailScreen> {
                                     Text(
                                       'Approved: ${_formatQty(item.approvedQuantity, item.uomName, item.uomAllowDecimal)}',
                                       style: const TextStyle(
-                                          color: Colors.green,
-                                          fontSize: 12),
+                                          color: Colors.green, fontSize: 12),
                                     ),
                                 ],
                               ),

@@ -32,11 +32,14 @@ class _GateEntryScreenState extends State<GateEntryScreen> {
   File? _weightReportImage;
 
   double? get _netWeight {
-    if (_tareWeight != null && _grossWeight != null && _grossWeight! >= _tareWeight!) {
+    if (_tareWeight != null &&
+        _grossWeight != null &&
+        _grossWeight! >= _tareWeight!) {
       return _grossWeight! - _tareWeight!;
     }
     return null;
   }
+
   bool _isSubmitting = false;
 
   Future<void> _pickImage(String type) async {
@@ -70,38 +73,50 @@ class _GateEntryScreenState extends State<GateEntryScreen> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
-    final hasInvoice = _invoiceNumber.isNotEmpty || _invoiceDate != null || _invoiceAmount > 0 || _invoiceImage != null;
+    final hasInvoice = _invoiceNumber.isNotEmpty ||
+        _invoiceDate != null ||
+        _invoiceAmount > 0 ||
+        _invoiceImage != null;
     final hasDC = _dcNumber.isNotEmpty || _dcDate != null || _dcImage != null;
 
     if (_invoiceNumber.isEmpty && _dcNumber.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Either Invoice Number or Delivery Challan Number is compulsory.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Either Invoice Number or Delivery Challan Number is compulsory.')));
       return;
     }
 
     if (hasInvoice) {
       if (_invoiceImage == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please capture an image of the invoice.')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Please capture an image of the invoice.')));
         return;
       }
       if (_invoiceNumber.isEmpty || _invoiceDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invoice Number and Date are required.')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Invoice Number and Date are required.')));
         return;
       }
     }
 
     if (hasDC) {
       if (_dcImage == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please capture an image of the DC.')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Please capture an image of the DC.')));
         return;
       }
       if (_dcNumber.isEmpty || _dcDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('DC Number and Date are required.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('DC Number and Date are required.')));
         return;
       }
     }
 
-    if (_grossWeight != null && _tareWeight != null && _grossWeight! < _tareWeight!) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gross weight cannot be less than Tare weight.')));
+    if (_grossWeight != null &&
+        _tareWeight != null &&
+        _grossWeight! < _tareWeight!) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Gross weight cannot be less than Tare weight.')));
       return;
     }
 
@@ -115,13 +130,13 @@ class _GateEntryScreenState extends State<GateEntryScreen> {
         final uploadRes = await _api.uploadInvoice(_invoiceImage!);
         invoiceScanUrl = uploadRes.data['url'];
       }
-      
+
       String? dcScanUrl;
       if (_dcImage != null) {
         final uploadRes = await _api.uploadInvoice(_dcImage!);
         dcScanUrl = uploadRes.data['url'];
       }
-      
+
       String? weightReportUrl;
       if (_weightReportImage != null) {
         final uploadRes = await _api.uploadInvoice(_weightReportImage!);
@@ -133,18 +148,20 @@ class _GateEntryScreenState extends State<GateEntryScreen> {
         'vehicle_number': _vehicleNumber,
         'delivery_person_name': _deliveryPersonName,
         'invoice_number': _invoiceNumber,
-        if (_invoiceDate != null) 'invoice_date': _invoiceDate!.toIso8601String().split('T')[0],
+        if (_invoiceDate != null)
+          'invoice_date': _invoiceDate!.toIso8601String().split('T')[0],
         'invoice_amount': _invoiceAmount,
         'invoice_scan_url': invoiceScanUrl ?? '',
         'dc_number': _dcNumber,
-        if (_dcDate != null) 'dc_date': _dcDate!.toIso8601String().split('T')[0],
+        if (_dcDate != null)
+          'dc_date': _dcDate!.toIso8601String().split('T')[0],
         'dc_scan_url': dcScanUrl ?? '',
         if (_tareWeight != null) 'tare_weight': _tareWeight,
         if (_grossWeight != null) 'gross_weight': _grossWeight,
         if (_netWeight != null) 'net_weight': _netWeight,
         'weight_report_url': weightReportUrl ?? '',
         'remarks': _remarks,
-        'driver_name': _deliveryPersonName, 
+        'driver_name': _deliveryPersonName,
       };
 
       await _api.createGateEntry(payload);
@@ -191,98 +208,138 @@ class _GateEntryScreenState extends State<GateEntryScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text('Invoice Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text('Invoice Details',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: const InputDecoration(labelText: 'Invoice Number', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                          labelText: 'Invoice Number',
+                          border: OutlineInputBorder()),
                       onSaved: (value) => _invoiceNumber = value ?? '',
                     ),
                     const SizedBox(height: 12),
                     InkWell(
                       onTap: () => _selectDate(context, 'invoice'),
                       child: InputDecorator(
-                        decoration: const InputDecoration(labelText: 'Invoice Date', border: OutlineInputBorder()),
-                        child: Text(_invoiceDate == null ? 'Select Date' : '${_invoiceDate!.year}-${_invoiceDate!.month.toString().padLeft(2, '0')}-${_invoiceDate!.day.toString().padLeft(2, '0')}'),
+                        decoration: const InputDecoration(
+                            labelText: 'Invoice Date',
+                            border: OutlineInputBorder()),
+                        child: Text(_invoiceDate == null
+                            ? 'Select Date'
+                            : '${_invoiceDate!.year}-${_invoiceDate!.month.toString().padLeft(2, '0')}-${_invoiceDate!.day.toString().padLeft(2, '0')}'),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: const InputDecoration(labelText: 'Invoice Amount', border: OutlineInputBorder()),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      onSaved: (value) => _invoiceAmount = double.tryParse(value ?? '') ?? 0.0,
+                      decoration: const InputDecoration(
+                          labelText: 'Invoice Amount',
+                          border: OutlineInputBorder()),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      onSaved: (value) =>
+                          _invoiceAmount = double.tryParse(value ?? '') ?? 0.0,
                     ),
                     const SizedBox(height: 12),
                     _buildImagePicker('Invoice Scan', _invoiceImage, 'invoice'),
-                    
                     const SizedBox(height: 24),
-                    const Text('Delivery Challan Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text('Delivery Challan Details',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: const InputDecoration(labelText: 'DC Number', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                          labelText: 'DC Number', border: OutlineInputBorder()),
                       onSaved: (value) => _dcNumber = value ?? '',
                     ),
                     const SizedBox(height: 12),
                     InkWell(
                       onTap: () => _selectDate(context, 'dc'),
                       child: InputDecorator(
-                        decoration: const InputDecoration(labelText: 'DC Date', border: OutlineInputBorder()),
-                        child: Text(_dcDate == null ? 'Select Date' : '${_dcDate!.year}-${_dcDate!.month.toString().padLeft(2, '0')}-${_dcDate!.day.toString().padLeft(2, '0')}'),
+                        decoration: const InputDecoration(
+                            labelText: 'DC Date', border: OutlineInputBorder()),
+                        child: Text(_dcDate == null
+                            ? 'Select Date'
+                            : '${_dcDate!.year}-${_dcDate!.month.toString().padLeft(2, '0')}-${_dcDate!.day.toString().padLeft(2, '0')}'),
                       ),
                     ),
                     const SizedBox(height: 12),
                     _buildImagePicker('DC Scan', _dcImage, 'dc'),
-                    
                     const SizedBox(height: 24),
-                    const Text('Transport Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text('Transport Details',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: const InputDecoration(labelText: 'Vehicle Number', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                          labelText: 'Vehicle Number',
+                          border: OutlineInputBorder()),
                       onSaved: (value) => _vehicleNumber = value ?? '',
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: const InputDecoration(labelText: 'Delivery Person Name *', border: OutlineInputBorder()),
-                      validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+                      decoration: const InputDecoration(
+                          labelText: 'Delivery Person Name *',
+                          border: OutlineInputBorder()),
+                      validator: (value) =>
+                          value == null || value.isEmpty ? 'Required' : null,
                       onSaved: (value) => _deliveryPersonName = value ?? '',
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: const InputDecoration(labelText: 'Remarks', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                          labelText: 'Remarks', border: OutlineInputBorder()),
                       maxLines: 2,
                       onSaved: (value) => _remarks = value ?? '',
                     ),
-
                     const SizedBox(height: 24),
-                    const Text('Vehicle Weight Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text('Vehicle Weight Details',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
                     Row(
                       children: [
                         Expanded(
                           child: TextFormField(
-                            decoration: const InputDecoration(labelText: 'Tare Wt (kg)', border: OutlineInputBorder()),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            onSaved: (value) => _tareWeight = double.tryParse(value ?? ''),
-                            onChanged: (val) => setState(() => _tareWeight = double.tryParse(val)),
+                            decoration: const InputDecoration(
+                                labelText: 'Tare Wt (kg)',
+                                border: OutlineInputBorder()),
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            onSaved: (value) =>
+                                _tareWeight = double.tryParse(value ?? ''),
+                            onChanged: (val) => setState(
+                                () => _tareWeight = double.tryParse(val)),
                           ),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: TextFormField(
-                            decoration: const InputDecoration(labelText: 'Gross Wt (kg)', border: OutlineInputBorder()),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            onSaved: (value) => _grossWeight = double.tryParse(value ?? ''),
-                            onChanged: (val) => setState(() => _grossWeight = double.tryParse(val)),
+                            decoration: const InputDecoration(
+                                labelText: 'Gross Wt (kg)',
+                                border: OutlineInputBorder()),
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            onSaved: (value) =>
+                                _grossWeight = double.tryParse(value ?? ''),
+                            onChanged: (val) => setState(
+                                () => _grossWeight = double.tryParse(val)),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
                     InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Net Weight (kg)', border: OutlineInputBorder()),
-                      child: Text(_netWeight != null ? _netWeight!.toStringAsFixed(2) : '—'),
+                      decoration: const InputDecoration(
+                          labelText: 'Net Weight (kg)',
+                          border: OutlineInputBorder()),
+                      child: Text(_netWeight != null
+                          ? _netWeight!.toStringAsFixed(2)
+                          : '—'),
                     ),
                     const SizedBox(height: 12),
-                    _buildImagePicker('Weight Report Scan', _weightReportImage, 'weight'),
+                    _buildImagePicker(
+                        'Weight Report Scan', _weightReportImage, 'weight'),
                     const SizedBox(height: 32),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -322,9 +379,12 @@ class _GateEntryScreenState extends State<GateEntryScreen> {
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.camera_alt, size: 36, color: Colors.grey),
+                      const Icon(Icons.camera_alt,
+                          size: 36, color: Colors.grey),
                       const SizedBox(height: 8),
-                      Text('Tap to capture $label', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                      Text('Tap to capture $label',
+                          style: const TextStyle(
+                              color: Colors.grey, fontSize: 12)),
                     ],
                   )
                 : ClipRRect(

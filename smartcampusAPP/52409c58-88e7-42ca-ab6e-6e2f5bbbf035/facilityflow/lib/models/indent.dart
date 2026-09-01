@@ -1,6 +1,31 @@
 import 'package:facilityflow/models/indent_item.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 
+class ApprovalHistory {
+  final String approverName;
+  final String status;
+  final String remarks;
+  final DateTime date;
+
+  ApprovalHistory({
+    required this.approverName,
+    required this.status,
+    required this.remarks,
+    required this.date,
+  });
+
+  factory ApprovalHistory.fromJson(Map<String, dynamic> json) {
+    return ApprovalHistory(
+      approverName: json['approver_name'] ?? 'System',
+      status: json['status'] ?? 'Approved',
+      remarks: json['remarks'] ?? '',
+      date: json['created_at'] != null
+          ? DateTime.parse(json['created_at']).toLocal()
+          : DateTime.now(),
+    );
+  }
+}
+
 @NowaGenerated()
 class Indent {
   const Indent({
@@ -19,6 +44,7 @@ class Indent {
     this.roomName = '',
     this.currentApprovalLevel = 1,
     this.canUserApprove = false,
+    this.approvalHistory = const [],
   });
 
   factory Indent.fromJson(Map<String, dynamic> json) {
@@ -43,6 +69,10 @@ class Indent {
       roomName: json['room_name'] as String? ?? '',
       currentApprovalLevel: json['current_approval_level'] as int? ?? 1,
       canUserApprove: json['can_user_approve'] as bool? ?? false,
+      approvalHistory: (json['approval_history'] as List<dynamic>?)
+              ?.map((h) => ApprovalHistory.fromJson(h as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
 
@@ -54,7 +84,7 @@ class Indent {
   final String status;
   final List<IndentItem> items;
   final DateTime date;
-  
+
   final String requesterName;
   final String institutionName;
   final String buildingName;
@@ -62,6 +92,7 @@ class Indent {
   final String roomName;
   final int currentApprovalLevel;
   final bool canUserApprove;
+  final List<ApprovalHistory> approvalHistory;
 
   Map<String, dynamic> toJson() {
     return {

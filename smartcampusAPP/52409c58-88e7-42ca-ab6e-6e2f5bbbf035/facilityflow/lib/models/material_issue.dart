@@ -20,7 +20,9 @@ class MaterialIssue {
       relatedIndentId: json['indent_id'] as int?,
       relatedComplaintId: json['complaint_id'] as int?,
       isAcknowledged: json['is_acknowledged'] as bool? ?? false,
-      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'] as String) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'] as String)
+          : null,
       items: (json['items'] as List<dynamic>?)
               ?.map((item) => IndentItem.fromJson(item as Map<String, dynamic>))
               .toList() ??

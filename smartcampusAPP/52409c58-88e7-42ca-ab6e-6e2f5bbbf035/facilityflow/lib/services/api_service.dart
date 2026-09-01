@@ -82,6 +82,15 @@ class ApiService {
     return await dio.get('/api/buildings');
   }
 
+  Future<Response> getEquipment() async {
+    return await dio.get('/api/equipment', queryParameters: {'limit': 1000});
+  }
+
+  Future<Response> getIndents({int? complaintId}) async {
+    return await dio.get(
+        '/api/indents${complaintId != null ? '?complaint_id=$complaintId' : ''}');
+  }
+
   Future<Response> getIssues() async {
     return await dio.get('/api/issues');
   }
@@ -104,6 +113,14 @@ class ApiService {
 
   Future<Response> getMaterials({int limit = 10000}) async {
     return await dio.get('/api/materials', queryParameters: {'limit': limit});
+  }
+
+  Future<Response> getStores() async {
+    try {
+      return await dio.get('/api/stores');
+    } catch (e) {
+      return await dio.get('/api/warehouses');
+    }
   }
 
   // --- Gate Entry endpoints ---
@@ -147,8 +164,8 @@ class ApiService {
   }
 
   // --- Indent endpoints ---
-  Future<Response> approveIndent(
-      int id, List<Map<String, dynamic>> items, {String? remarks}) async {
+  Future<Response> approveIndent(int id, List<Map<String, dynamic>> items,
+      {String? remarks}) async {
     return await dio.post('/api/indents/$id/approve', data: {
       'items': items,
       'remarks': remarks,
@@ -173,9 +190,13 @@ class ApiService {
         .post('/api/complaints/$id/assign', data: {'assigned_to_id': techId});
   }
 
-  Future<Response> inspectComplaint(
+  Future<Response> startInspection(int id) async {
+    return await dio.post('/api/complaints/$id/inspect');
+  }
+
+  Future<Response> completeInspection(
       int id, bool materialRequired, String inspectionDetails) async {
-    return await dio.post('/api/complaints/$id/inspect', data: {
+    return await dio.post('/api/complaints/$id/complete-inspection', data: {
       'repair_method': materialRequired ? 'Material Required' : 'Internal',
       'inspection_details': inspectionDetails
     });
@@ -190,15 +211,52 @@ class ApiService {
       {String? statusOnWorkCompletion,
       bool jobCompletedSatisfactorily = true,
       String? completionDate,
-      Map<String, dynamic>? pmChecklistData}) async {
-    return await dio.post('/api/complaints/$id/resolve', data: {
-      'resolution_remarks': remarks,
+      String? completionTime,
+      String? closureReason,
+      Map<String, dynamic>? pmChecklistData,
+      String? equipmentPhotoUrl,
+      String? serialNumberPhotoUrl,
+      String? installationReportUrl,
+      String? serialNumber,
+      List<String>? documentUrls}) async {
+    return await dio.post('/api/complaints/$id/close', data: {
+      'resolution_entered': remarks,
+      'closure_reason': closureReason ?? 'Resolved via App',
       'resolution_image_urls': imageUrls,
-      if (statusOnWorkCompletion != null) 'status_on_work_completion': statusOnWorkCompletion,
+      if (statusOnWorkCompletion != null)
+        'status_on_work_completion': statusOnWorkCompletion,
       'job_completed_satisfactorily': jobCompletedSatisfactorily,
       if (completionDate != null) 'completion_date': completionDate,
+      if (completionTime != null) 'completion_time': completionTime,
       if (pmChecklistData != null) 'pm_checklist_data': pmChecklistData,
+      if (equipmentPhotoUrl != null) 'equipment_photo_url': equipmentPhotoUrl,
+      if (serialNumberPhotoUrl != null)
+        'serial_number_photo_url': serialNumberPhotoUrl,
+      if (installationReportUrl != null)
+        'installation_report_url': installationReportUrl,
+      if (serialNumber != null) 'serial_number': serialNumber,
+      if (documentUrls != null) 'document_urls': documentUrls,
     });
+  }
+
+  Future<Response> approveComplaintClosure(int id, String approvalType) async {
+    return await dio.post('/api/complaints/$id/approve-closure', data: {
+      'approval_type': approvalType,
+    });
+  }
+
+  Future<Response> reopenComplaint(int id, String reason) async {
+    return await dio.post('/api/complaints/$id/reopen', data: {
+      'reason': reason,
+    });
+  }
+
+  Future<Response> getComplaintDetail(int id) async {
+    return await dio.get('/api/complaints/$id');
+  }
+
+  Future<Response> updateComplaint(int id, Map<String, dynamic> data) async {
+    return await dio.put('/api/complaints/$id', data: data);
   }
 
   // --- RWO endpoints ---
@@ -213,8 +271,8 @@ class ApiService {
     return await dio.get('/api/rwos/$id');
   }
 
-  Future<Response> approveRwo(
-      int id, List<Map<String, dynamic>> items, {String? remarks}) async {
+  Future<Response> approveRwo(int id, List<Map<String, dynamic>> items,
+      {String? remarks}) async {
     return await dio.post('/api/procurement/work-orders/$id/approve', data: {
       'items': items,
       'remarks': remarks,

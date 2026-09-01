@@ -7,6 +7,10 @@ import 'package:facilityflow/globals/app_state.dart';
 import 'package:intl/intl.dart';
 import 'package:facilityflow/services/api_service.dart';
 import 'package:facilityflow/pages/create_indent_screen.dart';
+import 'dart:async';
+import 'package:facilityflow/widgets/pm_checklist_form.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 @NowaGenerated()
 class ComplaintDetailScreen extends StatefulWidget {
@@ -22,6 +26,63 @@ class ComplaintDetailScreen extends StatefulWidget {
 @NowaGenerated()
 class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   bool _isLoading = false;
+  bool _actionLoading = false;
+  List<dynamic> _materialIndents = [];
+  List<dynamic> _materialIssues = [];
+  Map<String, dynamic>? _rwo;
+  Timer? _pollingTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDetails();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      _fetchDetails(silent: true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchDetails({bool silent = false}) async {
+    if (!silent) setState(() => _isLoading = true);
+    try {
+      final api = ApiService();
+      final results = await Future.wait([
+        api.getIndents(complaintId: widget.complaint.id),
+        api.getIssues(),
+        api.getRwos(),
+      ]);
+      if (mounted) {
+        setState(() {
+          _materialIndents = results[0].data ?? [];
+          final allIssues = results[1].data as List<dynamic>? ?? [];
+          _materialIssues = allIssues
+              .where((i) =>
+                  i['complaint_id'] == widget.complaint.id ||
+                  (i['indent_id'] != null &&
+                      _materialIndents
+                          .any((ind) => ind['id'] == i['indent_id'])))
+              .toList();
+
+          final allRwos = results[2].data as List<dynamic>? ?? [];
+          try {
+            _rwo = allRwos
+                .firstWhere((r) => r['complaint_id'] == widget.complaint.id);
+          } catch (_) {
+            _rwo = null;
+          }
+        });
+      }
+    } catch (e) {
+      // Ignore polling errors
+    } finally {
+      if (mounted && !silent) setState(() => _isLoading = false);
+    }
+  }
 
   Color _getStatusColor(String status) {
     switch (status) {
@@ -127,7 +188,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
 
   void _showInspectDialog() {
     final controller = TextEditingController();
-    bool materialRequired = false;
+    String? repairMethod;
 
     showDialog(
         context: context,
@@ -135,22 +196,33 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
           bool isSubmitting = false;
           return StatefulBuilder(builder: (dialogContext, setStateDialog) {
             return AlertDialog(
-              title: const Text('Start Inspection'),
+              title: const Text('Complete Inspection'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
                     controller: controller,
                     maxLines: 3,
-                    decoration:
-                        const InputDecoration(labelText: 'Inspection Details'),
+                    decoration: const InputDecoration(
+                        labelText: 'Inspection Details',
+                        border: OutlineInputBorder()),
                   ),
                   const SizedBox(height: 16),
-                  SwitchListTile(
-                    title: const Text('Material Required'),
-                    value: materialRequired,
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(
+                        labelText: 'Action Required',
+                        border: OutlineInputBorder()),
+                    value: repairMethod,
+                    items: const [
+                      DropdownMenuItem(
+                          value: 'Material Required',
+                          child: Text('Material Required')),
+                      DropdownMenuItem(
+                          value: 'Material Not Required',
+                          child: Text('Material Not Required')),
+                    ],
                     onChanged: (val) =>
-                        setStateDialog(() => materialRequired = val),
+                        setStateDialog(() => repairMethod = val),
                   ),
                 ],
               ),
@@ -159,21 +231,31 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                     onPressed: () => Navigator.pop(ctx),
                     child: const Text('Cancel')),
                 ElevatedButton(
-                  onPressed: isSubmitting
+                  onPressed: repairMethod == null || isSubmitting
                       ? null
                       : () async {
                           setStateDialog(() => isSubmitting = true);
                           try {
-                            await ApiService().inspectComplaint(
+                            await ApiService().completeInspection(
                                 widget.complaint.id,
-                                materialRequired,
+                                repairMethod == 'Material Required',
                                 controller.text);
                             if (ctx.mounted) {
                               Navigator.pop(ctx); // Pop dialog
                             }
-                            _refreshComplaints();
-                            if (Navigator.canPop(context)) {
-                              Navigator.pop(context); // Pop detail screen
+                            if (repairMethod == 'Material Required' &&
+                                mounted) {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (c) => CreateIndentScreen(
+                                          linkedComplaintId:
+                                              widget.complaint.id)));
+                            } else {
+                              _refreshComplaints();
+                              if (mounted && Navigator.canPop(context)) {
+                                Navigator.pop(context); // Pop detail screen
+                              }
                             }
                           } catch (e) {
                             if (!mounted) return;
@@ -220,31 +302,59 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   }
 
   void _showResolveDialog() {
+    final isInstallation =
+        widget.complaint.complaintType.toLowerCase().contains('installation');
+    final isPm = widget.complaint.isPmCalibrationCall ||
+        widget.complaint.complaintType.toLowerCase().contains('pm') ||
+        widget.complaint.complaintType
+            .toLowerCase()
+            .contains('preventive maintenance');
+
     showDialog(
         context: context,
         builder: (ctx) {
-          final controller = TextEditingController();
-          final statusController = TextEditingController();
+          final remarksController = TextEditingController(
+              text: widget.complaint.resolutionEntered ?? '');
+          final statusController = TextEditingController(
+              text: widget.complaint.statusOnWorkCompletion ?? '');
+          final reasonController =
+              TextEditingController(text: widget.complaint.closureReason ?? '');
+          final serialNumberController = TextEditingController(
+              text: widget.complaint.serialNumber == 'NA'
+                  ? ''
+                  : (widget.complaint.serialNumber ?? ''));
+
           bool jobSatisfactory = true;
-          String completionDate = DateTime.now().toIso8601String().split('T')[0];
-          List<File> images = [];
-          bool isSubmitting = false;
-          
-          final isPm = widget.complaint.complaintType == 'Preventive Maintenance';
+          String completionDate =
+              DateTime.now().toIso8601String().split('T')[0];
+          String completionTime =
+              '${TimeOfDay.now().hour.toString().padLeft(2, '0')}:${TimeOfDay.now().minute.toString().padLeft(2, '0')}';
           Map<String, dynamic> pmData = {};
 
+          List<File> images = [];
+          File? equipmentPhoto;
+          File? serialNumberPhoto;
+          File? installationReport;
+          File? signedReport;
+          List<File> otherDocs = [];
+          bool noSerialNumber = widget.complaint.serialNumber == 'NA';
+
+          bool isSubmitting = false;
+
           return StatefulBuilder(builder: (dialogCtx, setStateDialog) {
-            Future<void> pickImage() async {
+            void pickImage(Function(File) onPicked) async {
               final picker = ImagePicker();
               final picked =
                   await picker.pickImage(source: ImageSource.gallery);
               if (picked != null) {
-                setStateDialog(() => images.add(File(picked.path)));
+                setStateDialog(() {
+                  onPicked(File(picked.path));
+                });
               }
             }
 
             return AlertDialog(
-              title: const Text('Resolve Complaint'),
+              title: const Text('Initiate Closure Workflow'),
               content: SizedBox(
                 width: double.maxFinite,
                 child: SingleChildScrollView(
@@ -252,30 +362,36 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       TextField(
-                        controller: controller,
+                        controller: remarksController,
                         decoration: const InputDecoration(
-                          labelText: 'Resolution Remarks',
-                          border: OutlineInputBorder(),
-                        ),
-                        maxLines: 3,
+                            labelText: 'Resolution Entered (Action Taken) *',
+                            border: OutlineInputBorder()),
+                        maxLines: 2,
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: reasonController,
+                        decoration: const InputDecoration(
+                            labelText: 'Closure Reason *',
+                            border: OutlineInputBorder()),
+                        maxLines: 2,
                       ),
                       const SizedBox(height: 16),
                       TextField(
                         controller: statusController,
                         decoration: const InputDecoration(
-                          labelText: 'Status on Work Completion',
-                          border: OutlineInputBorder(),
-                        ),
+                            labelText: 'Status on Work Completion',
+                            border: OutlineInputBorder()),
                         maxLines: 2,
                       ),
                       const SizedBox(height: 16),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Job Completed Satisfactorily?'),
                           Switch(
                             value: jobSatisfactory,
-                            onChanged: (val) => setStateDialog(() => jobSatisfactory = val),
+                            onChanged: (val) =>
+                                setStateDialog(() => jobSatisfactory = val),
                           ),
                         ],
                       ),
@@ -292,40 +408,139 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                                 lastDate: DateTime(2100),
                               );
                               if (picked != null) {
-                                setStateDialog(() => completionDate = picked.toIso8601String().split('T')[0]);
+                                setStateDialog(() => completionDate =
+                                    picked.toIso8601String().split('T')[0]);
                               }
                             },
                             child: Text(completionDate),
                           ),
                         ],
                       ),
-                      if (isPm) ...[
-                         const SizedBox(height: 16),
-                         const Text('PM Checklist Data (JSON):', style: TextStyle(fontWeight: FontWeight.bold)),
-                         const SizedBox(height: 8),
-                         TextField(
-                           maxLines: 3,
-                           decoration: const InputDecoration(
-                             hintText: 'Enter PM JSON data...',
-                             border: OutlineInputBorder(),
-                           ),
-                           onChanged: (val) {
-                             try {
-                               pmData = jsonDecode(val);
-                             } catch (e) {}
-                           },
-                         ),
-                      ],
-                      const SizedBox(height: 16),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Attach Images'),
-                          IconButton(
-                              onPressed: pickImage,
-                              icon: const Icon(Icons.add_a_photo)),
+                          const Text('Completion Time: '),
+                          TextButton(
+                            onPressed: () async {
+                              final picked = await showTimePicker(
+                                context: dialogCtx,
+                                initialTime: TimeOfDay.now(),
+                              );
+                              if (picked != null) {
+                                setStateDialog(() => completionTime =
+                                    '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}');
+                              }
+                            },
+                            child: Text(completionTime),
+                          ),
                         ],
                       ),
+                      if (isPm) ...[
+                        const SizedBox(height: 16),
+                        const Text('PM Checklist',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        PMChecklistForm(
+                          data: pmData,
+                          onChanged: (val) =>
+                              setStateDialog(() => pmData = val),
+                        ),
+                      ],
+                      if (isInstallation) ...[
+                        const SizedBox(height: 16),
+                        const Divider(),
+                        const Text('Mandatory Installation Documents',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red)),
+                        const SizedBox(height: 8),
+                        ListTile(
+                          title: const Text('Equipment Photo *'),
+                          trailing: IconButton(
+                              icon: const Icon(Icons.camera_alt),
+                              onPressed: () =>
+                                  pickImage((f) => equipmentPhoto = f)),
+                          subtitle: equipmentPhoto != null
+                              ? const Text('Attached',
+                                  style: TextStyle(color: Colors.green))
+                              : const Text('Required',
+                                  style: TextStyle(color: Colors.red)),
+                        ),
+                        TextField(
+                          controller: serialNumberController,
+                          decoration: const InputDecoration(
+                              labelText: 'Serial Number *',
+                              border: OutlineInputBorder()),
+                          enabled: !noSerialNumber,
+                        ),
+                        CheckboxListTile(
+                          title: const Text('No Serial Number Available (NA)'),
+                          value: noSerialNumber,
+                          onChanged: (val) => setStateDialog(
+                              () => noSerialNumber = val ?? false),
+                        ),
+                        if (!noSerialNumber)
+                          ListTile(
+                            title: const Text('Serial Number Photo *'),
+                            trailing: IconButton(
+                                icon: const Icon(Icons.camera_alt),
+                                onPressed: () =>
+                                    pickImage((f) => serialNumberPhoto = f)),
+                            subtitle: serialNumberPhoto != null
+                                ? const Text('Attached',
+                                    style: TextStyle(color: Colors.green))
+                                : const Text('Required',
+                                    style: TextStyle(color: Colors.red)),
+                          ),
+                        ListTile(
+                          title: const Text('Installation Report *'),
+                          trailing: IconButton(
+                              icon: const Icon(Icons.camera_alt),
+                              onPressed: () =>
+                                  pickImage((f) => installationReport = f)),
+                          subtitle: installationReport != null
+                              ? const Text('Attached',
+                                  style: TextStyle(color: Colors.green))
+                              : const Text('Required',
+                                  style: TextStyle(color: Colors.red)),
+                        ),
+                        const Divider(),
+                      ],
+                      if (!isInstallation) ...[
+                        const SizedBox(height: 16),
+                        ListTile(
+                          title: Text(isPm
+                              ? 'Upload Signed PM Report *'
+                              : 'Upload Signed Engineer Evaluation Report *'),
+                          trailing: IconButton(
+                              icon: const Icon(Icons.upload_file),
+                              onPressed: () =>
+                                  pickImage((f) => signedReport = f)),
+                          subtitle: signedReport != null
+                              ? const Text('Attached',
+                                  style: TextStyle(color: Colors.green))
+                              : const Text('Required',
+                                  style: TextStyle(color: Colors.red)),
+                        ),
+                        ListTile(
+                          title: const Text('Upload Other Service Documents'),
+                          trailing: IconButton(
+                              icon: const Icon(Icons.upload_file),
+                              onPressed: () =>
+                                  pickImage((f) => otherDocs.add(f))),
+                          subtitle: Text('${otherDocs.length} attached'),
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      if (!isInstallation)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Upload Post Repair Photos'),
+                            IconButton(
+                                onPressed: () =>
+                                    pickImage((f) => images.add(f)),
+                                icon: const Icon(Icons.add_a_photo)),
+                          ],
+                        ),
                       if (images.isNotEmpty) ...[
                         const SizedBox(height: 16),
                         Wrap(
@@ -363,53 +578,191 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                 TextButton(
                     onPressed: () => Navigator.pop(ctx),
                     child: const Text('Cancel')),
+                TextButton(
+                    onPressed: isSubmitting
+                        ? null
+                        : () async {
+                            try {
+                              setStateDialog(() => isSubmitting = true);
+                              await ApiService()
+                                  .updateComplaint(widget.complaint.id, {
+                                'resolution_entered': remarksController.text,
+                                'closure_reason': reasonController.text,
+                                'status_on_work_completion':
+                                    statusController.text,
+                                'job_completed_satisfactorily': jobSatisfactory,
+                                'completion_date': completionDate,
+                                'completion_time': completionTime,
+                                'pm_checklist_data': isPm ? pmData : null,
+                              });
+                              if (mounted)
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            'Details saved successfully')));
+                            } catch (e) {
+                              if (mounted)
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content:
+                                            Text('Failed to save details')));
+                            } finally {
+                              setStateDialog(() => isSubmitting = false);
+                            }
+                          },
+                    child: const Text('Save Details')),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white),
                   onPressed: isSubmitting
                       ? null
                       : () async {
-                          if (statusController.text.trim().isEmpty) {
-                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Status on Work Completion is required.')));
-                             return;
+                          if (remarksController.text.trim().isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text(
+                                        'Resolution Entered is required.')));
+                            return;
                           }
+                          if (reasonController.text.trim().isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content:
+                                        Text('Closure Reason is required.')));
+                            return;
+                          }
+                          if (isInstallation) {
+                            if (equipmentPhoto == null ||
+                                (!noSerialNumber &&
+                                    serialNumberPhoto == null) ||
+                                (!noSerialNumber &&
+                                    serialNumberController.text
+                                        .trim()
+                                        .isEmpty) ||
+                                installationReport == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'All installation documents are mandatory.')));
+                              return;
+                            }
+                          } else {
+                            if (signedReport == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text('Signed Report is required.')));
+                              return;
+                            }
+                          }
+                          if (isPm) {
+                            if (pmData['pm_start_date_time'] == null ||
+                                pmData['pm_completed_date'] == null ||
+                                pmData['next_pm_due_on'] == null ||
+                                pmData['status'] == null ||
+                                pmData['accepted_for_use'] == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Please complete all footer details in PM Checklist.')));
+                              return;
+                            }
+                          }
+
                           setStateDialog(() => isSubmitting = true);
                           try {
                             final api = ApiService();
                             List<String> imageUrls = [];
                             for (var img in images) {
-                              final res = await api.uploadInvoice(img);
+                              final res = await api.uploadComplaintImage(img);
                               imageUrls.add(res.data['url']);
                             }
+                            List<String> docUrls = [];
+                            if (signedReport != null) {
+                              final res =
+                                  await api.uploadComplaintImage(signedReport!);
+                              docUrls.add(res.data['url']);
+                            }
+                            for (var doc in otherDocs) {
+                              final res = await api.uploadComplaintImage(doc);
+                              docUrls.add(res.data['url']);
+                            }
+
+                            String? equipUrl;
+                            if (equipmentPhoto != null) {
+                              final res = await api
+                                  .uploadComplaintImage(equipmentPhoto!);
+                              equipUrl = res.data['url'];
+                            }
+                            String? serialUrl;
+                            if (serialNumberPhoto != null) {
+                              final res = await api
+                                  .uploadComplaintImage(serialNumberPhoto!);
+                              serialUrl = res.data['url'];
+                            }
+                            String? reportUrl;
+                            if (installationReport != null) {
+                              final res = await api
+                                  .uploadComplaintImage(installationReport!);
+                              reportUrl = res.data['url'];
+                            }
+
                             await api.resolveComplaint(
                               widget.complaint.id,
-                              controller.text, 
+                              remarksController.text,
                               imageUrls,
+                              closureReason: reasonController.text,
                               statusOnWorkCompletion: statusController.text,
                               jobCompletedSatisfactorily: jobSatisfactory,
                               completionDate: completionDate,
-                              pmChecklistData: pmData.isEmpty ? null : pmData,
+                              completionTime: completionTime,
+                              pmChecklistData: isPm ? pmData : null,
+                              equipmentPhotoUrl: equipUrl,
+                              serialNumberPhotoUrl: serialUrl,
+                              installationReportUrl: reportUrl,
+                              serialNumber: noSerialNumber
+                                  ? 'NA'
+                                  : serialNumberController.text.trim(),
+                              documentUrls: docUrls,
                             );
-                            if (ctx.mounted) {
-                              Navigator.pop(ctx); 
-                            }
-                            _refreshComplaints();
-                            if (Navigator.canPop(context)) {
-                              Navigator.pop(context); 
-                            }
+
+                            if (!mounted) return;
+                            Navigator.pop(ctx);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content:
+                                        Text('Closure workflow initiated.')));
+                            if (Navigator.canPop(context))
+                              Navigator.pop(context);
                           } catch (e) {
+                            setStateDialog(() => isSubmitting = false);
                             if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Failed: $e')));
-                            setStateDialog(() => isSubmitting = false);
+                                const SnackBar(
+                                    content:
+                                        Text('Failed to initiate closure.')));
                           }
                         },
                   child: isSubmitting
-                      ? const CircularProgressIndicator()
-                      : const Text('Resolve & Close'),
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2))
+                      : const Text('Initiate Closure'),
                 ),
               ],
             );
           });
         });
+  }
+
+  String _getFullUrl(String url) {
+    if (url.isEmpty) return '';
+    if (url.startsWith('http')) return url;
+    final baseUrl = dotenv.env['API_URL']?.replaceAll(RegExp(r'/$'), '') ?? '';
+    return '$baseUrl${url.startsWith('/') ? '' : '/'}$url';
   }
 
   @override
@@ -425,17 +778,23 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
         .toList();
 
     // Determine which actions to show based on web app logic
-    final isRegistered = widget.complaint.status == 'Registered' ||
-        widget.complaint.status == 'Open';
-    final isAssigned = widget.complaint.status == 'Assigned';
-    final isMaterialPending = widget.complaint.status == 'Material Pending';
-    final isInProgress = widget.complaint.status == 'In Progress';
+    final isAssigned = widget.complaint.status == 'Assigned' ||
+        (widget.complaint.status == 'Open' &&
+            widget.complaint.assignedToName != null);
+    final isRegistered = widget.complaint.status == 'Registered';
+    final isMaterialPending = widget.complaint.status == 'Under Inspection' &&
+        _materialIndents.isNotEmpty;
+    final isInProgress = widget.complaint.status == 'In Progress' ||
+        widget.complaint.status == 'Under Inspection' ||
+        widget.complaint.status == 'Material Pending';
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.complaint.docketNo,
             style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
+      bottomNavigationBar: _buildBottomActionBar(
+          isRegistered, isAssigned, isMaterialPending, isInProgress),
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -487,11 +846,206 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                             const SizedBox(height: 4),
                             Text(widget.complaint.location,
                                 style: theme.textTheme.bodyLarge),
+                            const SizedBox(height: 12),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text('ASSIGNED TO',
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                  fontWeight: FontWeight.bold)),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                          widget.complaint.assignedToName ??
+                                              'Not Assigned',
+                                          style: theme.textTheme.bodyLarge),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text('RAISED BY',
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                  fontWeight: FontWeight.bold)),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                          widget.complaint.createdByName ??
+                                              'Unknown',
+                                          style: theme.textTheme.bodyLarge),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (widget.complaint.warrantyStatus != null) ...[
+                              const SizedBox(height: 12),
+                              Text('WARRANTY STATUS',
+                                  style: theme.textTheme.bodySmall
+                                      ?.copyWith(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: widget.complaint.warrantyStatus ==
+                                          'Warranty'
+                                      ? Colors.green.withValues(alpha: 0.1)
+                                      : Colors.orange.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: widget.complaint.warrantyStatus ==
+                                            'Warranty'
+                                        ? Colors.green
+                                        : Colors.orange,
+                                  ),
+                                ),
+                                child: Text(
+                                  widget.complaint.warrantyStatus!,
+                                  style: TextStyle(
+                                    color: widget.complaint.warrantyStatus ==
+                                            'Warranty'
+                                        ? Colors.green[700]
+                                        : Colors.orange[700],
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            if (widget.complaint.inspectionDetails != null &&
+                                widget.complaint.inspectionDetails!
+                                    .isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              Text('INSPECTION DETAILS',
+                                  style: theme.textTheme.bodySmall
+                                      ?.copyWith(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 4),
+                              Text(widget.complaint.inspectionDetails!,
+                                  style: theme.textTheme.bodyMedium
+                                      ?.copyWith(fontStyle: FontStyle.italic)),
+                            ],
+                            if (_rwo != null) ...[
+                              const SizedBox(height: 12),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withValues(alpha: 0.05),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                      color:
+                                          Colors.blue.withValues(alpha: 0.2)),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('RWO Details',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.blue[700])),
+                                    const SizedBox(height: 4),
+                                    Text('Status: ${_rwo!['status']}',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    if (_rwo!['remarks'] != null)
+                                      Text('Remarks: ${_rwo!['remarks']}'),
+                                    if (_rwo!['po_number'] != null)
+                                      Text('PO: ${_rwo!['po_number']}'),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
                     ),
                     const SizedBox(height: 20),
+                    if (widget.complaint.status != 'Registered' &&
+                        widget.complaint.status != 'Assigned' &&
+                        widget.complaint.status != 'Closed') ...[
+                      Text('Progress',
+                          style: theme.textTheme.titleSmall
+                              ?.copyWith(color: theme.colorScheme.primary)),
+                      const SizedBox(height: 8),
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.check_circle,
+                                      color:
+                                          widget.complaint.inspectionDetails !=
+                                                  null
+                                              ? Colors.green
+                                              : Colors.grey),
+                                  const SizedBox(width: 8),
+                                  const Text('Inspection Complete'),
+                                ],
+                              ),
+                              if (_materialIndents.isNotEmpty) ...[
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Icon(Icons.check_circle,
+                                        color: _materialIndents.any((i) =>
+                                                i['status'] != 'Rejected')
+                                            ? Colors.green
+                                            : Colors.red),
+                                    const SizedBox(width: 8),
+                                    const Text('Material Indent Sent'),
+                                  ],
+                                ),
+                              ],
+                              if (_rwo != null) ...[
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Icon(Icons.check_circle,
+                                        color: _rwo!['status'] == 'Approved' ||
+                                                _rwo!['status'] ==
+                                                    'PO Issued' ||
+                                                _rwo!['status'] ==
+                                                    'Work Completed'
+                                            ? Colors.green
+                                            : Colors.orange),
+                                    const SizedBox(width: 8),
+                                    Text('RWO Status: ${_rwo!['status']}'),
+                                  ],
+                                ),
+                              ],
+                              if (_materialIssues.isNotEmpty) ...[
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Icon(Icons.check_circle,
+                                        color: _materialIssues.every((i) =>
+                                                i['is_acknowledged'] == true)
+                                            ? Colors.green
+                                            : Colors.orange),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                        'Materials Received: ${_materialIssues.where((i) => i['is_acknowledged'] == true).length} / ${_materialIssues.length}'),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                     Text('Detailed Description',
                         style: theme.textTheme.titleSmall
                             ?.copyWith(color: theme.colorScheme.primary)),
@@ -507,7 +1061,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                     ),
                     const SizedBox(height: 20),
                     if (widget.complaint.images.isNotEmpty) ...[
-                      Text('Issue Images',
+                      Text('Issue Images (Pre-Repair)',
                           style: theme.textTheme.titleSmall
                               ?.copyWith(color: theme.colorScheme.primary)),
                       const SizedBox(height: 8),
@@ -515,16 +1069,44 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                         height: 150,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: widget.complaint.images.length,
+                          itemCount: widget.complaint.images
+                              .where(
+                                  (img) => img['is_resolution_image'] != true)
+                              .length,
                           itemBuilder: (context, index) {
-                            return Container(
-                              margin: const EdgeInsets.only(right: 12),
-                              width: 150,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                    widget.complaint.images[index],
-                                    fit: BoxFit.cover),
+                            final preImages = widget.complaint.images
+                                .where(
+                                    (img) => img['is_resolution_image'] != true)
+                                .toList();
+                            return GestureDetector(
+                              onTap: () {
+                                showDialog(
+                                    context: context,
+                                    builder: (ctx) => Dialog(
+                                            child: Stack(children: [
+                                          Image.network(_getFullUrl(
+                                              preImages[index]['image_url'] ??
+                                                  '')),
+                                          Positioned(
+                                              top: 10,
+                                              right: 10,
+                                              child: IconButton(
+                                                  icon: const Icon(Icons.close,
+                                                      color: Colors.white),
+                                                  onPressed: () =>
+                                                      Navigator.pop(ctx)))
+                                        ])));
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 12),
+                                width: 150,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                      _getFullUrl(
+                                          preImages[index]['image_url'] ?? ''),
+                                      fit: BoxFit.cover),
+                                ),
                               ),
                             );
                           },
@@ -532,9 +1114,86 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                       ),
                       const SizedBox(height: 20),
                     ],
+                    if (widget.complaint.images
+                        .any((img) => img['is_resolution_image'] == true)) ...[
+                      Text('Post-Repair Images',
+                          style: theme.textTheme.titleSmall
+                              ?.copyWith(color: theme.colorScheme.primary)),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 150,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: widget.complaint.images
+                              .where(
+                                  (img) => img['is_resolution_image'] == true)
+                              .length,
+                          itemBuilder: (context, index) {
+                            final postImages = widget.complaint.images
+                                .where(
+                                    (img) => img['is_resolution_image'] == true)
+                                .toList();
+                            return GestureDetector(
+                              onTap: () {
+                                showDialog(
+                                    context: context,
+                                    builder: (ctx) => Dialog(
+                                            child: Stack(children: [
+                                          Image.network(_getFullUrl(
+                                              postImages[index]['image_url'] ??
+                                                  '')),
+                                          Positioned(
+                                              top: 10,
+                                              right: 10,
+                                              child: IconButton(
+                                                  icon: const Icon(Icons.close,
+                                                      color: Colors.white),
+                                                  onPressed: () =>
+                                                      Navigator.pop(ctx)))
+                                        ])));
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 12),
+                                width: 150,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                      _getFullUrl(
+                                          postImages[index]['image_url'] ?? ''),
+                                      fit: BoxFit.cover),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                    if (widget.complaint.rejectionRemarks != null &&
+                        widget.complaint.rejectionRemarks!.isNotEmpty) ...[
+                      const SizedBox(height: 20),
+                      Text('Rejection Remarks',
+                          style: theme.textTheme.titleSmall
+                              ?.copyWith(color: Colors.red)),
+                      const SizedBox(height: 8),
+                      Card(
+                        color: const Color(0xFFFEF2F2),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: const BorderSide(color: Color(0xFFFCA5A5))),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          child: Text(widget.complaint.rejectionRemarks!,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: const Color(0xFF991B1B), height: 1.4)),
+                        ),
+                      ),
+                    ],
                     if (widget.complaint.status == 'Closed' &&
-                        widget.complaint.resolutionRemarks.isNotEmpty) ...[
-                      Text('Resolution Details',
+                        (widget.complaint.resolutionEntered != null ||
+                            widget.complaint.resolutionRemarks.isNotEmpty)) ...[
+                      Text('Closure Details',
                           style: theme.textTheme.titleSmall
                               ?.copyWith(color: const Color(0xFF059669))),
                       const SizedBox(height: 8),
@@ -562,16 +1221,57 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                                 ],
                               ),
                               const SizedBox(height: 8),
-                              Text(widget.complaint.resolutionRemarks,
+                              Text(
+                                  'Resolution Entered: ${widget.complaint.resolutionEntered ?? widget.complaint.resolutionRemarks}',
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                       color: const Color(0xFF065F46),
                                       height: 1.4)),
+                              if (widget.complaint.closureReason != null)
+                                Text(
+                                    'Closure Reason: ${widget.complaint.closureReason}',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: const Color(0xFF065F46),
+                                        height: 1.4)),
+                              if (widget.complaint.statusOnWorkCompletion !=
+                                  null)
+                                Text(
+                                    'Status on Completion: ${widget.complaint.statusOnWorkCompletion}',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: const Color(0xFF065F46),
+                                        height: 1.4)),
+                              if (widget.complaint.documents.isNotEmpty) ...[
+                                const SizedBox(height: 12),
+                                const Text('Service Documents:',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                ...widget.complaint.documents.map((doc) {
+                                  return InkWell(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 4.0),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.description,
+                                              size: 16, color: Colors.blue),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                              doc['document_url'] ?? 'Document',
+                                              style: const TextStyle(
+                                                  color: Colors.blue,
+                                                  decoration: TextDecoration
+                                                      .underline)),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }).toList()
+                              ]
                             ],
                           ),
                         ),
                       ),
                     ],
-                    if (materialIssues.isNotEmpty) ...[
+                    if (_materialIssues.isNotEmpty) ...[
                       const SizedBox(height: 20),
                       Text('Material Issue Acknowledgement Status',
                           style: theme.textTheme.titleSmall
@@ -583,54 +1283,219 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                           padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: materialIssues.map((issue) {
+                            children: _materialIssues.map((issue) {
+                              return Container(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: issue['is_acknowledged'] == true
+                                        ? const Color(0xFFF0FDF4)
+                                        : const Color(0xFFFFFBEB),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                        color: issue['is_acknowledged'] == true
+                                            ? const Color(0xFFBBF7D0)
+                                            : const Color(0xFFFDE68A)),
+                                  ),
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                    issue['issue_number'] ?? '',
+                                                    style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  issue['is_acknowledged'] ==
+                                                          true
+                                                      ? 'Acknowledged'
+                                                      : 'Awaiting Acknowledgement',
+                                                  style: TextStyle(
+                                                    color: Colors.grey[700],
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Chip(
+                                              label: Text(
+                                                  issue['is_acknowledged'] ==
+                                                          true
+                                                      ? 'Acknowledged'
+                                                      : 'Pending',
+                                                  style: const TextStyle(
+                                                      fontSize: 12)),
+                                              backgroundColor:
+                                                  issue['is_acknowledged'] ==
+                                                          true
+                                                      ? const Color(0xFF059669)
+                                                      : const Color(0xFFD97706),
+                                              labelStyle: const TextStyle(
+                                                  color: Colors.white),
+                                              materialTapTargetSize:
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
+                                            ),
+                                          ],
+                                        ),
+                                        if (issue['issue_items'] != null &&
+                                            (issue['issue_items'] as List)
+                                                .isNotEmpty) ...[
+                                          const SizedBox(height: 12),
+                                          const Text('Items:',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12)),
+                                          const SizedBox(height: 4),
+                                          Table(
+                                            border: TableBorder.all(
+                                                color: Colors.grey.shade300),
+                                            columnWidths: const {
+                                              0: FlexColumnWidth(1),
+                                              1: FlexColumnWidth(2),
+                                              2: FlexColumnWidth(1),
+                                            },
+                                            children: [
+                                              TableRow(
+                                                decoration: BoxDecoration(
+                                                    color:
+                                                        Colors.grey.shade100),
+                                                children: const [
+                                                  Padding(
+                                                      padding:
+                                                          EdgeInsets.all(4.0),
+                                                      child: Text('Code',
+                                                          style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 10))),
+                                                  Padding(
+                                                      padding:
+                                                          EdgeInsets.all(4.0),
+                                                      child: Text('Name',
+                                                          style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 10))),
+                                                  Padding(
+                                                      padding:
+                                                          EdgeInsets.all(4.0),
+                                                      child: Text('Qty',
+                                                          style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 10))),
+                                                ],
+                                              ),
+                                              ...((issue['issue_items'] as List)
+                                                  .map((item) {
+                                                return TableRow(
+                                                  children: [
+                                                    Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(4.0),
+                                                        child: Text(
+                                                            item['material_code']
+                                                                    ?.toString() ??
+                                                                '',
+                                                            style:
+                                                                const TextStyle(
+                                                                    fontSize:
+                                                                        10))),
+                                                    Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(4.0),
+                                                        child: Text(
+                                                            item['material_name']
+                                                                    ?.toString() ??
+                                                                '',
+                                                            style:
+                                                                const TextStyle(
+                                                                    fontSize:
+                                                                        10))),
+                                                    Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(4.0),
+                                                        child: Text(
+                                                            '${item['issued_quantity']} ${item['uom'] ?? ''}',
+                                                            style:
+                                                                const TextStyle(
+                                                                    fontSize:
+                                                                        10))),
+                                                  ],
+                                                );
+                                              }).toList())
+                                            ],
+                                          )
+                                        ]
+                                      ] // Close column children
+                                      ) // Close Column
+                                  );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (_materialIndents.isNotEmpty) ...[
+                      const SizedBox(height: 20),
+                      Text('Material Indents',
+                          style: theme.textTheme.titleSmall
+                              ?.copyWith(color: theme.colorScheme.primary)),
+                      const SizedBox(height: 8),
+                      Card(
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: _materialIndents.map((indent) {
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 12),
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: issue.isAcknowledged
-                                      ? const Color(0xFFF0FDF4)
-                                      : const Color(0xFFFFFBEB),
+                                  color: Colors.grey.shade50,
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                      color: issue.isAcknowledged
-                                          ? const Color(0xFFBBF7D0)
-                                          : const Color(0xFFFDE68A)),
+                                  border:
+                                      Border.all(color: Colors.grey.shade300),
                                 ),
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(issue.issueNumber,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold)),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          issue.isAcknowledged
-                                              ? 'Acknowledged'
-                                              : 'Awaiting Acknowledgement',
-                                          style: TextStyle(
-                                            color: Colors.grey[700],
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                    Text(
+                                        indent['indent_number']?.toString() ??
+                                            '',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold)),
                                     Chip(
-                                      label: Text(
-                                          issue.isAcknowledged
-                                              ? 'Acknowledged'
-                                              : 'Pending',
-                                          style: const TextStyle(fontSize: 12)),
-                                      backgroundColor: issue.isAcknowledged
-                                          ? const Color(0xFF059669)
-                                          : const Color(0xFFD97706),
-                                      labelStyle:
-                                          const TextStyle(color: Colors.white),
+                                      label: Text(indent['status'] ?? 'Unknown',
+                                          style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.white)),
+                                      backgroundColor:
+                                          indent['status'] == 'Rejected'
+                                              ? Colors.red
+                                              : (indent['status'] == 'Issued' ||
+                                                      indent['status'] ==
+                                                          'Completed'
+                                                  ? Colors.green
+                                                  : Colors.orange),
                                       materialTapTargetSize:
                                           MaterialTapTargetSize.shrinkWrap,
                                     ),
@@ -646,8 +1511,6 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                 ),
               ),
       ),
-      bottomNavigationBar: _buildBottomActionBar(
-          isRegistered, isAssigned, isMaterialPending, isInProgress),
     );
   }
 
@@ -655,6 +1518,18 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
       bool isMaterialPending, bool isInProgress) {
     if (!isRegistered && !isAssigned && !isMaterialPending && !isInProgress) {
       return null;
+    }
+
+    bool canStartRepair = _rwo != null ||
+        _materialIssues.isNotEmpty ||
+        _materialIndents.every((i) => i['status'] == 'Rejected');
+    bool canClose = true;
+    if (_materialIndents.isNotEmpty) {
+      canClose = _materialIndents.every((ind) =>
+              ind['status'] == 'Issued' ||
+              ind['status'] == 'Rejected' ||
+              ind['status'] == 'Closed') &&
+          _materialIssues.every((i) => i['is_acknowledged'] == true);
     }
 
     return Container(
@@ -683,7 +1558,8 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _showInspectDialog,
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue),
                       icon: const Icon(Icons.search),
                       label: const Text('Start Inspection'),
                     ),
@@ -692,7 +1568,8 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _showAssignDialog,
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.indigo),
                       icon: const Icon(Icons.assignment_ind),
                       label: const Text('Reassign'),
                     ),
@@ -700,22 +1577,32 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                 ],
                 if (isMaterialPending)
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _startRepair,
-                      style:
-                          ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                      icon: const Icon(Icons.build),
-                      label: const Text('Start Repair (Mat. Procured)'),
+                    child: Tooltip(
+                      message: canStartRepair
+                          ? ''
+                          : 'Waiting for materials (RWO or Issued Indent required)',
+                      child: ElevatedButton.icon(
+                        onPressed: canStartRepair ? _startRepair : null,
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange),
+                        icon: const Icon(Icons.build),
+                        label: const Text('Start Repair'),
+                      ),
                     ),
                   ),
                 if (isInProgress)
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _showResolveDialog,
-                      style:
-                          ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                      icon: const Icon(Icons.check_circle),
-                      label: const Text('Resolve & Close'),
+                    child: Tooltip(
+                      message: canClose
+                          ? ''
+                          : 'All materials must be issued and acknowledged to resolve',
+                      child: ElevatedButton.icon(
+                        onPressed: canClose ? _showResolveDialog : null,
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green),
+                        icon: const Icon(Icons.check_circle),
+                        label: const Text('Resolve & Close'),
+                      ),
                     ),
                   ),
               ],
@@ -735,5 +1622,130 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
         ),
       ),
     );
+  }
+
+  void _showApproveDialog(String level) {
+    showDialog(
+        context: context,
+        builder: (ctx) {
+          bool isSubmitting = false;
+          return StatefulBuilder(builder: (dialogCtx, setStateDialog) {
+            return AlertDialog(
+              title: Text('Approve Closure ($level)'),
+              content: const Text(
+                  'Are you sure you want to approve the closure of this complaint?'),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Cancel')),
+                ElevatedButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          setStateDialog(() => isSubmitting = true);
+                          try {
+                            await ApiService().approveComplaintClosure(
+                                widget.complaint.id, level);
+                            if (mounted) {
+                              Navigator.pop(ctx);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Complaint approved successfully')));
+                              if (Navigator.canPop(context))
+                                Navigator.pop(context, true); // Refresh list
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text('Failed to approve complaint')));
+                            }
+                          } finally {
+                            if (mounted)
+                              setStateDialog(() => isSubmitting = false);
+                          }
+                        },
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator())
+                      : const Text('Approve'),
+                )
+              ],
+            );
+          });
+        });
+  }
+
+  void _showReopenDialog() {
+    showDialog(
+        context: context,
+        builder: (ctx) {
+          final reasonController = TextEditingController();
+          bool isSubmitting = false;
+          return StatefulBuilder(builder: (dialogCtx, setStateDialog) {
+            return AlertDialog(
+              title: const Text('Reopen Complaint'),
+              content: TextField(
+                controller: reasonController,
+                decoration: const InputDecoration(
+                    labelText: 'Reason for reopening',
+                    border: OutlineInputBorder()),
+                maxLines: 3,
+              ),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Cancel')),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          if (reasonController.text.trim().isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Reason is required')));
+                            return;
+                          }
+                          setStateDialog(() => isSubmitting = true);
+                          try {
+                            await ApiService().reopenComplaint(
+                                widget.complaint.id, reasonController.text);
+                            if (mounted) {
+                              Navigator.pop(ctx);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Complaint reopened successfully')));
+                              if (Navigator.canPop(context))
+                                Navigator.pop(context, true); // Refresh list
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text('Failed to reopen complaint')));
+                            }
+                          } finally {
+                            if (mounted)
+                              setStateDialog(() => isSubmitting = false);
+                          }
+                        },
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator())
+                      : const Text('Reopen'),
+                )
+              ],
+            );
+          });
+        });
   }
 }

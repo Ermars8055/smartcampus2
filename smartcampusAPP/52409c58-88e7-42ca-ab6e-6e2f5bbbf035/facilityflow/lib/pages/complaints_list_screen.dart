@@ -206,7 +206,10 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
           controller: _tabController,
           isScrollable: true,
           tabAlignment: TabAlignment.start,
-          indicatorColor: Colors.white,
+          indicator: const UnderlineTabIndicator(
+            borderSide: BorderSide(width: 3.0, color: Colors.white),
+            insets: EdgeInsets.symmetric(horizontal: 16.0),
+          ),
           labelColor: Colors.white,
           unselectedLabelColor: const Color(0xFF93C5FD),
           tabs: _tabs.map((t) => Tab(text: t)).toList(),
@@ -290,13 +293,17 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text(
-                                            complaint.docketNo,
-                                            style: theme.textTheme.titleMedium?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: theme.colorScheme.primary,
+                                          Expanded(
+                                            child: Text(
+                                              complaint.docketNo,
+                                              style: theme.textTheme.titleMedium?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: theme.colorScheme.primary,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
+                                          const SizedBox(width: 8),
                                           Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                             decoration: BoxDecoration(
@@ -429,7 +436,7 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
                         iconSize: 16,
                         isDense: true,
                         items: [10, 20, 50, 100]
-                            .map((e) => DropdownMenuItem(value: e, child: Text('$e rows')))
+                            .map((e) => DropdownMenuItem(value: e, child: Text('$e')))
                             .toList(),
                         onChanged: (v) {
                           if (v != null) {
@@ -441,9 +448,9 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
                           }
                         },
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 4),
                       Text(
-                        '${totalItems == 0 ? 0 : (_currentPage * _rowsPerPage) + 1}-${((_currentPage * _rowsPerPage) + _rowsPerPage).clamp(0, totalItems)} of $totalItems',
+                        '${totalItems == 0 ? 0 : (_currentPage * _rowsPerPage) + 1}-${((_currentPage * _rowsPerPage) + _rowsPerPage).clamp(0, totalItems)}/$totalItems',
                         style: theme.textTheme.bodySmall,
                       ),
                       IconButton(

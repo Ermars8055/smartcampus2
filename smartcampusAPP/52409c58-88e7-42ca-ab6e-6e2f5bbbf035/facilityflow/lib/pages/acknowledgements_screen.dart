@@ -13,6 +13,15 @@ class AcknowledgementsScreen extends StatefulWidget {
 }
 
 class _AcknowledgementsScreenState extends State<AcknowledgementsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final appState = AppState.of(context, listen: false);
+      appState.fetchIssues();
+    });
+  }
+
   Future<void> _showAcknowledgeDialog(MaterialIssue issue) async {
     final theme = Theme.of(context);
     final appState = AppState.of(context, listen: false);

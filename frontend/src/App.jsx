@@ -74,7 +74,7 @@ import ComplaintForm from './pages/ComplaintForm';
 import ComplaintDetail from './pages/ComplaintDetail';
 import Contracts from './pages/Contracts';
 import ContractForm from './pages/ContractForm';
-import WorkOrders from './pages/WorkOrders';
+
 
 
 import VendorPendingInvoicesReport from './pages/VendorPendingInvoicesReport';
@@ -149,7 +149,7 @@ function AppRoutes() {
         <Route path="purchase-requests" element={<PurchaseRequests />} />
         <Route path="quotations" element={<Quotations />} />
         <Route path="purchase-orders" element={<PurchaseOrders />} />
-        <Route path="work-orders" element={<WorkOrders />} />
+
 
         <Route path="gate-entry" element={<GateEntry />} />
         <Route path="invoices" element={<Invoices />} />

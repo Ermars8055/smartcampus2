@@ -71,7 +71,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     if (_addedItems.isEmpty) {
       _addedItems.add({
         'material_id': null,
-        'requestedQuantity': 1.0,
+        'requestedQuantity': null,
         'materialName': null,
         'materialCode': null,
         'uom': null
@@ -374,7 +374,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     setState(() {
       _addedItems.add({
         'material_id': null,
-        'requestedQuantity': 1.0,
+        'requestedQuantity': null,
         'materialName': null,
         'materialCode': null,
         'uom': null
@@ -782,9 +782,11 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                               ),
                             ),
                             TextFormField(
-                              initialValue: item['uom_allow_decimal'] == false 
-                                  ? (item['requestedQuantity'] as num).toInt().toString()
-                                  : item['requestedQuantity'].toString(),
+                              initialValue: item['requestedQuantity'] == null 
+                                  ? ''
+                                  : (item['uom_allow_decimal'] == false 
+                                      ? (item['requestedQuantity'] as num).toInt().toString()
+                                      : item['requestedQuantity'].toString()),
                               keyboardType: TextInputType.numberWithOptions(
                                 decimal: item['uom_allow_decimal'] ?? true,
                               ),

@@ -274,6 +274,22 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
         });
   }
 
+  void _startInspection() async {
+    setState(() => _isLoading = true);
+    try {
+      await ApiService().startInspection(widget.complaint.id);
+      _refreshComplaints();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed: $e')));
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   void _startRepair() async {
     setState(() => _isLoading = true);
     try {
@@ -781,12 +797,10 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
     final isAssigned = widget.complaint.status == 'Assigned' ||
         (widget.complaint.status == 'Open' &&
             widget.complaint.assignedToName != null);
-    final isRegistered = widget.complaint.status == 'Registered';
-    final isMaterialPending = widget.complaint.status == 'Under Inspection' &&
-        _materialIndents.isNotEmpty;
-    final isInProgress = widget.complaint.status == 'In Progress' ||
-        widget.complaint.status == 'Under Inspection' ||
-        widget.complaint.status == 'Material Pending';
+    final isRegistered = widget.complaint.status == 'Registered' || (widget.complaint.status == 'Open' && widget.complaint.assignedToName == null);
+    final isUnderInspection = widget.complaint.status == 'Under Inspection';
+    final isMaterialPending = widget.complaint.status == 'Material Pending';
+    final isInProgress = widget.complaint.status == 'In Progress';
 
     return Scaffold(
       appBar: AppBar(
@@ -794,7 +808,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
             style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
       bottomNavigationBar: _buildBottomActionBar(
-          isRegistered, isAssigned, isMaterialPending, isInProgress),
+          isRegistered, isAssigned, isUnderInspection, isMaterialPending, isInProgress),
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -1514,9 +1528,9 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
     );
   }
 
-  Widget? _buildBottomActionBar(bool isRegistered, bool isAssigned,
+  Widget? _buildBottomActionBar(bool isRegistered, bool isAssigned, bool isUnderInspection,
       bool isMaterialPending, bool isInProgress) {
-    if (!isRegistered && !isAssigned && !isMaterialPending && !isInProgress) {
+    if (!isRegistered && !isAssigned && !isUnderInspection && !isMaterialPending && !isInProgress) {
       return null;
     }
 
@@ -1557,7 +1571,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                 if (isAssigned) ...[
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: _showInspectDialog,
+                      onPressed: _startInspection,
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue),
                       icon: const Icon(Icons.search),
@@ -1572,6 +1586,17 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                           backgroundColor: Colors.indigo),
                       icon: const Icon(Icons.assignment_ind),
                       label: const Text('Reassign'),
+                    ),
+                  ),
+                ],
+                if (isUnderInspection) ...[
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _showInspectDialog,
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue),
+                      icon: const Icon(Icons.playlist_add_check),
+                      label: const Text('Complete Inspection'),
                     ),
                   ),
                 ],

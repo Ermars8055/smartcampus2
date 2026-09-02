@@ -18,7 +18,7 @@ from app.routers import (
     indents, approval_flows, quotations, reports, uploads, terms,
     admin_users, invoices, company_addresses, material_limits, configurations,
     complaints, finance, quotation_extraction, equipment, contracts, repair_work_orders, rentals,
-    work_orders, menus, credit_notes
+    menus, credit_notes
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -108,7 +108,6 @@ app.include_router(finance.router)
 app.include_router(contracts.router)
 app.include_router(repair_work_orders.router)
 app.include_router(rentals.router)
-app.include_router(work_orders.router)
 app.include_router(menus.router)
 app.include_router(credit_notes.router)
 @app.get("/api/health")

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict HNZbhGmNaqcev7YA84Oe7tVrG5wf2DNI7cxthGfaAuvKikjr2h5QIGfmcs32g01
+\restrict eczA1tJHPFKsJ3gx0AQZTtIMQUOENnpHJxzObxJrsYQ1lQrXUwUavRJANyAQysf
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -26,7 +26,7 @@ SET row_security = off;
 -- *not* creating schema, since initdb creates it
 
 
-ALTER SCHEMA public OWNER TO nissigrid;
+ALTER SCHEMA public OWNER TO postgres;
 
 --
 -- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
@@ -48,7 +48,7 @@ CREATE TABLE public.alembic_version (
 );
 
 
-ALTER TABLE public.alembic_version OWNER TO nissigrid;
+ALTER TABLE public.alembic_version OWNER TO postgres;
 
 --
 -- Name: alerts; Type: TABLE; Schema: public; Owner: postgres
@@ -73,7 +73,7 @@ CREATE TABLE public.alerts (
 );
 
 
-ALTER TABLE public.alerts OWNER TO nissigrid;
+ALTER TABLE public.alerts OWNER TO postgres;
 
 --
 -- Name: alerts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -88,7 +88,7 @@ CREATE SEQUENCE public.alerts_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.alerts_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.alerts_id_seq OWNER TO postgres;
 
 --
 -- Name: alerts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -115,7 +115,7 @@ CREATE TABLE public.approval_flows (
 );
 
 
-ALTER TABLE public.approval_flows OWNER TO nissigrid;
+ALTER TABLE public.approval_flows OWNER TO postgres;
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -130,7 +130,7 @@ CREATE SEQUENCE public.approval_flows_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.approval_flows_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.approval_flows_id_seq OWNER TO postgres;
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -158,7 +158,7 @@ CREATE TABLE public.audit_logs (
 );
 
 
-ALTER TABLE public.audit_logs OWNER TO nissigrid;
+ALTER TABLE public.audit_logs OWNER TO postgres;
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -173,7 +173,7 @@ CREATE SEQUENCE public.audit_logs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.audit_logs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.audit_logs_id_seq OWNER TO postgres;
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -201,7 +201,7 @@ CREATE TABLE public.buildings (
 );
 
 
-ALTER TABLE public.buildings OWNER TO nissigrid;
+ALTER TABLE public.buildings OWNER TO postgres;
 
 --
 -- Name: buildings_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -216,7 +216,7 @@ CREATE SEQUENCE public.buildings_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.buildings_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.buildings_id_seq OWNER TO postgres;
 
 --
 -- Name: buildings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -250,7 +250,7 @@ CREATE TABLE public.calibration_schedules (
 );
 
 
-ALTER TABLE public.calibration_schedules OWNER TO nissigrid;
+ALTER TABLE public.calibration_schedules OWNER TO postgres;
 
 --
 -- Name: calibration_schedules_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -265,7 +265,7 @@ CREATE SEQUENCE public.calibration_schedules_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.calibration_schedules_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.calibration_schedules_id_seq OWNER TO postgres;
 
 --
 -- Name: calibration_schedules_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -292,7 +292,7 @@ CREATE TABLE public.categories (
 );
 
 
-ALTER TABLE public.categories OWNER TO nissigrid;
+ALTER TABLE public.categories OWNER TO postgres;
 
 --
 -- Name: categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -307,7 +307,7 @@ CREATE SEQUENCE public.categories_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.categories_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.categories_id_seq OWNER TO postgres;
 
 --
 -- Name: categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -346,7 +346,7 @@ CREATE TABLE public.company_addresses (
 );
 
 
-ALTER TABLE public.company_addresses OWNER TO nissigrid;
+ALTER TABLE public.company_addresses OWNER TO postgres;
 
 --
 -- Name: company_addresses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -361,7 +361,7 @@ CREATE SEQUENCE public.company_addresses_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.company_addresses_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.company_addresses_id_seq OWNER TO postgres;
 
 --
 -- Name: company_addresses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -384,7 +384,7 @@ CREATE TABLE public.complaint_documents (
 );
 
 
-ALTER TABLE public.complaint_documents OWNER TO nissigrid;
+ALTER TABLE public.complaint_documents OWNER TO postgres;
 
 --
 -- Name: complaint_documents_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -399,7 +399,7 @@ CREATE SEQUENCE public.complaint_documents_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.complaint_documents_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.complaint_documents_id_seq OWNER TO postgres;
 
 --
 -- Name: complaint_documents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -421,7 +421,7 @@ CREATE TABLE public.complaint_images (
 );
 
 
-ALTER TABLE public.complaint_images OWNER TO nissigrid;
+ALTER TABLE public.complaint_images OWNER TO postgres;
 
 --
 -- Name: complaint_images_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -436,7 +436,7 @@ CREATE SEQUENCE public.complaint_images_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.complaint_images_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.complaint_images_id_seq OWNER TO postgres;
 
 --
 -- Name: complaint_images_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -497,7 +497,7 @@ CREATE TABLE public.complaints (
 );
 
 
-ALTER TABLE public.complaints OWNER TO nissigrid;
+ALTER TABLE public.complaints OWNER TO postgres;
 
 --
 -- Name: complaints_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -512,7 +512,7 @@ CREATE SEQUENCE public.complaints_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.complaints_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.complaints_id_seq OWNER TO postgres;
 
 --
 -- Name: complaints_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -535,7 +535,7 @@ CREATE TABLE public.contract_approvals (
 );
 
 
-ALTER TABLE public.contract_approvals OWNER TO nissigrid;
+ALTER TABLE public.contract_approvals OWNER TO postgres;
 
 --
 -- Name: contract_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -550,7 +550,7 @@ CREATE SEQUENCE public.contract_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.contract_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.contract_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: contract_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -582,7 +582,7 @@ CREATE TABLE public.contract_items (
 );
 
 
-ALTER TABLE public.contract_items OWNER TO nissigrid;
+ALTER TABLE public.contract_items OWNER TO postgres;
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -597,7 +597,7 @@ CREATE SEQUENCE public.contract_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.contract_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.contract_items_id_seq OWNER TO postgres;
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -639,7 +639,7 @@ CREATE TABLE public.contracts (
 );
 
 
-ALTER TABLE public.contracts OWNER TO nissigrid;
+ALTER TABLE public.contracts OWNER TO postgres;
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -654,7 +654,7 @@ CREATE SEQUENCE public.contracts_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.contracts_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.contracts_id_seq OWNER TO postgres;
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -677,7 +677,7 @@ CREATE TABLE public.credit_note_approvals (
 );
 
 
-ALTER TABLE public.credit_note_approvals OWNER TO nissigrid;
+ALTER TABLE public.credit_note_approvals OWNER TO postgres;
 
 --
 -- Name: credit_note_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -692,7 +692,7 @@ CREATE SEQUENCE public.credit_note_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.credit_note_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.credit_note_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: credit_note_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -723,17 +723,11 @@ CREATE TABLE public.credit_note_items (
     igst_amount double precision,
     taxable_amount double precision,
     amount double precision NOT NULL,
-    remarks text,
-    invoice_item_id integer,
-    po_item_id integer,
-    grn_item_id integer,
-    invoice_quantity double precision,
-    received_quantity double precision,
-    previously_credited_quantity double precision
+    remarks text
 );
 
 
-ALTER TABLE public.credit_note_items OWNER TO nissigrid;
+ALTER TABLE public.credit_note_items OWNER TO postgres;
 
 --
 -- Name: credit_note_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -748,7 +742,7 @@ CREATE SEQUENCE public.credit_note_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.credit_note_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.credit_note_items_id_seq OWNER TO postgres;
 
 --
 -- Name: credit_note_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -796,15 +790,11 @@ CREATE TABLE public.credit_notes (
     approved_at timestamp without time zone,
     is_deleted boolean,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    purchase_order_id integer,
-    grn_id integer,
-    credit_note_type character varying(100),
-    inventory_impact boolean
+    updated_at timestamp without time zone
 );
 
 
-ALTER TABLE public.credit_notes OWNER TO nissigrid;
+ALTER TABLE public.credit_notes OWNER TO postgres;
 
 --
 -- Name: credit_notes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -819,7 +809,7 @@ CREATE SEQUENCE public.credit_notes_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.credit_notes_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.credit_notes_id_seq OWNER TO postgres;
 
 --
 -- Name: credit_notes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -843,7 +833,7 @@ CREATE TABLE public.current_stock (
 );
 
 
-ALTER TABLE public.current_stock OWNER TO nissigrid;
+ALTER TABLE public.current_stock OWNER TO postgres;
 
 --
 -- Name: current_stock_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -858,7 +848,7 @@ CREATE SEQUENCE public.current_stock_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.current_stock_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.current_stock_id_seq OWNER TO postgres;
 
 --
 -- Name: current_stock_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -883,7 +873,7 @@ CREATE TABLE public.department_material_limits (
 );
 
 
-ALTER TABLE public.department_material_limits OWNER TO nissigrid;
+ALTER TABLE public.department_material_limits OWNER TO postgres;
 
 --
 -- Name: department_material_limits_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -898,7 +888,7 @@ CREATE SEQUENCE public.department_material_limits_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.department_material_limits_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.department_material_limits_id_seq OWNER TO postgres;
 
 --
 -- Name: department_material_limits_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -926,7 +916,7 @@ CREATE TABLE public.departments (
 );
 
 
-ALTER TABLE public.departments OWNER TO nissigrid;
+ALTER TABLE public.departments OWNER TO postgres;
 
 --
 -- Name: departments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -941,7 +931,7 @@ CREATE SEQUENCE public.departments_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.departments_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.departments_id_seq OWNER TO postgres;
 
 --
 -- Name: departments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -964,7 +954,7 @@ CREATE TABLE public.document_sequences (
 );
 
 
-ALTER TABLE public.document_sequences OWNER TO nissigrid;
+ALTER TABLE public.document_sequences OWNER TO postgres;
 
 --
 -- Name: document_sequences_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -979,7 +969,7 @@ CREATE SEQUENCE public.document_sequences_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.document_sequences_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.document_sequences_id_seq OWNER TO postgres;
 
 --
 -- Name: document_sequences_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1003,7 +993,7 @@ CREATE TABLE public.equipment_history (
 );
 
 
-ALTER TABLE public.equipment_history OWNER TO nissigrid;
+ALTER TABLE public.equipment_history OWNER TO postgres;
 
 --
 -- Name: equipment_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1018,7 +1008,7 @@ CREATE SEQUENCE public.equipment_history_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.equipment_history_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.equipment_history_id_seq OWNER TO postgres;
 
 --
 -- Name: equipment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1101,7 +1091,7 @@ CREATE TABLE public.equipment_items (
 );
 
 
-ALTER TABLE public.equipment_items OWNER TO nissigrid;
+ALTER TABLE public.equipment_items OWNER TO postgres;
 
 --
 -- Name: equipment_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1116,7 +1106,7 @@ CREATE SEQUENCE public.equipment_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.equipment_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.equipment_items_id_seq OWNER TO postgres;
 
 --
 -- Name: equipment_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1141,7 +1131,7 @@ CREATE TABLE public.equipment_writeoffs (
 );
 
 
-ALTER TABLE public.equipment_writeoffs OWNER TO nissigrid;
+ALTER TABLE public.equipment_writeoffs OWNER TO postgres;
 
 --
 -- Name: equipment_writeoffs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1156,7 +1146,7 @@ CREATE SEQUENCE public.equipment_writeoffs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.equipment_writeoffs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.equipment_writeoffs_id_seq OWNER TO postgres;
 
 --
 -- Name: equipment_writeoffs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1183,7 +1173,7 @@ CREATE TABLE public.floors (
 );
 
 
-ALTER TABLE public.floors OWNER TO nissigrid;
+ALTER TABLE public.floors OWNER TO postgres;
 
 --
 -- Name: floors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1198,7 +1188,7 @@ CREATE SEQUENCE public.floors_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.floors_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.floors_id_seq OWNER TO postgres;
 
 --
 -- Name: floors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1248,7 +1238,7 @@ CREATE TABLE public.gate_entries (
 );
 
 
-ALTER TABLE public.gate_entries OWNER TO nissigrid;
+ALTER TABLE public.gate_entries OWNER TO postgres;
 
 --
 -- Name: gate_entries_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1263,7 +1253,7 @@ CREATE SEQUENCE public.gate_entries_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.gate_entries_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.gate_entries_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1285,7 +1275,7 @@ CREATE TABLE public.gate_pass_items (
 );
 
 
-ALTER TABLE public.gate_pass_items OWNER TO nissigrid;
+ALTER TABLE public.gate_pass_items OWNER TO postgres;
 
 --
 -- Name: gate_pass_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1300,7 +1290,7 @@ CREATE SEQUENCE public.gate_pass_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.gate_pass_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.gate_pass_items_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_pass_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1340,7 +1330,7 @@ CREATE TABLE public.gate_passes (
 );
 
 
-ALTER TABLE public.gate_passes OWNER TO nissigrid;
+ALTER TABLE public.gate_passes OWNER TO postgres;
 
 --
 -- Name: gate_passes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1355,7 +1345,7 @@ CREATE SEQUENCE public.gate_passes_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.gate_passes_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.gate_passes_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_passes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1405,7 +1395,7 @@ CREATE TABLE public.grn (
 );
 
 
-ALTER TABLE public.grn OWNER TO nissigrid;
+ALTER TABLE public.grn OWNER TO postgres;
 
 --
 -- Name: grn_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1420,7 +1410,7 @@ CREATE SEQUENCE public.grn_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.grn_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.grn_id_seq OWNER TO postgres;
 
 --
 -- Name: grn_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1456,7 +1446,7 @@ CREATE TABLE public.grn_items (
 );
 
 
-ALTER TABLE public.grn_items OWNER TO nissigrid;
+ALTER TABLE public.grn_items OWNER TO postgres;
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1471,7 +1461,7 @@ CREATE SEQUENCE public.grn_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.grn_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.grn_items_id_seq OWNER TO postgres;
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1495,7 +1485,7 @@ CREATE TABLE public.indent_approvals (
 );
 
 
-ALTER TABLE public.indent_approvals OWNER TO nissigrid;
+ALTER TABLE public.indent_approvals OWNER TO postgres;
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1510,7 +1500,7 @@ CREATE SEQUENCE public.indent_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.indent_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.indent_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1534,7 +1524,7 @@ CREATE TABLE public.indent_items (
 );
 
 
-ALTER TABLE public.indent_items OWNER TO nissigrid;
+ALTER TABLE public.indent_items OWNER TO postgres;
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1549,7 +1539,7 @@ CREATE SEQUENCE public.indent_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.indent_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.indent_items_id_seq OWNER TO postgres;
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1588,7 +1578,7 @@ CREATE TABLE public.indents (
 );
 
 
-ALTER TABLE public.indents OWNER TO nissigrid;
+ALTER TABLE public.indents OWNER TO postgres;
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1603,7 +1593,7 @@ CREATE SEQUENCE public.indents_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.indents_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.indents_id_seq OWNER TO postgres;
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1629,7 +1619,7 @@ CREATE TABLE public.institutions (
 );
 
 
-ALTER TABLE public.institutions OWNER TO nissigrid;
+ALTER TABLE public.institutions OWNER TO postgres;
 
 --
 -- Name: institutions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1644,7 +1634,7 @@ CREATE SEQUENCE public.institutions_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.institutions_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.institutions_id_seq OWNER TO postgres;
 
 --
 -- Name: institutions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1679,7 +1669,7 @@ CREATE TABLE public.invoice_items (
 );
 
 
-ALTER TABLE public.invoice_items OWNER TO nissigrid;
+ALTER TABLE public.invoice_items OWNER TO postgres;
 
 --
 -- Name: invoice_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1694,7 +1684,7 @@ CREATE SEQUENCE public.invoice_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.invoice_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.invoice_items_id_seq OWNER TO postgres;
 
 --
 -- Name: invoice_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1774,7 +1764,7 @@ CREATE TABLE public.invoices (
 );
 
 
-ALTER TABLE public.invoices OWNER TO nissigrid;
+ALTER TABLE public.invoices OWNER TO postgres;
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1789,7 +1779,7 @@ CREATE SEQUENCE public.invoices_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.invoices_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.invoices_id_seq OWNER TO postgres;
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1814,7 +1804,7 @@ CREATE TABLE public.location_master (
 );
 
 
-ALTER TABLE public.location_master OWNER TO nissigrid;
+ALTER TABLE public.location_master OWNER TO postgres;
 
 --
 -- Name: location_master_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1829,7 +1819,7 @@ CREATE SEQUENCE public.location_master_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.location_master_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.location_master_id_seq OWNER TO postgres;
 
 --
 -- Name: location_master_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1853,7 +1843,7 @@ CREATE TABLE public.material_issue_items (
 );
 
 
-ALTER TABLE public.material_issue_items OWNER TO nissigrid;
+ALTER TABLE public.material_issue_items OWNER TO postgres;
 
 --
 -- Name: material_issue_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1868,7 +1858,7 @@ CREATE SEQUENCE public.material_issue_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_issue_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_issue_items_id_seq OWNER TO postgres;
 
 --
 -- Name: material_issue_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1907,7 +1897,7 @@ CREATE TABLE public.material_issues (
 );
 
 
-ALTER TABLE public.material_issues OWNER TO nissigrid;
+ALTER TABLE public.material_issues OWNER TO postgres;
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1922,7 +1912,7 @@ CREATE SEQUENCE public.material_issues_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_issues_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_issues_id_seq OWNER TO postgres;
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1947,7 +1937,7 @@ CREATE TABLE public.material_return_items (
 );
 
 
-ALTER TABLE public.material_return_items OWNER TO nissigrid;
+ALTER TABLE public.material_return_items OWNER TO postgres;
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1962,7 +1952,7 @@ CREATE SEQUENCE public.material_return_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_return_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_return_items_id_seq OWNER TO postgres;
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1996,7 +1986,7 @@ CREATE TABLE public.material_returns (
 );
 
 
-ALTER TABLE public.material_returns OWNER TO nissigrid;
+ALTER TABLE public.material_returns OWNER TO postgres;
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2011,7 +2001,7 @@ CREATE SEQUENCE public.material_returns_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_returns_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_returns_id_seq OWNER TO postgres;
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2055,7 +2045,7 @@ CREATE TABLE public.materials (
 );
 
 
-ALTER TABLE public.materials OWNER TO nissigrid;
+ALTER TABLE public.materials OWNER TO postgres;
 
 --
 -- Name: materials_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2070,7 +2060,7 @@ CREATE SEQUENCE public.materials_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.materials_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.materials_id_seq OWNER TO postgres;
 
 --
 -- Name: materials_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2100,7 +2090,7 @@ CREATE TABLE public.menu_items (
 );
 
 
-ALTER TABLE public.menu_items OWNER TO nissigrid;
+ALTER TABLE public.menu_items OWNER TO postgres;
 
 --
 -- Name: menu_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2115,7 +2105,7 @@ CREATE SEQUENCE public.menu_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.menu_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.menu_items_id_seq OWNER TO postgres;
 
 --
 -- Name: menu_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2143,7 +2133,7 @@ CREATE TABLE public.organizations (
 );
 
 
-ALTER TABLE public.organizations OWNER TO nissigrid;
+ALTER TABLE public.organizations OWNER TO postgres;
 
 --
 -- Name: organizations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2158,7 +2148,7 @@ CREATE SEQUENCE public.organizations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.organizations_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.organizations_id_seq OWNER TO postgres;
 
 --
 -- Name: organizations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2180,7 +2170,7 @@ CREATE TABLE public.password_reset_tokens (
 );
 
 
-ALTER TABLE public.password_reset_tokens OWNER TO nissigrid;
+ALTER TABLE public.password_reset_tokens OWNER TO postgres;
 
 --
 -- Name: password_reset_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2195,7 +2185,7 @@ CREATE SEQUENCE public.password_reset_tokens_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.password_reset_tokens_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.password_reset_tokens_id_seq OWNER TO postgres;
 
 --
 -- Name: password_reset_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2229,7 +2219,7 @@ CREATE TABLE public.pm_schedules (
 );
 
 
-ALTER TABLE public.pm_schedules OWNER TO nissigrid;
+ALTER TABLE public.pm_schedules OWNER TO postgres;
 
 --
 -- Name: pm_schedules_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2244,7 +2234,7 @@ CREATE SEQUENCE public.pm_schedules_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.pm_schedules_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.pm_schedules_id_seq OWNER TO postgres;
 
 --
 -- Name: pm_schedules_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2275,7 +2265,7 @@ CREATE TABLE public.projects (
 );
 
 
-ALTER TABLE public.projects OWNER TO nissigrid;
+ALTER TABLE public.projects OWNER TO postgres;
 
 --
 -- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2290,7 +2280,7 @@ CREATE SEQUENCE public.projects_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.projects_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.projects_id_seq OWNER TO postgres;
 
 --
 -- Name: projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2314,7 +2304,7 @@ CREATE TABLE public.purchase_order_approvals (
 );
 
 
-ALTER TABLE public.purchase_order_approvals OWNER TO nissigrid;
+ALTER TABLE public.purchase_order_approvals OWNER TO postgres;
 
 --
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2329,7 +2319,7 @@ CREATE SEQUENCE public.purchase_order_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_order_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_order_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2360,7 +2350,7 @@ CREATE TABLE public.purchase_order_items (
 );
 
 
-ALTER TABLE public.purchase_order_items OWNER TO nissigrid;
+ALTER TABLE public.purchase_order_items OWNER TO postgres;
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2375,7 +2365,7 @@ CREATE SEQUENCE public.purchase_order_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_order_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_order_items_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2433,7 +2423,7 @@ CREATE TABLE public.purchase_orders (
 );
 
 
-ALTER TABLE public.purchase_orders OWNER TO nissigrid;
+ALTER TABLE public.purchase_orders OWNER TO postgres;
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2448,7 +2438,7 @@ CREATE SEQUENCE public.purchase_orders_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_orders_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_orders_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2472,7 +2462,7 @@ CREATE TABLE public.purchase_request_approvals (
 );
 
 
-ALTER TABLE public.purchase_request_approvals OWNER TO nissigrid;
+ALTER TABLE public.purchase_request_approvals OWNER TO postgres;
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2487,7 +2477,7 @@ CREATE SEQUENCE public.purchase_request_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_request_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_request_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2509,7 +2499,7 @@ CREATE TABLE public.purchase_request_items (
 );
 
 
-ALTER TABLE public.purchase_request_items OWNER TO nissigrid;
+ALTER TABLE public.purchase_request_items OWNER TO postgres;
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2524,7 +2514,7 @@ CREATE SEQUENCE public.purchase_request_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_request_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_request_items_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2567,7 +2557,7 @@ CREATE TABLE public.purchase_requests (
 );
 
 
-ALTER TABLE public.purchase_requests OWNER TO nissigrid;
+ALTER TABLE public.purchase_requests OWNER TO postgres;
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2582,7 +2572,7 @@ CREATE SEQUENCE public.purchase_requests_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_requests_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_requests_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2609,7 +2599,7 @@ CREATE TABLE public.quotation_comparisons (
 );
 
 
-ALTER TABLE public.quotation_comparisons OWNER TO nissigrid;
+ALTER TABLE public.quotation_comparisons OWNER TO postgres;
 
 --
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2624,7 +2614,7 @@ CREATE SEQUENCE public.quotation_comparisons_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_comparisons_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_comparisons_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2649,7 +2639,7 @@ CREATE TABLE public.quotation_negotiation_history (
 );
 
 
-ALTER TABLE public.quotation_negotiation_history OWNER TO nissigrid;
+ALTER TABLE public.quotation_negotiation_history OWNER TO postgres;
 
 --
 -- Name: quotation_negotiation_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2664,7 +2654,7 @@ CREATE SEQUENCE public.quotation_negotiation_history_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_negotiation_history_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_negotiation_history_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_negotiation_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2686,7 +2676,7 @@ CREATE TABLE public.quotation_request_item_sources (
 );
 
 
-ALTER TABLE public.quotation_request_item_sources OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_item_sources OWNER TO postgres;
 
 --
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2701,7 +2691,7 @@ CREATE SEQUENCE public.quotation_request_item_sources_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_item_sources_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_item_sources_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2724,7 +2714,7 @@ CREATE TABLE public.quotation_request_items (
 );
 
 
-ALTER TABLE public.quotation_request_items OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_items OWNER TO postgres;
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2739,7 +2729,7 @@ CREATE SEQUENCE public.quotation_request_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_items_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2759,7 +2749,7 @@ CREATE TABLE public.quotation_request_prs (
 );
 
 
-ALTER TABLE public.quotation_request_prs OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_prs OWNER TO postgres;
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2774,7 +2764,7 @@ CREATE SEQUENCE public.quotation_request_prs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_prs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_prs_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2797,7 +2787,7 @@ CREATE TABLE public.quotation_request_vendors (
 );
 
 
-ALTER TABLE public.quotation_request_vendors OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_vendors OWNER TO postgres;
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2812,7 +2802,7 @@ CREATE SEQUENCE public.quotation_request_vendors_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_vendors_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_vendors_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2844,7 +2834,7 @@ CREATE TABLE public.quotation_requests (
 );
 
 
-ALTER TABLE public.quotation_requests OWNER TO nissigrid;
+ALTER TABLE public.quotation_requests OWNER TO postgres;
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2859,7 +2849,7 @@ CREATE SEQUENCE public.quotation_requests_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_requests_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_requests_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2887,7 +2877,7 @@ CREATE TABLE public.reagent_consumption_logs (
 );
 
 
-ALTER TABLE public.reagent_consumption_logs OWNER TO nissigrid;
+ALTER TABLE public.reagent_consumption_logs OWNER TO postgres;
 
 --
 -- Name: reagent_consumption_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2902,7 +2892,7 @@ CREATE SEQUENCE public.reagent_consumption_logs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.reagent_consumption_logs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.reagent_consumption_logs_id_seq OWNER TO postgres;
 
 --
 -- Name: reagent_consumption_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2937,7 +2927,7 @@ CREATE TABLE public.repair_work_orders (
 );
 
 
-ALTER TABLE public.repair_work_orders OWNER TO nissigrid;
+ALTER TABLE public.repair_work_orders OWNER TO postgres;
 
 --
 -- Name: repair_work_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2952,7 +2942,7 @@ CREATE SEQUENCE public.repair_work_orders_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.repair_work_orders_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.repair_work_orders_id_seq OWNER TO postgres;
 
 --
 -- Name: repair_work_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2977,7 +2967,7 @@ CREATE TABLE public.role_permissions (
 );
 
 
-ALTER TABLE public.role_permissions OWNER TO nissigrid;
+ALTER TABLE public.role_permissions OWNER TO postgres;
 
 --
 -- Name: role_permissions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2992,7 +2982,7 @@ CREATE SEQUENCE public.role_permissions_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.role_permissions_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.role_permissions_id_seq OWNER TO postgres;
 
 --
 -- Name: role_permissions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3017,7 +3007,7 @@ CREATE TABLE public.roles (
 );
 
 
-ALTER TABLE public.roles OWNER TO nissigrid;
+ALTER TABLE public.roles OWNER TO postgres;
 
 --
 -- Name: roles_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3032,7 +3022,7 @@ CREATE SEQUENCE public.roles_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.roles_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.roles_id_seq OWNER TO postgres;
 
 --
 -- Name: roles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3059,7 +3049,7 @@ CREATE TABLE public.rooms (
 );
 
 
-ALTER TABLE public.rooms OWNER TO nissigrid;
+ALTER TABLE public.rooms OWNER TO postgres;
 
 --
 -- Name: rooms_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3074,7 +3064,7 @@ CREATE SEQUENCE public.rooms_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.rooms_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.rooms_id_seq OWNER TO postgres;
 
 --
 -- Name: rooms_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3098,7 +3088,7 @@ CREATE TABLE public.sites (
 );
 
 
-ALTER TABLE public.sites OWNER TO nissigrid;
+ALTER TABLE public.sites OWNER TO postgres;
 
 --
 -- Name: sites_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3113,7 +3103,7 @@ CREATE SEQUENCE public.sites_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.sites_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.sites_id_seq OWNER TO postgres;
 
 --
 -- Name: sites_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3146,7 +3136,7 @@ CREATE TABLE public.stock_ledger (
 );
 
 
-ALTER TABLE public.stock_ledger OWNER TO nissigrid;
+ALTER TABLE public.stock_ledger OWNER TO postgres;
 
 --
 -- Name: stock_ledger_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3161,7 +3151,7 @@ CREATE SEQUENCE public.stock_ledger_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.stock_ledger_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.stock_ledger_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_ledger_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3186,7 +3176,7 @@ CREATE TABLE public.stock_transfer_items (
 );
 
 
-ALTER TABLE public.stock_transfer_items OWNER TO nissigrid;
+ALTER TABLE public.stock_transfer_items OWNER TO postgres;
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3201,7 +3191,7 @@ CREATE SEQUENCE public.stock_transfer_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.stock_transfer_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.stock_transfer_items_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3233,7 +3223,7 @@ CREATE TABLE public.stock_transfers (
 );
 
 
-ALTER TABLE public.stock_transfers OWNER TO nissigrid;
+ALTER TABLE public.stock_transfers OWNER TO postgres;
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3248,7 +3238,7 @@ CREATE SEQUENCE public.stock_transfers_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.stock_transfers_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.stock_transfers_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3272,7 +3262,7 @@ CREATE TABLE public.subcategories (
 );
 
 
-ALTER TABLE public.subcategories OWNER TO nissigrid;
+ALTER TABLE public.subcategories OWNER TO postgres;
 
 --
 -- Name: subcategories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3287,7 +3277,7 @@ CREATE SEQUENCE public.subcategories_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.subcategories_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.subcategories_id_seq OWNER TO postgres;
 
 --
 -- Name: subcategories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3310,7 +3300,7 @@ CREATE TABLE public.system_lookups (
 );
 
 
-ALTER TABLE public.system_lookups OWNER TO nissigrid;
+ALTER TABLE public.system_lookups OWNER TO postgres;
 
 --
 -- Name: system_lookups_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3325,7 +3315,7 @@ CREATE SEQUENCE public.system_lookups_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.system_lookups_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.system_lookups_id_seq OWNER TO postgres;
 
 --
 -- Name: system_lookups_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3355,7 +3345,7 @@ CREATE TABLE public.tenant_configurations (
 );
 
 
-ALTER TABLE public.tenant_configurations OWNER TO nissigrid;
+ALTER TABLE public.tenant_configurations OWNER TO postgres;
 
 --
 -- Name: tenant_configurations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3370,7 +3360,7 @@ CREATE SEQUENCE public.tenant_configurations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tenant_configurations_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.tenant_configurations_id_seq OWNER TO postgres;
 
 --
 -- Name: tenant_configurations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3392,7 +3382,7 @@ CREATE TABLE public.tenant_memberships (
 );
 
 
-ALTER TABLE public.tenant_memberships OWNER TO nissigrid;
+ALTER TABLE public.tenant_memberships OWNER TO postgres;
 
 --
 -- Name: tenant_memberships_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3407,7 +3397,7 @@ CREATE SEQUENCE public.tenant_memberships_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tenant_memberships_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.tenant_memberships_id_seq OWNER TO postgres;
 
 --
 -- Name: tenant_memberships_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3431,7 +3421,7 @@ CREATE TABLE public.tenants (
 );
 
 
-ALTER TABLE public.tenants OWNER TO nissigrid;
+ALTER TABLE public.tenants OWNER TO postgres;
 
 --
 -- Name: tenants_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3446,7 +3436,7 @@ CREATE SEQUENCE public.tenants_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tenants_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.tenants_id_seq OWNER TO postgres;
 
 --
 -- Name: tenants_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3471,7 +3461,7 @@ CREATE TABLE public.terms_and_conditions (
 );
 
 
-ALTER TABLE public.terms_and_conditions OWNER TO nissigrid;
+ALTER TABLE public.terms_and_conditions OWNER TO postgres;
 
 --
 -- Name: terms_and_conditions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3486,7 +3476,7 @@ CREATE SEQUENCE public.terms_and_conditions_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.terms_and_conditions_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.terms_and_conditions_id_seq OWNER TO postgres;
 
 --
 -- Name: terms_and_conditions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3511,7 +3501,7 @@ CREATE TABLE public.uom (
 );
 
 
-ALTER TABLE public.uom OWNER TO nissigrid;
+ALTER TABLE public.uom OWNER TO postgres;
 
 --
 -- Name: uom_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3526,7 +3516,7 @@ CREATE SEQUENCE public.uom_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.uom_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.uom_id_seq OWNER TO postgres;
 
 --
 -- Name: uom_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3549,7 +3539,7 @@ CREATE TABLE public.user_role_assignments (
 );
 
 
-ALTER TABLE public.user_role_assignments OWNER TO nissigrid;
+ALTER TABLE public.user_role_assignments OWNER TO postgres;
 
 --
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3564,7 +3554,7 @@ CREATE SEQUENCE public.user_role_assignments_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.user_role_assignments_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.user_role_assignments_id_seq OWNER TO postgres;
 
 --
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3593,7 +3583,7 @@ CREATE TABLE public.users (
 );
 
 
-ALTER TABLE public.users OWNER TO nissigrid;
+ALTER TABLE public.users OWNER TO postgres;
 
 --
 -- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3608,7 +3598,7 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.users_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.users_id_seq OWNER TO postgres;
 
 --
 -- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3631,7 +3621,7 @@ CREATE TABLE public.vendor_approvals (
 );
 
 
-ALTER TABLE public.vendor_approvals OWNER TO nissigrid;
+ALTER TABLE public.vendor_approvals OWNER TO postgres;
 
 --
 -- Name: vendor_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3646,7 +3636,7 @@ CREATE SEQUENCE public.vendor_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3666,7 +3656,7 @@ CREATE TABLE public.vendor_categories (
 );
 
 
-ALTER TABLE public.vendor_categories OWNER TO nissigrid;
+ALTER TABLE public.vendor_categories OWNER TO postgres;
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3681,7 +3671,7 @@ CREATE SEQUENCE public.vendor_categories_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_categories_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_categories_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3705,7 +3695,7 @@ CREATE TABLE public.vendor_history (
 );
 
 
-ALTER TABLE public.vendor_history OWNER TO nissigrid;
+ALTER TABLE public.vendor_history OWNER TO postgres;
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3720,7 +3710,7 @@ CREATE SEQUENCE public.vendor_history_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_history_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_history_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3749,7 +3739,7 @@ CREATE TABLE public.vendor_quotation_items (
 );
 
 
-ALTER TABLE public.vendor_quotation_items OWNER TO nissigrid;
+ALTER TABLE public.vendor_quotation_items OWNER TO postgres;
 
 --
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3764,7 +3754,7 @@ CREATE SEQUENCE public.vendor_quotation_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_quotation_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_quotation_items_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3792,7 +3782,7 @@ CREATE TABLE public.vendor_quotations (
 );
 
 
-ALTER TABLE public.vendor_quotations OWNER TO nissigrid;
+ALTER TABLE public.vendor_quotations OWNER TO postgres;
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3807,7 +3797,7 @@ CREATE SEQUENCE public.vendor_quotations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_quotations_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_quotations_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3858,7 +3848,7 @@ CREATE TABLE public.vendors (
 );
 
 
-ALTER TABLE public.vendors OWNER TO nissigrid;
+ALTER TABLE public.vendors OWNER TO postgres;
 
 --
 -- Name: vendors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3873,7 +3863,7 @@ CREATE SEQUENCE public.vendors_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendors_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendors_id_seq OWNER TO postgres;
 
 --
 -- Name: vendors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3904,7 +3894,7 @@ CREATE TABLE public.warehouses (
 );
 
 
-ALTER TABLE public.warehouses OWNER TO nissigrid;
+ALTER TABLE public.warehouses OWNER TO postgres;
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3919,154 +3909,13 @@ CREATE SEQUENCE public.warehouses_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.warehouses_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.warehouses_id_seq OWNER TO postgres;
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.warehouses_id_seq OWNED BY public.warehouses.id;
-
-
---
--- Name: work_order_approvals; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.work_order_approvals (
-    id integer NOT NULL,
-    wo_id integer NOT NULL,
-    approval_flow_id integer NOT NULL,
-    approver_id integer NOT NULL,
-    approved_quantities json,
-    remarks text,
-    approved_at timestamp without time zone
-);
-
-
-ALTER TABLE public.work_order_approvals OWNER TO nissigrid;
-
---
--- Name: work_order_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.work_order_approvals_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.work_order_approvals_id_seq OWNER TO nissigrid;
-
---
--- Name: work_order_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.work_order_approvals_id_seq OWNED BY public.work_order_approvals.id;
-
-
---
--- Name: work_order_items; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.work_order_items (
-    id integer NOT NULL,
-    wo_id integer NOT NULL,
-    material_id integer NOT NULL,
-    quantity double precision NOT NULL,
-    rate double precision NOT NULL,
-    amount double precision NOT NULL,
-    received_quantity double precision,
-    approved_quantity double precision,
-    discount_percent double precision,
-    cgst_percentage double precision,
-    sgst_percentage double precision,
-    igst_percentage double precision,
-    is_gst_inclusive boolean,
-    remarks text
-);
-
-
-ALTER TABLE public.work_order_items OWNER TO nissigrid;
-
---
--- Name: work_order_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.work_order_items_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.work_order_items_id_seq OWNER TO nissigrid;
-
---
--- Name: work_order_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.work_order_items_id_seq OWNED BY public.work_order_items.id;
-
-
---
--- Name: work_orders; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.work_orders (
-    id integer NOT NULL,
-    tenant_id integer NOT NULL,
-    site_id integer NOT NULL,
-    wo_number character varying(50) NOT NULL,
-    vendor_id integer NOT NULL,
-    project_id integer NOT NULL,
-    institution_id integer,
-    contract_id integer,
-    equipment_id integer,
-    wo_type character varying(50),
-    advance_percentage double precision,
-    total_amount double precision,
-    target_completion_date date,
-    status character varying(50),
-    current_approval_level integer,
-    terms text,
-    remarks text,
-    annexure text,
-    created_by_id integer NOT NULL,
-    approved_by_id integer,
-    approved_at timestamp without time zone,
-    is_deleted boolean,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone
-);
-
-
-ALTER TABLE public.work_orders OWNER TO nissigrid;
-
---
--- Name: work_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.work_orders_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.work_orders_id_seq OWNER TO nissigrid;
-
---
--- Name: work_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.work_orders_id_seq OWNED BY public.work_orders.id;
 
 
 --
@@ -4088,7 +3937,7 @@ CREATE TABLE public.write_off_items (
 );
 
 
-ALTER TABLE public.write_off_items OWNER TO nissigrid;
+ALTER TABLE public.write_off_items OWNER TO postgres;
 
 --
 -- Name: write_off_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -4103,7 +3952,7 @@ CREATE SEQUENCE public.write_off_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.write_off_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.write_off_items_id_seq OWNER TO postgres;
 
 --
 -- Name: write_off_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -4138,7 +3987,7 @@ CREATE TABLE public.write_offs (
 );
 
 
-ALTER TABLE public.write_offs OWNER TO nissigrid;
+ALTER TABLE public.write_offs OWNER TO postgres;
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -4153,7 +4002,7 @@ CREATE SEQUENCE public.write_offs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.write_offs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.write_offs_id_seq OWNER TO postgres;
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -4751,27 +4600,6 @@ ALTER TABLE ONLY public.warehouses ALTER COLUMN id SET DEFAULT nextval('public.w
 
 
 --
--- Name: work_order_approvals id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_order_approvals ALTER COLUMN id SET DEFAULT nextval('public.work_order_approvals_id_seq'::regclass);
-
-
---
--- Name: work_order_items id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_order_items ALTER COLUMN id SET DEFAULT nextval('public.work_order_items_id_seq'::regclass);
-
-
---
--- Name: work_orders id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_orders ALTER COLUMN id SET DEFAULT nextval('public.work_orders_id_seq'::regclass);
-
-
---
 -- Name: write_off_items id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4790,7 +4618,7 @@ ALTER TABLE ONLY public.write_offs ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-8bd5c0c33801
+aa1f5111513e
 \.
 
 
@@ -4929,6 +4757,11 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 128	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00039	You have been assigned to complaint CMP-00039. Nature of complaint: Request for Equipment Installation: EPCMS-102-ESA-001	ComplaintAssigned	475	\N	f	f	2026-08-28 18:33:36.881016	\N	34
 129	2	2	Indent Approved	Success	Indent IND-00041 Approved	The indent (IND-00041) has been approved by EastPoint Admin.	IndentApproved	256	\N	f	f	2026-08-28 18:35:02.873519	\N	3
 130	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00041) have been issued. Please review and acknowledge receipt.	IndentIssued	256	\N	f	f	2026-08-28 18:35:32.215106	\N	3
+131	2	2	Indent Approved	Success	Indent IND-00042 Approved	The indent (IND-00042) has been approved by EastPoint Admin.	IndentApproved	257	\N	f	f	2026-09-01 15:06:24.200286	\N	3
+132	2	2	Indent Approved	Success	Indent IND-00043 Approved	The indent (IND-00043) has been approved by EastPoint Admin.	IndentApproved	258	\N	f	f	2026-09-01 17:21:05.480764	\N	9
+133	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00043) have been issued. Please review and acknowledge receipt.	IndentIssued	258	\N	f	f	2026-09-01 17:25:04.68975	\N	9
+134	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00043) have been issued. Please review and acknowledge receipt.	IndentIssued	258	\N	f	f	2026-09-01 17:25:32.38787	\N	9
+135	2	2	Complaint Assigned	Info	Complaint Assigned: PM-202608-EPCMS-POST OT -PM-114	You have been assigned to complaint PM-202608-EPCMS-POST OT -PM-114. Nature of complaint: Scheduled Preventive Maintenance	ComplaintAssigned	439	\N	f	f	2026-09-01 18:29:33.008275	\N	34
 \.
 
 
@@ -4947,28 +4780,28 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 16	2	2	INDENT	2	CEO	0	\N	\N	t
 17	2	2	PURCHASE_REQUEST	2	CEO	0	\N	\N	t
 18	2	2	PURCHASE_ORDER	2	CEO	0	\N	\N	t
+25	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
+49	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
+101	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
+45	2	2	INDENT	1	Department Head	0	\N	\N	t
+104	2	2	INDENT	1	Admin	0	\N	\N	t
 19	2	2	PURCHASE_REQUEST	1	Store Manager	0	\N	\N	t
+107	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
+108	2	2	INDENT	2	Admin	0	\N	\N	t
+139	2	2	CreditNote	1	Admin	0	\N	\N	t
+46	2	2	INDENT	1	Institution Head	0	\N	\N	f
+44	2	2	INDENT	1	Institution Head	0	\N	19	t
 95	2	2	VENDOR	2	Admin	0	\N	\N	f
 103	2	2	VENDOR	2	Admin	0	\N	\N	f
-139	2	2	CreditNote	1	Admin	0	\N	\N	t
 111	2	2	VENDOR	2	Admin	0	\N	\N	f
-45	2	2	INDENT	1	Department Head	0	\N	\N	t
-44	2	2	INDENT	1	Institution Head	0	\N	19	t
-46	2	2	INDENT	1	Institution Head	0	\N	\N	t
-49	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 98	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-101	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
-104	2	2	INDENT	1	Admin	0	\N	\N	f
 106	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
-107	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
-108	2	2	INDENT	2	Admin	0	\N	\N	f
 109	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 13	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 14	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 20	2	2	INDENT	1	Admin	0	\N	\N	f
 21	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 23	2	2	INDENT	2	Admin	0	\N	\N	f
-25	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 26	2	2	INDENT	1	Admin	0	\N	\N	f
 27	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 29	2	2	INDENT	2	Admin	0	\N	\N	f
@@ -4978,14 +4811,13 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 22	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 24	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 102	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
-15	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
-28	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
-30	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
-96	2	2	INDENT	1	Admin	0	\N	\N	t
-99	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
-100	2	2	INDENT	2	Admin	0	\N	\N	t
-105	2	2	CONTRACT	1	Admin	0	\N	\N	t
-87	2	2	PURCHASE_ORDER	1	Technician	5000	123456789	\N	f
+140	2	2	WRITE_OFF	1	Store Manager	0	\N	\N	t
+15	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+28	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
+30	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
+96	2	2	INDENT	1	Admin	0	\N	\N	f
+99	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
+100	2	2	INDENT	2	Admin	0	\N	\N	f
 74	2	2	INDENT	1	Admin	0	\N	\N	f
 54	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 56	2	2	INDENT	2	Admin	0	\N	\N	f
@@ -4999,6 +4831,7 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 67	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 68	2	2	INDENT	1	Admin	0	\N	\N	f
 69	2	2	INDENT	2	Admin	0	\N	\N	f
+87	2	2	PURCHASE_ORDER	1	Technician	5000	123456789	\N	f
 70	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 71	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 72	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
@@ -5012,6 +4845,8 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 91	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 92	2	2	INDENT	2	Admin	0	\N	\N	f
 93	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
+105	2	2	CONTRACT	1	Admin	0	\N	\N	t
+141	2	2	PURCHASE_REQUEST	1	Institution Head	0	\N	\N	t
 51	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 52	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 89	2	2	CONTRACT	1	Admin	0	\N	\N	f
@@ -6539,11 +6374,11 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 436	2	2	PM-202608-EPCMS-POST OT -PM-111	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684698	2026-08-11 18:37:11.684705	\N	f	\N	\N	\N	\N	\N	\N	\N	1500	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 437	2	2	PM-202608-EPCMS-POST OT -PM-112	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684712	2026-08-11 18:37:11.684718	\N	f	\N	\N	\N	\N	\N	\N	\N	1501	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 438	2	2	PM-202608-EPCMS-POST OT -PM-113	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684725	2026-08-11 18:37:11.684732	\N	f	\N	\N	\N	\N	\N	\N	\N	1502	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-439	2	2	PM-202608-EPCMS-POST OT -PM-114	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684738	2026-08-11 18:37:11.684745	\N	f	\N	\N	\N	\N	\N	\N	\N	1503	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 440	2	2	PM-202608-EPCMS-POST OT -PM-115	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684752	2026-08-11 18:37:11.684758	\N	f	\N	\N	\N	\N	\N	\N	\N	1504	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 441	2	2	PM-202608-EPCMS-POST OT -SYP-060	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684765	2026-08-11 18:37:11.684771	\N	f	\N	\N	\N	\N	\N	\N	\N	1505	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 444	2	2	PM-202608-EPCMS-POST OT -PM-117	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Assigned	35	\N	3	\N	f	2026-08-11 18:37:11.684805	2026-08-12 12:09:46.430096	\N	f	\N	\N	\N	\N	\N	\N	\N	1508	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 457	2	2	TEST-CMP-1787064166-1	2026-08-18	20:12	Testing	\N	\N	\N	Automated test - Material Req	\N	\N	Closed	8	\N	8	\N	f	2026-08-18 20:12:46.86473	2026-08-18 20:12:47.020047	\N	t	\N	\N	\N	Looks like an automated test.	\N	\N	\N	\N	Breakdown	f	8	2026-08-18 14:42:47.003066	8	2026-08-18 14:42:47.019418	Fixed it via script	Automated closure	\N	\N	\N	\N	\N
+439	2	2	PM-202608-EPCMS-POST OT -PM-114	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	In Progress	34	\N	3	\N	f	2026-08-11 18:37:11.684738	2026-09-01 18:29:48.18372	\N	f	\N	\N	\N		\N	\N	\N	1503	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 443	2	2	PM-202608-EPCMS-POST OT -PM-116	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	In Progress	34	\N	3	\N	f	2026-08-11 18:37:11.684791	2026-08-27 14:02:33.464354	\N	f	\N	\N	\N		\N	\N	\N	1507	Preventive Maintenance Call	t	\N	\N	\N	\N				t	2026-08-27	14:01	\N
 445	2	2	CMP-00017	2026-08-12	11:09	HEALTH 	7	237		issue	general issue		Closed	34	\N	3	\N	f	2026-08-12 11:09:14.018811	2026-08-17 11:24:51.865397	\N	f	\N	\N	\N		\N	\N	\N	\N	General Complaint	f	3	2026-08-17 05:54:50.316926	3	2026-08-17 05:54:51.863207	product repaired succesfully	finished	\N	\N	\N	\N	\N
 446	3	3	CMP-99999	2026-08-17	11:32	Test Dept	\N	\N		Testing the issue	Test detail	John Doe	Registered	\N	\N	4	\N	f	2026-08-17 11:32:26.592734	2026-08-17 11:32:26.592747	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -6675,13 +6510,13 @@ COPY public.credit_note_approvals (id, credit_note_id, approval_flow_id, approve
 -- Data for Name: credit_note_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.credit_note_items (id, credit_note_id, material_id, description, hsn_sac, quantity, rate, uom, discount_percent, cgst_rate, sgst_rate, igst_rate, cgst_amount, sgst_amount, igst_amount, taxable_amount, amount, remarks, invoice_item_id, po_item_id, grn_item_id, invoice_quantity, received_quantity, previously_credited_quantity) FROM stdin;
-8	8	2565	0.035X150CM TEFLON WIRE J.TIP		21	10	Numbers	0	6	6	0	12.6	12.6	0	210	235.2		\N	\N	\N	\N	\N	\N
-9	8	2564	0.032 X 150 TERUMO GUIDE WIRE		5	16526.16	Numbers	0	6	6	0	4957.848	4957.848	0	82630.8	92546.496		\N	\N	\N	\N	\N	\N
-10	8	3505	110mmx75mm Bush		30	761.41	Numbers	0	9	9	0	2055.807	2055.807	0	22842.3	26953.914		\N	\N	\N	\N	\N	\N
-11	8	2352	1 1/2 Cpvc NRV		20	726.57	Numbers	0	9	9	0	1307.826	1307.826	0	14531.400000000001	17147.052000000003		\N	\N	\N	\N	\N	\N
-12	8	3492	110mmx75mm Multi trap PVC		10	3477.26	Numbers	0	9	9	0	3129.5340000000006	3129.5340000000006	0	34772.600000000006	41031.668000000005		\N	\N	\N	\N	\N	\N
-15	1	3474	110 Door Bend PVC		2	3262.58	NOS	0	9	9	0	587.2643999999999	587.2643999999999	0	6525.16	7699.6888		\N	\N	\N	\N	\N	\N
+COPY public.credit_note_items (id, credit_note_id, material_id, description, hsn_sac, quantity, rate, uom, discount_percent, cgst_rate, sgst_rate, igst_rate, cgst_amount, sgst_amount, igst_amount, taxable_amount, amount, remarks) FROM stdin;
+8	8	2565	0.035X150CM TEFLON WIRE J.TIP		21	10	Numbers	0	6	6	0	12.6	12.6	0	210	235.2	
+9	8	2564	0.032 X 150 TERUMO GUIDE WIRE		5	16526.16	Numbers	0	6	6	0	4957.848	4957.848	0	82630.8	92546.496	
+10	8	3505	110mmx75mm Bush		30	761.41	Numbers	0	9	9	0	2055.807	2055.807	0	22842.3	26953.914	
+11	8	2352	1 1/2 Cpvc NRV		20	726.57	Numbers	0	9	9	0	1307.826	1307.826	0	14531.400000000001	17147.052000000003	
+12	8	3492	110mmx75mm Multi trap PVC		10	3477.26	Numbers	0	9	9	0	3129.5340000000006	3129.5340000000006	0	34772.600000000006	41031.668000000005	
+15	1	3474	110 Door Bend PVC		2	3262.58	NOS	0	9	9	0	587.2643999999999	587.2643999999999	0	6525.16	7699.6888	
 \.
 
 
@@ -6689,9 +6524,9 @@ COPY public.credit_note_items (id, credit_note_id, material_id, description, hsn
 -- Data for Name: credit_notes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.credit_notes (id, tenant_id, site_id, credit_note_number, date, vendor_id, invoice_id, consignee_id, buyer_id, original_invoice_number, original_invoice_date, reference_number, reference_date, buyer_order_number, buyer_order_date, dispatch_doc_number, dispatched_through, destination, terms_of_delivery, total_taxable_amount, total_cgst, total_sgst, total_igst, total_discount, total_amount, status, current_approval_level, remarks, scan_url, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, purchase_order_id, grn_id, credit_note_type, inventory_impact) FROM stdin;
-8	2	2	CN-00008	2026-08-26	64	12	6	4	INV2001	2026-06-30		\N	PO-00016	\N					154987.1	11463.615000000002	11463.615000000002	0	0	177914.33000000002	Draft	1			3	\N	\N	f	2026-08-28 21:14:27.769954	2026-08-28 21:14:27.769971	\N	\N	\N	\N
-1	2	2	CN-00001	2026-08-28	70	15	\N	\N	VJ2398Y845	2026-08-10		\N	EPCN/PO-00001	\N					6525.16	587.2643999999999	587.2643999999999	0	0	7699.6888	Approved	1			3	3	2026-08-31 11:44:13.744027	f	2026-08-28 19:30:19.58144	2026-08-31 11:44:13.745678	\N	\N	\N	\N
+COPY public.credit_notes (id, tenant_id, site_id, credit_note_number, date, vendor_id, invoice_id, consignee_id, buyer_id, original_invoice_number, original_invoice_date, reference_number, reference_date, buyer_order_number, buyer_order_date, dispatch_doc_number, dispatched_through, destination, terms_of_delivery, total_taxable_amount, total_cgst, total_sgst, total_igst, total_discount, total_amount, status, current_approval_level, remarks, scan_url, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at) FROM stdin;
+8	2	2	CN-00008	2026-08-26	64	12	6	4	INV2001	2026-06-30		\N	PO-00016	\N					154987.1	11463.615000000002	11463.615000000002	0	0	177914.33000000002	Draft	1			3	\N	\N	f	2026-08-28 21:14:27.769954	2026-08-28 21:14:27.769971
+1	2	2	CN-00001	2026-08-28	70	15	\N	\N	VJ2398Y845	2026-08-10		\N	EPCN/PO-00001	\N					6525.16	587.2643999999999	587.2643999999999	0	0	7699.6888	Approved	1			3	3	2026-08-31 11:44:13.744027	f	2026-08-28 19:30:19.58144	2026-08-31 11:44:13.745678
 \.
 
 
@@ -9813,6 +9648,10 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 3660	2	2	3474	62	59	2026-08-19 17:07:51.183648
 4404	2	2	4877	62	9	2026-08-27 15:46:20.452707
 2734	2	2	2435	62	182	2026-08-28 18:35:32.216105
+4405	2	2	4878	62	5	2026-09-01 14:56:54.468561
+4406	2	2	4879	62	10	2026-09-01 15:47:23.916781
+4407	2	2	4880	62	95	2026-09-01 17:33:00.060344
+4408	2	2	4880	63	40	2026-09-01 17:30:19.757891
 \.
 
 
@@ -10502,7 +10341,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 128	2	2	MATERIAL_74	RAD	5
 129	2	2	MATERIAL_67	HEQ	67
 113	1	1	WORK_ORDER	WO-	3
-74	2	2	RETURN	RET	4
 143	1	1	COMPLAINT	CMP	1
 131	2	2	MATERIAL_75	STY	195
 132	2	2	MATERIAL_76	HOI	36
@@ -10511,16 +10349,13 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 134	2	2	MATERIAL_66	ELE	89
 115	2	2	PURCHASE_ORDER_7	EPCN/PO	1
 77	2	2	GATEPASS	GP	5
-73	2	2	TRANSFER	TRF	4
 50	3	3	MATERIAL_56	HSK	68
 147	2	2	EQP_108	EQP_108	1
 119	3	3	COMPLAINT	CMP	1
 95	2	2	PURCHASE_ORDER_3	EPCET/PO	7
 144	1	1	VENDOR_WORK_ORDER	VWO	1
-97	2	2	EQP	EQP	2
 125	2	2	MATERIAL_65	CIV	77
 76	2	2	INVOICE_REF	INV	9
-93	2	2	WRITE_OFF	WO	11
 100	2	2	EQUIPMENT_WRITE_OFF	EWO	2
 72	2	2	WAREHOUSE	WH	14
 112	2	2	WORK_ORDER	WO	8
@@ -10530,22 +10365,28 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 145	2	2	EQP_109	EQP_109	2
 150	2	2	EQP_111	EQP_111	1
 146	2	2	CATEGORY		16
-130	2	2	MATERIAL_70	ITI	40
+75	2	2	GRN	GRN	24
 138	2	2	EQP_110	EQP_110	3
-71	2	2	GATE_ENTRY	GE	15
+130	2	2	MATERIAL_70	ITI	42
 120	2	2	MATERIAL_80	CHE	267
+71	2	2	GATE_ENTRY	GE	16
 70	2	2	QUOTATION_REQUEST	QR	43
-75	2	2	GRN	GRN	20
+73	2	2	TRANSFER	TRF	5
 78	2	2	COMPLAINT	CMP	39
-68	2	2	PURCHASE_REQUEST	PR	19
 69	2	2	PURCHASE_ORDER	PO	39
-66	2	2	INDENT	IND	41
+68	2	2	PURCHASE_REQUEST	PR	22
 152	2	2	CREDIT_NOTE	CN	8
 96	2	2	CONTRACT	CNT	17
-94	2	2	PURCHASE_ORDER_11	EPAHS/PO	8
+153	2	2	MATERIAL_82	TML	1
 102	2	2	PURCHASE_ORDER_9	NRCN/PO	4
-67	2	2	ISSUE	ISS	27
+93	2	2	WRITE_OFF	WO	13
 151	2	2	EQP_208	EQP_208	2
+74	2	2	RETURN	RET	5
+154	2	2	MATERIAL_81	ELC	1
+97	2	2	EQP	EQP	7
+66	2	2	INDENT	IND	44
+67	2	2	ISSUE	ISS	29
+94	2	2	PURCHASE_ORDER_11	EPAHS/PO	11
 \.
 
 
@@ -10584,6 +10425,11 @@ COPY public.equipment_history (id, equipment_id, event_type, event_date, descrip
 COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id, grn_id, grn_item_id, serial_number, serial_number_status, is_biomedical, requires_installation, installation_status, installation_date, installation_report_url, installation_remarks, warehouse_id, project_id, status, created_at, updated_at, warranty_available, warranty_expiry_date, amc_cmc_status, amc_cmc_end_date, amc_po_number, last_pm_date, next_pm_due_date, last_calibration_date, next_calibration_due_date, rental_agreement_number, rental_start_date, rental_end_date, rental_vendor_id, location_id, contact_number, institution_id, po_id, make, model, equipment_cost, equipment_category, serial_number_photo_url, equipment_photo_url, installed_by, amc_cost, pm_required, calibration_required, battery_details, procurement_type, rental_type, rental_cost, billing_frequency, cost_per_test, linked_reagents, agreement_status, renewal_date, expected_return_date, rental_status, warranty_end_date, rental_agreement_document, year_of_purchase, po_number, po_date, rber_reason, amc_cmc_required, amc_cmc_start_date) FROM stdin;
 1507	2	2	EPCMS-POST OT -PM-116	3899	\N	\N	301410M1380490002	Captured	t	f	Not Required	\N	\N	\N	62	\N	Under maintenance	2026-08-05 19:04:45.381725	2026-08-27 12:07:08.960642	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1617	2	2	EPPUC - Jnanaprabha Campus-208-00X1-00002	2564	\N	\N	C67G98VV	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-28 11:08:35.929352	2026-08-28 05:39:29.716231	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	85	\N	12	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+1618	2	2	EQP-00003	4878	224	527	0001	Captured	f	t	Pending Installation	2026-09-01 00:00:00	\N	\N	62	3	Pending Installation	2026-09-01 14:56:54.501687	2026-09-01 14:56:54.501699	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+1619	2	2	EQP-00004	4878	224	527	\N	Pending Update	f	t	Pending Installation	2026-09-01 00:00:00	\N	\N	62	3	Pending Installation	2026-09-01 14:56:54.565309	2026-09-01 14:56:54.565321	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+1620	2	2	EQP-00005	4878	224	527	\N	Pending Update	f	t	Pending Installation	2026-09-01 00:00:00	\N	\N	62	3	Pending Installation	2026-09-01 14:56:54.567966	2026-09-01 14:56:54.567979	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+1621	2	2	EQP-00006	4878	224	527	\N	Pending Update	f	t	Pending Installation	2026-09-01 00:00:00	\N	\N	62	3	Pending Installation	2026-09-01 14:56:54.570353	2026-09-01 14:56:54.570366	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+1622	2	2	EQP-00007	4878	224	527	\N	Pending Update	f	t	Pending Installation	2026-09-01 00:00:00	\N	\N	62	3	Pending Installation	2026-09-01 14:56:54.578504	2026-09-01 14:56:54.578516	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1616	2	2	EPSN-208-CHAI-00001	4877	\N	\N	38579C	Captured	f	t	Installation Requested	\N	\N	\N	62	\N	Pending Installation	2026-08-27 13:00:36.277739	2026-08-28 11:06:58.560191	t	2030-08-27	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	85	\N	8	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 805	2	2	EPCMS-102-ESA-001	3896	\N	\N	1234321	Pending Update	t	t	Installed	2026-08-28 13:08:21.476649	/api/uploads/installation_reports/2/20260828_132952_af5ac43f.png	\N	62	\N	Operational	2026-08-05 19:04:39.217136	2026-08-28 13:29:52.028678	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	\N	\N	\N	\N	/api/uploads/complaints/2/20260828_130757_1c137f7a.png	/api/uploads/complaints/2/20260828_130757_90fe99d9.png	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1615	2	2	NRCN-109-00X1-00002	2564	\N	\N	1234L	Pending Update	f	f	Installed	2026-08-27 09:55:49.798232	/api/uploads/complaints/2/20260827_095543_0c00352e.jpg	\N	62	\N	Operational	2026-08-19 17:42:55.780212	2026-08-27 15:25:49.799168	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	79	\N	9	\N	\N	\N	\N	\N	/api/uploads/complaints/2/20260827_095543_2d524a8c.jpg	/api/uploads/complaints/2/20260827_095543_c400a8c7.jpg	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -11310,7 +11156,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1500	2	2	EPCMS-POST OT -PM-111	3899	\N	\N	CN42787555	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381686	2026-08-11 18:37:11.375244	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	PHILIPS	SURESIGN VM8	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1501	2	2	EPCMS-POST OT -PM-112	3899	\N	\N	CN 12007147	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381691	2026-08-11 18:37:11.375247	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1502	2	2	EPCMS-POST OT -PM-113	3899	\N	\N	301410M1370340001	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381697	2026-08-11 18:37:11.37525	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-1503	2	2	EPCMS-POST OT -PM-114	3899	\N	\N	E7181214066B	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381702	2026-08-11 18:37:11.375253	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	COMEN	STAR8000	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1504	2	2	EPCMS-POST OT -PM-115	3899	\N	\N	112613M13804950009	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381708	2026-08-11 18:37:11.375256	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	M3	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1505	2	2	EPCMS-POST OT -SYP-060	3900	\N	\N	160560460	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381714	2026-08-11 18:37:11.375259	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1509	2	2	EPCMS-PSY OPD-BIOF-001	4056	\N	\N	RELAX2203013	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.410308	2026-08-05 19:04:45.410318	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	143	\N	\N	\N	RMS	RELAX 701	\N	\N	\N	\N	DANNY	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -11322,6 +11167,7 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1492	2	2	EPCMS-PICU-VBOX-030	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314616	2026-08-10 17:17:54.221799	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1512	2	2	EPCMS-PSY WD-ECG-019	3902	\N	\N	DUTB1M12514	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.445342	2026-08-05 19:04:45.44535	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	144	\N	\N	\N	BPL	CARDIO HEART 9108	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1513	2	2	EPCMS-RAD-USTD-014	3909	\N	\N	1499962WX7	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514789	2026-08-05 19:04:45.514801	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	P9_L3-12-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+1503	2	2	EPCMS-POST OT -PM-114	3899	\N	\N	E7181214066B	Captured	t	f	Not Required	\N	\N	\N	62	\N	Under maintenance	2026-08-05 19:04:45.381702	2026-09-01 18:29:35.247536	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	COMEN	STAR8000	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1514	2	2	EPCMS-RAD-USTD-015	3909	\N	\N	1427602WX6	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514805	2026-08-05 19:04:45.514808	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	P9_C1-5-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1515	2	2	EPCMS-RAD-USTD-016	3909	\N	\N	1068553WX5	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514811	2026-08-05 19:04:45.514813	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	P9_E8CS-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1516	2	2	EPCMS-RAD-USTD-017	3909	\N	\N	230580KR3	Captured	t	f	Not Required	\N	\N	\N	62	\N	Not working	2026-08-05 19:04:45.514816	2026-08-05 19:04:45.514819	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	E6_R1C5-9-D	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -11483,7 +11329,6 @@ COPY public.gate_entries (id, tenant_id, site_id, entry_number, vehicle_number, 
 197	2	2	GE-00002		\N	\N	\N	\N	\N	2026-06-12 02:15:30.632616	shyam	\N	shyam	Standard	\N	/uploads/invoices/2/20260611_204513_3b365a57.png		Completed	3	f	2026-06-12 02:15:30.633704	inv01020	2026-06-04	1212121	\N	\N	\N	\N	\N	\N	\N	\N
 200	2	2	GE-00005		\N	\N	\N	\N	\N	2026-06-30 18:39:27.614044	RAMESH	\N	RAMESH	Standard	\N	/api/uploads/invoices/2/20260630_130925_abb74d56.pdf		Completed	3	f	2026-06-30 18:39:27.615165	INV20023	2026-06-30	2000	\N	\N	\N	\N	\N	\N	\N	\N
 199	2	2	GE-00004		\N	\N	\N	\N	\N	2026-06-12 02:41:55.864898	Vijayan	\N	Vijayan	Standard	\N	/uploads/invoices/2/20260611_211153_feff01fd.jpg		Completed	8	f	2026-06-12 02:41:55.869321	IV543	2026-06-04	18000	\N	\N	\N	\N	\N	\N	\N	\N
-201	2	2	GE-00006		\N	\N	\N	\N	\N	2026-07-22 17:35:16.068379	Fredrick	\N	Fredrick	Standard	\N	/api/uploads/invoices/2/20260722_120501_36d4ec51.jpg		Awaiting GRN	3	f	2026-07-22 17:35:16.070259	inv0002	2026-07-16	20000	\N	\N	\N				\N	\N
 198	2	2	GE-00003		\N	\N	\N	\N	\N	2026-06-12 02:21:24.198782	ram	\N	ram	Standard	\N	/uploads/invoices/2/20260611_205122_2e043a7f.png		Completed	3	f	2026-06-12 02:21:24.199618	inv123	2026-06-11	10500	\N	\N	\N	\N	\N	\N	\N	\N
 203	2	2	GE-00008	KA 05 H 1234	\N	\N	\N	\N	\N	2026-08-06 13:34:04.704551	vikkk	\N	vikkk	Standard	\N	/api/uploads/invoices/2/20260806_080322_994710f4.png	none	Completed	3	f	2026-08-06 13:34:04.706791	A2456Y	2026-08-04	10000	\N	\N	\N		/api/uploads/invoices/2/20260806_080207_3c61f7e0.png	5555555	2026-08-03	\N
 204	2	2	GE-00009	TN 08 N 4567	\N	\N	\N	\N	\N	2026-08-06 14:56:45.52839	NOS	\N	NOS	Standard	\N	/api/uploads/invoices/2/20260806_092619_1796e5e4.png		Completed	3	f	2026-08-06 14:56:45.529696	A566S54	2026-08-03	60606	\N	\N	\N		/api/uploads/invoices/2/20260806_092552_24c3c8d0.png	88888	2026-08-02	\N
@@ -11492,8 +11337,10 @@ COPY public.gate_entries (id, tenant_id, site_id, entry_number, vehicle_number, 
 207	2	2	GE-00012	TN 09 N 1234	\N	\N	\N	\N	\N	2026-08-17 11:05:56.207301	udhay	\N	udhay	Standard	\N	/api/uploads/invoices/2/20260817_053552_b931067d.webp		Completed	3	f	2026-08-17 11:05:56.20925	A4576C56	2026-08-11	100000	\N	\N	\N		/api/uploads/invoices/2/20260817_053405_974aef41.png	4546745	2026-08-10	\N
 208	2	2	GE-00013	KA 02 EX 1234	\N	\N	\N	\N	\N	2026-08-17 12:12:05.350568	Ram	\N	Ram	Standard	\N			Completed	3	f	2026-08-17 12:12:05.351843		\N	0	1700	2500	800	/api/uploads/invoices/2/20260817_064203_39a6471d.png	/api/uploads/invoices/2/20260817_064120_6c6f0417.png	DC5463	2026-08-16	\N
 209	2	2	GE-00014	TN 08 V 2508	\N	\N	\N	\N	\N	2026-08-18 11:56:36.527989	giri	\N	giri	Standard	\N	/api/uploads/invoices/2/20260818_062605_6be797fa.png		Completed	3	f	2026-08-18 11:56:36.529581	A89B7655	2026-08-10	20000	\N	\N	\N		/api/uploads/invoices/2/20260818_062532_d6fd3d5a.png	12657	2026-08-10	\N
+201	2	2	GE-00006		\N	\N	\N	\N	\N	2026-07-22 17:35:16.068379	Fredrick	\N	Fredrick	Standard	\N	/api/uploads/invoices/2/20260722_120501_36d4ec51.jpg		Completed	3	f	2026-07-22 17:35:16.070259	inv0002	2026-07-16	20000	\N	\N	\N				\N	\N
 202	2	2	GE-00007		\N	\N	\N	\N	\N	2026-08-05 20:33:59.079737	General	\N	General	Standard	\N			Completed	3	f	2026-08-05 20:33:59.08112		\N	0	\N	\N	\N		/api/uploads/invoices/2/20260805_150345_8ce00da4.pdf	33333	2026-08-04	\N
 210	2	2	GE-00015	KA 09 A 6574	\N	\N	\N	\N	\N	2026-08-28 12:15:02.00723	raina	\N	raina	Standard	\N	/api/uploads/invoices/2/20260828_064441_059cb5bd.pdf		Completed	8	f	2026-08-28 12:15:02.008284	Q26F67898	2026-08-27	10900	\N	\N	\N		/api/uploads/invoices/2/20260828_064409_eeeb545b.png	124587	2026-08-27	\N
+211	2	2	GE-00016	TN 01 AB 1234	\N	\N	\N	\N	\N	2026-09-01 14:52:19.379264	arun	\N	arun	Standard	\N	/api/uploads/invoices/2/20260901_092141_a9fbbae5.pdf		Completed	8	f	2026-09-01 14:52:19.380531	H57894JH	2026-09-01	34780	\N	\N	\N		/api/uploads/invoices/2/20260901_092050_eafdd6fc.png	99823	2026-09-01	\N
 \.
 
 
@@ -11598,6 +11445,10 @@ COPY public.grn (id, tenant_id, site_id, grn_number, po_id, gate_entry_id, wareh
 221	2	2	GRN-00018	\N	\N	62	3	69	Direct Invoice	121212	2026-08-26	1200		\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-27 15:44:28.070195	2026-08-27 10:14:28.097061	\N	\N		\N	
 222	2	2	GRN-00019	\N	202	62	3	69	Direct Invoice	123123	\N	0		\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-27 15:45:52.983411	2026-08-27 10:15:53.009989	\N	\N	33333	2026-08-04	/api/uploads/invoices/2/20260805_150345_8ce00da4.pdf
 223	2	2	GRN-00020	\N	210	62	3	69	Direct Invoice	Q26F67898	2026-08-27	10900	/api/uploads/invoices/2/20260828_064441_059cb5bd.pdf	\N	10900	0	0	0	0	\N	Pending	Completed	\N	10	f	2026-08-28 12:24:47.230144	2026-08-28 06:54:47.285683	\N	\N	124587	2026-08-27	/api/uploads/invoices/2/20260828_064409_eeeb545b.png
+224	2	2	GRN-00021	289	211	62	3	66	PO-Based	H57894JH	2026-09-01	250000	/api/uploads/invoices/2/20260901_092141_a9fbbae5.pdf	\N	250000	0	0	0	0	\N	Not Applicable	Completed	\N	10	f	2026-09-01 14:56:54.365342	2026-09-01 09:26:54.571495	\N	\N	99823	2026-09-01	/api/uploads/invoices/2/20260901_092050_eafdd6fc.png
+225	2	2	GRN-00022	\N	201	62	3	66	Direct Invoice	inv0002	2026-07-16	20000	/api/uploads/invoices/2/20260722_120501_36d4ec51.jpg	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-09-01 15:08:37.19439	2026-09-01 09:38:37.200146	\N	\N		\N	
+226	2	2	GRN-00023	\N	\N	62	3	69	Direct Invoice	r567j9	2026-09-01	11000		\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-09-01 17:06:05.701174	2026-09-01 11:36:05.718062	\N	\N		2026-09-01	
+227	2	2	GRN-00024	\N	\N	62	3	69	Direct Invoice	3dfger4565	2026-09-01	11000		\N	0	0	0	0	0	\N	Pending	Completed	\N	10	f	2026-09-01 17:15:41.237013	2026-09-01 11:45:41.268752	\N	\N	45365	\N	
 \.
 
 
@@ -11670,6 +11521,10 @@ COPY public.grn_items (id, grn_id, material_id, po_item_id, ordered_quantity, re
 524	221	2564	\N	0	11	11	0	0	\N	0	0	0	0	0	0	0	0	\N
 525	222	4877	\N	0	10	10	0	0	\N	0	0	0	0	0	0	0	0	\N
 526	223	2564	\N	0	1	1	0	10900	\N	0	0	0	0	0	0	10900	0	\N
+527	224	4878	1762	5	5	5	0	50000	\N	0	0	0	0	0	0	250000	0	\N
+528	225	4879	\N	0	10	10	0	0	\N	0	0	0	0	0	0	0	0	\N
+529	226	4880	\N	0	100	100	0	0	\N	0	0	0	0	0	0	0	0	\N
+530	227	4880	\N	0	50	50	0	0	\N	0	0	0	0	0	0	0	0	\N
 \.
 
 
@@ -11820,6 +11675,15 @@ COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, appr
 140	256	26	3	2026-08-28 18:34:57.60678	{"540": {"quantity": 2.0, "remarks": null}}	\N
 141	256	16	3	2026-08-28 18:35:02.842163	{"540": {"quantity": 2.0, "remarks": null}}	\N
 142	256	29	3	2026-08-28 18:35:02.842188	{"540": {"quantity": 2.0, "remarks": null}}	\N
+143	257	46	7	2026-09-01 15:04:30.907881	{"541": {"quantity": 1.0, "remarks": null}}	\N
+144	257	16	3	2026-09-01 15:06:24.177397	{"541": {"quantity": 1.0, "remarks": null}}	\N
+145	257	100	3	2026-09-01 15:06:24.177414	{"541": {"quantity": 1.0, "remarks": null}}	\N
+146	258	45	3	2026-09-01 17:20:59.667853	{"542": {"quantity": 10.0, "remarks": null}}	\N
+147	258	44	3	2026-09-01 17:20:59.667896	{"542": {"quantity": 10.0, "remarks": null}}	\N
+148	258	46	3	2026-09-01 17:20:59.667939	{"542": {"quantity": 10.0, "remarks": null}}	\N
+149	258	96	3	2026-09-01 17:20:59.667954	{"542": {"quantity": 10.0, "remarks": null}}	\N
+150	258	16	3	2026-09-01 17:21:05.448953	{"542": {"quantity": 10.0, "remarks": null}}	\N
+151	258	100	3	2026-09-01 17:21:05.448996	{"542": {"quantity": 10.0, "remarks": null}}	\N
 \.
 
 
@@ -11948,6 +11812,9 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 538	254	2565	1	0	0	\N
 539	255	4604	5	0	0	5
 540	256	2435	2	2	2	2
+541	257	4879	1	0	0	1
+542	258	4880	10	10	0	10
+543	259	4881	1	0	0	\N
 \.
 
 
@@ -12034,6 +11901,9 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 252	2	2	IND-00037	9	\N	\N			Pharmaceutics		46575.7	Issued	2	3	2026-08-28 06:30:21.367917	f	2026-08-28 11:44:54.734349	2026-08-28 12:03:40.440445	4	\N	\N
 256	2	2	IND-00041	3	237	\N	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00039 - Request for Equipment Installation: EPCMS-102-ESA-001	9315.14	Issued	2	3	2026-08-28 13:05:02.870907	f	2026-08-28 18:34:23.468818	2026-08-28 18:35:32.216772	11	475	\N
 255	2	2	IND-00040	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		16400	Approved	2	3	2026-08-28 10:35:55.885687	f	2026-08-28 16:05:39.664545	2026-08-28 16:05:55.891759	11	\N	\N
+257	2	2	IND-00042	3	\N	\N			CSE - Data Science		70000	Approved	2	3	2026-09-01 09:36:24.198002	f	2026-09-01 15:02:30.637206	2026-09-01 15:06:24.258591	3	\N	\N
+259	2	2	IND-00044	9	\N	\N			Admin		85000	Submitted	1	\N	\N	f	2026-09-01 18:08:51.443756	2026-09-01 18:08:51.4438	12	\N	\N
+258	2	2	IND-00043	9	\N	\N			Medical Surgical Nursing		1100	Issued	2	3	2026-09-01 11:51:05.477348	f	2026-09-01 17:20:22.198302	2026-09-01 17:25:32.391743	8	\N	\N
 \.
 
 
@@ -12359,6 +12229,8 @@ COPY public.material_issue_items (id, issue_id, material_id, quantity, rate, rem
 235	255	2435	10	4657.57	\N	62
 236	256	2423	5	3569.11	\N	62
 237	257	2435	2	4657.57	\N	62
+238	267	4880	5	110	\N	62
+239	268	4880	5	110	\N	62
 \.
 
 
@@ -12435,6 +12307,8 @@ COPY public.material_issues (id, tenant_id, site_id, issue_number, warehouse_id,
 255	2	2	ISS-00025	62	3	252	\N	\N	Pharmaceutics	\N	Fulfillment for IND-00037	Completed	3	\N	t	2026-08-28 06:33:47.050091	3	\N	f	2026-08-28 12:03:40.332158	\N
 256	2	2	ISS-00026	62	3	253	\N	\N	Civil Engineering	\N	Fulfillment for IND-00038	Completed	12	\N	f	\N	\N	\N	f	2026-08-28 12:37:52.381178	\N
 257	2	2	ISS-00027	62	1	256	7	237	HEALTH 	\N	Fulfillment for IND-00041	Completed	3	\N	t	2026-08-28 13:05:38.395185	3	\N	f	2026-08-28 18:35:32.20909	\N
+267	2	2	ISS-00028	62	3	258	\N	\N	Medical Surgical Nursing	\N	Fulfillment for IND-00043	Completed	3	\N	f	\N	\N	\N	f	2026-09-01 17:25:04.685214	\N
+268	2	2	ISS-00029	62	3	258	\N	\N	Medical Surgical Nursing	\N	Fulfillment for IND-00043	Completed	3	\N	f	\N	\N	\N	f	2026-09-01 17:25:32.371109	\N
 \.
 
 
@@ -12460,6 +12334,7 @@ COPY public.material_return_items (id, return_id, material_id, returned_qty, rem
 14	23	2565	5		4	-1	none
 16	25	2751	1	no need	1	0	
 17	26	2564	1		1	0	
+18	27	4879	1	upgrade	1	0	
 \.
 
 
@@ -12485,6 +12360,7 @@ COPY public.material_returns (id, tenant_id, site_id, return_number, warehouse_i
 25	2	2	RET-00003	62	3	\N	Cardiothoracic Lab	Unused		vik	3	f	2026-08-06 14:48:02.906889	Completed	2026-08-06 09:18:11.140767	3
 23	2	2	RET-00002	62	3	\N	HEALTH 	Unused			3	f	2026-06-12 02:04:24.390151	Partially Received	2026-08-17 05:56:27.492976	3
 26	2	2	RET-00004	62	3	\N	Admin	Unused		vikky	3	f	2026-08-18 11:19:42.572711	Completed	2026-08-18 05:49:52.043785	3
+27	2	2	RET-00005	62	3	\N	Admin	Unused		VIKK	3	f	2026-09-01 15:34:48.956606	Completed	2026-09-01 10:05:11.646958	3
 \.
 
 
@@ -15900,6 +15776,10 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 4845	2	2	CHE-00242	Vanillin	80	\N	47	301	0	1377	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.306891	2026-08-06 13:39:15.644035	62	\N	\N	f	f	\N
 4846	2	2	CHE-00243	Wager's reagent	80	\N	48	68	0	1124	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306897	2026-08-06 13:39:15.644038	62	\N	\N	f	f	\N
 4877	2	2	HSK-00071	chair	69	\N	29	10	30	680	\N	General		18	Furniture		t	f	2026-08-27 12:39:41.211811	2026-08-27 12:40:33.301802	62			f	f	
+4878	2	2	ITI-00041	LAP	70	77	29	10	20	50000	\N	Secure Storage		18	Equipment		t	f	2026-09-01 14:32:58.571305	2026-09-01 14:32:58.571322	75		0001	f	t	
+4879	2	2	ITI-00042	IT-LAP	70	77	29	10	20	70000	\N	Secure Storage		18	Non-Consumable		t	f	2026-09-01 15:01:39.300224	2026-09-01 15:01:39.300237	75			f	f	
+4880	2	2	TML-00001	Plywood 18mm	82	\N	29	20	200	110	\N	General		18	Consumable		t	f	2026-09-01 17:03:26.491667	2026-09-01 17:04:45.044865	62			f	f	
+4881	2	2	ELC-00001	DIGITAL theodolite	81	\N	29	20	200	85000	\N	Rack Storage		18	Non-Consumable		t	f	2026-09-01 17:37:33.859112	2026-09-01 17:37:33.859155	62			f	f	
 \.
 
 
@@ -15908,77 +15788,75 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 --
 
 COPY public.menu_items (id, text, icon_name, path, resource, platform_only, parent_id, "order", is_active, basic_actions, extended_actions, created_at, updated_at) FROM stdin;
-1	Dashboard	Dashboard	/	\N	f	\N	0	t	[]	[]	2026-08-12 10:42:10.006236	2026-08-12 10:42:10.00625
-2	Dashboard	\N	/	dashboard	f	1	0	t	["read"]	[]	2026-08-12 10:42:10.007872	2026-08-12 10:42:10.007883
-3	Master Data	Category	\N	\N	f	\N	1	t	[]	[]	2026-08-12 10:42:10.00858	2026-08-12 10:42:10.00859
-4	Materials	\N	/materials	materials	f	3	0	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.010064	2026-08-12 10:42:10.010072
-5	Categories	\N	/categories	categories	f	3	1	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.010076	2026-08-12 10:42:10.010079
-6	Sub Categories	\N	/subcategories	subcategories	f	3	2	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.010083	2026-08-12 10:42:10.010085
-7	UOM	\N	/uom	uom	f	3	3	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.010089	2026-08-12 10:42:10.010092
-8	Vendors	\N	/vendors	vendors	f	3	4	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}]	2026-08-12 10:42:10.010095	2026-08-12 10:42:10.010098
-9	Stores	\N	/warehouses	warehouses	f	3	5	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.010101	2026-08-12 10:42:10.010104
-11	Procurement	ShoppingCart	\N	\N	f	\N	2	t	[]	[]	2026-08-12 10:42:10.01141	2026-08-12 10:42:10.011418
-12	Indents	\N	/indents	indents	f	11	0	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_convert_to_po", "label": "Convert to PO", "color": "#3B82F6"}, {"key": "can_acknowledge", "label": "Acknowledge", "color": "#F59E0B"}]	2026-08-12 10:42:10.012431	2026-08-12 10:42:10.01244
-13	Purchase Requests	\N	/purchase-requests	purchase_requests	f	11	1	t	["read", "create", "update", "delete"]	[{"key": "can_submit", "label": "Submit", "color": "#3B82F6"}, {"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_convert_to_po", "label": "Convert to PO", "color": "#3B82F6"}, {"key": "can_hold", "label": "Hold", "color": "#F59E0B"}, {"key": "can_short_close", "label": "Short Close", "color": "#F97316"}]	2026-08-12 10:42:10.012444	2026-08-12 10:42:10.012447
-14	Quotations	\N	/quotations	quotations	f	11	2	t	["read", "create", "update", "delete"]	[{"key": "can_send_to_vendors", "label": "Send to Vendors", "color": "#3B82F6"}, {"key": "can_receive", "label": "Receive", "color": "#10B981"}, {"key": "can_enter_quotes", "label": "Enter Quotes", "color": "#F59E0B"}, {"key": "can_compare", "label": "Compare", "color": "#8B5CF6"}, {"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_convert_to_po", "label": "Convert to PO", "color": "#3B82F6"}]	2026-08-12 10:42:10.012451	2026-08-12 10:42:10.012454
-15	Contracts	\N	/contracts	contracts	f	11	3	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}]	2026-08-12 10:42:10.012457	2026-08-12 10:42:10.01246
-16	Purchase Orders	\N	/purchase-orders	purchase_orders	f	11	4	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_hold", "label": "Hold", "color": "#F59E0B"}, {"key": "can_send_to_vendor", "label": "Send to Vendor", "color": "#3B82F6"}, {"key": "can_short_close", "label": "Short Close", "color": "#F97316"}]	2026-08-12 10:42:10.012463	2026-08-12 10:42:10.012466
-18	Store Operations	Store	\N	\N	f	\N	3	t	[]	[]	2026-08-12 10:42:10.013512	2026-08-12 10:42:10.013523
-19	Gate Entry	\N	/gate-entry	gate_entry	f	18	0	t	["read", "create", "update", "delete"]	[{"key": "can_record_entry", "label": "Record Entry", "color": "#3B82F6"}, {"key": "can_verify", "label": "Verify", "color": "#10B981"}]	2026-08-12 10:42:10.014624	2026-08-12 10:42:10.014639
-20	Invoices	\N	/invoices	invoice	f	18	1	t	["read", "create", "update", "delete"]	[{"key": "can_register", "label": "Register", "color": "#3B82F6"}, {"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-08-12 10:42:10.014643	2026-08-12 10:42:10.014646
-28	Inventory	Warehouse	/inventory	\N	f	\N	4	t	[]	[]	2026-08-12 10:42:10.015722	2026-08-12 10:42:10.015731
-29	Inventory	\N	/inventory	inventory	f	28	0	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.016437	2026-08-12 10:42:10.016445
-30	Maintenance	Build	\N	\N	f	\N	5	t	[]	[]	2026-08-12 10:42:10.016789	2026-08-12 10:42:10.016797
-31	Complaints	\N	/complaints	complaints	f	30	0	t	["read", "create", "update", "delete"]	[{"key": "can_assign", "label": "Assign", "color": "#3B82F6"}, {"key": "can_approve_level1", "label": "Level 1 Approve", "color": "#10B981"}, {"key": "can_approve_level2", "label": "Level 2 Approve", "color": "#10B981"}]	2026-08-12 10:42:10.017526	2026-08-12 10:42:10.017534
-32	PM Schedule	\N	/equipment/pm-schedule	pm_schedule	f	30	1	t	["read", "create", "update", "delete"]	[{"key": "generate_calls", "label": "Generate Calls", "color": "#3B82F6"}]	2026-08-12 10:42:10.017538	2026-08-12 10:42:10.017541
-33	Calibration Schedule	\N	/equipment/calibration-schedule	calibration_schedule	f	30	2	t	["read", "create", "update", "delete"]	[{"key": "generate_calls", "label": "Generate Calls", "color": "#3B82F6"}]	2026-08-12 10:42:10.017544	2026-08-12 10:42:10.017547
-35	Intelligence	\N	/intelligence	intelligence	f	34	0	t	["read"]	[]	2026-08-12 10:42:10.018931	2026-08-12 10:42:10.01894
-36	Finance	AccountBalance	\N	\N	f	\N	7	t	[]	[]	2026-08-12 10:42:10.019286	2026-08-12 10:42:10.019294
-34	Intelligence	Insights	/intelligence	\N	f	\N	6	t	[]	[]	2026-08-12 10:42:10.018194	2026-08-12 10:42:10.018203
-24	Stock Transfer	\N	/transfers	transfers	f	18	6	t	["read", "create", "update", "delete"]	[{"key": "can_transfer", "label": "Transfer Stock", "color": "#3B82F6"}]	2026-08-12 10:42:10.014666	2026-08-27 16:17:01.887431
-37	Invoice Tracking	\N	/invoice-tracking	finance_invoices	f	36	0	t	["read", "create", "update", "delete"]	[{"key": "can_send_hard_copy", "label": "Send Hard Copy", "color": "#3B82F6"}, {"key": "can_receive_hard_copy", "label": "Receive Hard Copy", "color": "#10B981"}, {"key": "can_send_for_payment", "label": "Send for Payment", "color": "#F59E0B"}, {"key": "can_mark_paid", "label": "Mark as Paid", "color": "#8B5CF6"}]	2026-08-12 10:42:10.020023	2026-08-12 10:42:10.020031
-38	Pending Invoices Report	\N	/finance/reports/pending-invoices	report_finance	f	36	1	t	["read"]	[]	2026-08-12 10:42:10.020035	2026-08-12 10:42:10.020038
-39	Pending Payments Report	\N	/finance/reports/pending-payments	report_finance	f	36	2	t	["read"]	[]	2026-08-12 10:42:10.020041	2026-08-12 10:42:10.020044
-40	Reports	Assessment	\N	\N	f	\N	8	t	[]	[]	2026-08-12 10:42:10.020668	2026-08-12 10:42:10.020676
-42	Issue Summary	\N	/reports/issue-summary	report_issue_summary	f	40	1	t	["read"]	[]	2026-08-12 10:42:10.021645	2026-08-12 10:42:10.021648
-43	Rate Analysis	\N	/reports/rate-analysis	report_rate_analysis	f	40	2	t	["read"]	[]	2026-08-12 10:42:10.021651	2026-08-12 10:42:10.021654
-44	Equipment Count	\N	/reports/equipment-count	report_equipment_count	f	40	3	t	["read"]	[]	2026-08-12 10:42:10.021657	2026-08-12 10:42:10.021659
-45	Receipt Summary	\N	/reports/receipt-summary	report_receipt_summary	f	40	4	t	["read"]	[]	2026-08-12 10:42:10.021662	2026-08-12 10:42:10.021665
-46	Department Inventory	\N	/reports/department-inventory	report_dept_inventory	f	40	5	t	["read"]	[]	2026-08-12 10:42:10.021669	2026-08-12 10:42:10.021671
-47	Department Equipment	\N	/reports/department-equipment	report_dept_inventory	f	40	6	t	["read"]	[]	2026-08-12 10:42:10.021674	2026-08-12 10:42:10.021677
-48	Pending Gatepass Returns	\N	/reports/pending-gatepass-returns	report_pending_gatepass	f	40	7	t	["read"]	[]	2026-08-12 10:42:10.02168	2026-08-12 10:42:10.021683
-49	Call Status	\N	/reports/call-status	reports	f	40	8	t	["read"]	[]	2026-08-12 10:42:10.021686	2026-08-12 10:42:10.021689
-50	Admin	Settings	\N	\N	f	\N	9	t	[]	[]	2026-08-12 10:42:10.022609	2026-08-12 10:42:10.022618
-51	Users	\N	/admin/users	admin_users	f	50	0	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.02364	2026-08-12 10:42:10.023648
-52	Roles	\N	/admin/roles	admin_roles	f	50	1	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.023652	2026-08-12 10:42:10.023655
-53	Audit Logs	\N	/admin/audit-logs	audit_logs	f	50	2	t	["read"]	[]	2026-08-12 10:42:10.023658	2026-08-12 10:42:10.023661
-54	Approval Flows	\N	/admin/approval-flows	approval_flows	f	50	3	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.023664	2026-08-12 10:42:10.023667
-55	Material Allowances	\N	/admin/material-allowances	material_allowances	f	50	4	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.02367	2026-08-12 10:42:10.023673
-56	Configurations	\N	/admin/configurations	configurations	f	50	5	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.023676	2026-08-12 10:42:10.023679
-57	Locations	\N	/admin/locations	locations	f	50	6	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.023682	2026-08-12 10:42:10.023684
-58	Projects	\N	/projects	projects	f	50	7	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.023687	2026-08-12 10:42:10.02369
-59	Terms & Conditions	\N	/terms	terms	f	50	8	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.023694	2026-08-12 10:42:10.023697
-60	Company Addresses	\N	/company-addresses	company_addresses	f	50	9	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.0237	2026-08-12 10:42:10.023703
-61	SaaS Admin	Security	/saas-admin	\N	t	\N	10	t	[]	[]	2026-08-12 10:42:10.024748	2026-08-12 10:42:10.02476
-62	Vendor Work Orders	assignment_turned_in	/procurement/vendor-work-orders	vendor_work_orders	\N	11	6	t	["read", "create", "update", "delete"]	[]	2026-08-14 13:34:38.683854	2026-08-14 13:34:38.683854
-17	Work Orders	\N	/work-orders	work_orders	f	11	5	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_send_to_vendor", "label": "Send to Vendor", "color": "#3B82F6"}, {"key": "can_short_close", "label": "Short Close", "color": "#F97316"}]	2026-08-12 10:42:10.012469	2026-08-12 10:42:10.012472
-63	Dept. Equip Details	Assessment	/reports/department-equipment-details	report_dept_inventory	f	40	9	t	[]	[]	2026-08-26 19:45:35.453739	2026-08-26 19:45:35.453753
-64	Calibration Details	\N	/reports/calibration-details	report_equipment	f	40	10	t	["read"]	[]	2026-08-27 15:31:37.279616	2026-08-27 15:31:37.279642
-21	GRN	\N	/grn	grn	f	18	3	t	["read", "create", "update", "delete"]	[{"key": "can_create_grn", "label": "Create GRN", "color": "#3B82F6"}, {"key": "can_complete", "label": "Complete", "color": "#10B981"}]	2026-08-12 10:42:10.014649	2026-08-27 16:17:01.887408
-22	Material Issue	\N	/issues	issues	f	18	4	t	["read", "create", "update", "delete"]	[{"key": "can_issue", "label": "Issue Materials", "color": "#3B82F6"}, {"key": "can_direct_issue", "label": "Direct Issue", "color": "#10B981"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-08-12 10:42:10.014655	2026-08-27 16:17:01.887421
-23	Returns	\N	/returns	returns	f	18	5	t	["read", "create", "update", "delete"]	[{"key": "can_return", "label": "Return Materials", "color": "#3B82F6"}, {"key": "receive", "label": "Receive Return", "color": "#10B981"}]	2026-08-12 10:42:10.01466	2026-08-27 16:17:01.887427
-25	Write Off	\N	/write-offs	write_offs	f	18	7	t	["read", "create", "update", "delete"]	[{"key": "can_submit", "label": "Submit", "color": "#3B82F6"}, {"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}]	2026-08-12 10:42:10.014672	2026-08-27 16:17:01.887434
-26	Gate Pass	\N	/gate-passes	gate_passes	f	18	8	t	["read", "create", "update", "delete"]	[{"key": "can_create", "label": "Create", "color": "#3B82F6"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-08-12 10:42:10.014678	2026-08-27 16:17:01.887437
-27	Issue Acknowledgement	\N	/pending-acknowledgments	acknowledgements	f	18	9	t	["read", "create", "update", "delete"]	[{"key": "can_acknowledge", "label": "Acknowledge Receipt", "color": "#F59E0B"}]	2026-08-12 10:42:10.014684	2026-08-27 16:17:01.88744
-66	Stock Report	\N	/reports/stock	reports	f	40	11	t	["read"]	[]	2026-08-27 16:37:24.85691	2026-08-28 14:24:10.718061
-67	Consumption Report	\N	/reports/consumption	reports	f	40	12	t	["read"]	[]	2026-08-27 16:37:24.856929	2026-08-28 14:24:10.71945
-68	PR Status	\N	/reports/pr-status	reports	f	40	13	t	["read"]	[]	2026-08-27 16:37:24.856937	2026-08-28 14:24:10.721037
-69	PO Status	\N	/reports/po-status	reports	f	40	14	t	["read"]	[]	2026-08-27 16:37:24.856943	2026-08-28 14:24:10.72237
-65	Credit Notes	ReceiptLong	/credit-notes	credit_note	f	18	2	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-08-27 16:11:10.3453	2026-08-31 11:27:35.039566
-10	Equipment	\N	/equipment	equipment	f	3	6	t	["read", "create", "update", "delete"]	[{"key": "create_po", "label": "Create PO", "color": "#10B981"}, {"key": "print_qr", "label": "Print QR", "color": "#64748B"}, {"key": "update_serial", "label": "Update Serial", "color": "#F59E0B"}, {"key": "complete_install", "label": "Complete Install", "color": "#10B981"}, {"key": "request_install", "label": "Request Install", "color": "#3B82F6"}, {"key": "upload_docs", "label": "Upload Docs", "color": "#8B5CF6"}, {"key": "log_usage", "label": "Log Usage", "color": "#EC4899"}, {"key": "relocate", "label": "Relocate", "color": "#6366F1"}]	2026-08-12 10:42:10.010107	2026-08-28 14:24:10.682016
-70	Material Movement	\N	/reports/movement	reports	f	40	15	t	["read"]	[]	2026-08-27 16:37:24.85695	2026-08-28 14:24:10.723499
-71	Return Summary	\N	/reports/return-summary	reports	f	40	16	t	["read"]	[]	2026-08-27 16:37:24.856956	2026-08-28 14:24:10.724702
-72	Equipment Write-off	\N	/reports/equipment-writeoff	reports	f	40	17	t	["read"]	[]	2026-08-27 16:37:24.856962	2026-08-28 14:24:10.725838
+31	Complaints	\N	/complaints	complaints	f	30	0	t	["read", "create", "update", "delete"]	[{"key": "can_assign", "label": "Assign", "color": "#3B82F6"}, {"key": "can_approve_level1", "label": "Level 1 Approve", "color": "#10B981"}, {"key": "can_approve_level2", "label": "Level 2 Approve", "color": "#10B981"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+32	PM Schedule	\N	/equipment/pm-schedule	pm_schedule	f	30	1	t	["read", "create", "update", "delete"]	[{"key": "generate_calls", "label": "Generate Calls", "color": "#3B82F6"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+1	Dashboard	Dashboard	/	\N	f	\N	0	t	[]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+2	Dashboard	\N	/	dashboard	f	1	0	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+3	Master Data	Category	\N	\N	f	\N	1	t	[]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+4	Materials	\N	/materials	materials	f	3	0	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+5	Categories	\N	/categories	categories	f	3	1	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+6	Sub Categories	\N	/subcategories	subcategories	f	3	2	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+7	UOM	\N	/uom	uom	f	3	3	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+8	Vendors	\N	/vendors	vendors	f	3	4	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+9	Stores	\N	/warehouses	warehouses	f	3	5	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+10	Equipment	\N	/equipment	equipment	f	3	6	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+11	Procurement	ShoppingCart	\N	\N	f	\N	2	t	[]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+12	Indents	\N	/indents	indents	f	11	0	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_convert_to_po", "label": "Convert to PO", "color": "#3B82F6"}, {"key": "can_acknowledge", "label": "Acknowledge", "color": "#F59E0B"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+13	Purchase Requests	\N	/purchase-requests	purchase_requests	f	11	1	t	["read", "create", "update", "delete"]	[{"key": "can_submit", "label": "Submit", "color": "#3B82F6"}, {"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_convert_to_po", "label": "Convert to PO", "color": "#3B82F6"}, {"key": "can_hold", "label": "Hold", "color": "#F59E0B"}, {"key": "can_short_close", "label": "Short Close", "color": "#F97316"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+14	Quotations	\N	/quotations	quotations	f	11	2	t	["read", "create", "update", "delete"]	[{"key": "can_send_to_vendors", "label": "Send to Vendors", "color": "#3B82F6"}, {"key": "can_receive", "label": "Receive", "color": "#10B981"}, {"key": "can_enter_quotes", "label": "Enter Quotes", "color": "#F59E0B"}, {"key": "can_compare", "label": "Compare", "color": "#8B5CF6"}, {"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_convert_to_po", "label": "Convert to PO", "color": "#3B82F6"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+15	Contracts	\N	/contracts	contracts	f	11	3	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+16	Purchase Orders	\N	/purchase-orders	purchase_orders	f	11	4	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_hold", "label": "Hold", "color": "#F59E0B"}, {"key": "can_send_to_vendor", "label": "Send to Vendor", "color": "#3B82F6"}, {"key": "can_short_close", "label": "Short Close", "color": "#F97316"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+18	Store Operations	Store	\N	\N	f	\N	3	t	[]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+19	Gate Entry	\N	/gate-entry	gate_entry	f	18	0	t	["read", "create", "update", "delete"]	[{"key": "can_record_entry", "label": "Record Entry", "color": "#3B82F6"}, {"key": "can_verify", "label": "Verify", "color": "#10B981"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+20	Invoices	\N	/invoices	invoice	f	18	1	t	["read", "create", "update", "delete"]	[{"key": "can_register", "label": "Register", "color": "#3B82F6"}, {"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+65	Credit Notes	ReceiptLong	/credit-notes	credit_notes	f	18	2	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+21	GRN	\N	/grn	grn	f	18	3	t	["read", "create", "update", "delete"]	[{"key": "can_create_grn", "label": "Create GRN", "color": "#3B82F6"}, {"key": "can_complete", "label": "Complete", "color": "#10B981"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+22	Material Issue	\N	/issues	issues	f	18	3	t	["read", "create", "update", "delete"]	[{"key": "can_issue", "label": "Issue Materials", "color": "#3B82F6"}, {"key": "can_direct_issue", "label": "Direct Issue", "color": "#10B981"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+23	Returns	\N	/returns	returns	f	18	4	t	["read", "create", "update", "delete"]	[{"key": "can_return", "label": "Return Materials", "color": "#3B82F6"}, {"key": "receive", "label": "Receive Return", "color": "#10B981"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+24	Stock Transfer	\N	/transfers	transfers	f	18	5	t	["read", "create", "update", "delete"]	[{"key": "can_transfer", "label": "Transfer Stock", "color": "#3B82F6"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+25	Write Off	\N	/write-offs	write_offs	f	18	6	t	["read", "create", "update", "delete"]	[{"key": "can_submit", "label": "Submit", "color": "#3B82F6"}, {"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+26	Gate Pass	\N	/gate-passes	gate_passes	f	18	7	t	["read", "create", "update", "delete"]	[{"key": "can_create", "label": "Create", "color": "#3B82F6"}, {"key": "can_print", "label": "Print", "color": "#8B5CF6"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+27	Issue Acknowledgement	\N	/pending-acknowledgments	acknowledgements	f	18	8	t	["read", "create", "update", "delete"]	[{"key": "can_acknowledge", "label": "Acknowledge Receipt", "color": "#F59E0B"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+28	Inventory	Warehouse	/inventory	\N	f	\N	4	t	[]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+29	Inventory	\N	/inventory	inventory	f	28	0	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+30	Maintenance	Build	\N	\N	f	\N	5	t	[]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+33	Calibration Schedule	\N	/equipment/calibration-schedule	calibration_schedule	f	30	2	t	["read", "create", "update", "delete"]	[{"key": "generate_calls", "label": "Generate Calls", "color": "#3B82F6"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+34	Intelligence	Insights	/intelligence	\N	f	\N	6	t	[]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+35	Intelligence	\N	/intelligence	intelligence	f	34	0	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+36	Finance	AccountBalance	\N	\N	f	\N	7	t	[]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+37	Invoice Tracking	\N	/invoice-tracking	finance_invoices	f	36	0	t	["read", "create", "update", "delete"]	[{"key": "can_send_hard_copy", "label": "Send Hard Copy", "color": "#3B82F6"}, {"key": "can_receive_hard_copy", "label": "Receive Hard Copy", "color": "#10B981"}, {"key": "can_send_for_payment", "label": "Send for Payment", "color": "#F59E0B"}, {"key": "can_mark_paid", "label": "Mark as Paid", "color": "#8B5CF6"}]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+38	Pending Invoices Report	\N	/finance/reports/pending-invoices	report_finance	f	36	1	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+39	Pending Payments Report	\N	/finance/reports/pending-payments	report_finance	f	36	2	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+40	Reports	Assessment	\N	\N	f	\N	8	t	[]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+42	Issue Summary	\N	/reports/issue-summary	report_issue_summary	f	40	1	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+43	Rate Analysis	\N	/reports/rate-analysis	report_rate_analysis	f	40	2	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+44	Equipment Count	\N	/reports/equipment-count	report_equipment_count	f	40	3	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+45	Receipt Summary	\N	/reports/receipt-summary	report_receipt_summary	f	40	4	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+46	Department Inventory	\N	/reports/department-inventory	report_dept_inventory	f	40	5	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+47	Department Equipment	\N	/reports/department-equipment	report_dept_inventory	f	40	6	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+48	Pending Gatepass Returns	\N	/reports/pending-gatepass-returns	report_pending_gatepass	f	40	7	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+49	Call Status	\N	/reports/call-status	reports	f	40	8	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+63	Dept. Equip Details	\N	/reports/department-equipment-details	reports	f	40	9	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+64	Calibration Details	\N	/reports/calibration-details	reports	f	40	10	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+66	Stock Report	\N	/reports/stock	reports	f	40	11	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+67	Consumption Report	\N	/reports/consumption	reports	f	40	12	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+68	PR Status	\N	/reports/pr-status	reports	f	40	13	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+69	PO Status	\N	/reports/po-status	reports	f	40	14	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+70	Material Movement	\N	/reports/movement	reports	f	40	15	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+71	Return Summary	\N	/reports/return-summary	reports	f	40	16	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+72	Equipment Write-off	\N	/reports/equipment-writeoff	reports	f	40	17	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+50	Admin	Settings	\N	\N	f	\N	9	t	[]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+51	Users	\N	/admin/users	admin_users	f	50	0	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+52	Roles	\N	/admin/roles	admin_roles	f	50	1	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+53	Audit Logs	\N	/admin/audit-logs	audit_logs	f	50	2	t	["read"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+54	Approval Flows	\N	/admin/approval-flows	approval_flows	f	50	3	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+55	Material Allowances	\N	/admin/material-allowances	material_allowances	f	50	4	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+56	Configurations	\N	/admin/configurations	configurations	f	50	5	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+57	Locations	\N	/admin/locations	locations	f	50	6	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+58	Projects	\N	/projects	projects	f	50	7	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+59	Terms & Conditions	\N	/terms	terms	f	50	8	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+60	Company Addresses	\N	/company-addresses	company_addresses	f	50	9	t	["read", "create", "update", "delete"]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
+61	SaaS Admin	Security	/saas-admin	\N	t	\N	10	t	[]	[]	2026-09-02 09:43:08.688541	2026-09-02 09:43:08.688541
 \.
 
 
@@ -16199,6 +16077,9 @@ COPY public.purchase_order_approvals (id, po_id, approval_flow_id, approver_id, 
 139	287	15	3	{"1760": {"quantity": 10.0, "remarks": null}}	\N	2026-08-28 12:12:09.546407
 140	213	8	3	{}	\N	2026-08-28 18:10:35.627545
 141	213	9	3	{}	\N	2026-08-28 18:10:35.649406
+142	289	28	3	{"1762": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:45:52.730387
+143	289	18	3	{"1762": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:45:58.834343
+144	289	15	3	{"1762": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:45:58.834356
 \.
 
 
@@ -16413,6 +16294,9 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 1758	285	2564	10	16526.16	165261.6	0	\N	0	6	6	0	f	10
 1759	286	2564	10	16526.16	165261.6	0	\N	0	6	6	0	f	10
 1760	287	3505	10	761.41	7614.1	0	\N	0	9	9	0	f	10
+1762	289	4878	5	50000	250000	5	\N	0	0	0	18	f	5
+1763	290	4880	50	110	5500	0	\N	0	9	9	0	f	\N
+1764	291	4881	2	85000	170000	0	\N	0	9	9	0	f	\N
 \.
 
 
@@ -16532,10 +16416,13 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 282	2	2	PO-00038	66	3	206	\N	229	Formal	2707.5	\N	Draft	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-19 19:10:17.624234	2026-08-19 19:10:17.627119	1	\N	\N	\N	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N	\N
 283	2	2	PO-00039	63	3	206	\N	229	Formal	980	\N	Draft	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-19 19:10:17.628818	2026-08-19 19:10:17.63177	1	\N	\N	\N	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N	\N
 284	2	2	EPAHS/PO-00006	69	3	\N	\N	\N	Formal	23380.18	2026-08-31	Submitted	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-19 20:13:13.707776	2026-08-19 20:13:13.710153	1		\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase		\N
+291	2	2	EPAHS/PO-00011	62	3	215	\N	\N	Formal	200600	2026-09-15	Draft	1. Bill/Invoices in the name of East Point School of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-09-01 18:00:52.594345	2026-09-01 18:00:52.604433	1	\N	\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N	\N
 287	2	2	NRCN/PO-00004	63	3	\N	\N	\N	Formal	8984.64	2026-08-28	Approved	1. Bill/Invoices in the name of New Royal College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-28 06:42:09.5741	f	2026-08-28 12:11:48.202352	2026-08-28 12:12:09.575205	2		\N	9	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase		\N
 286	2	2	EPAHS/PO-00008	69	3	\N	\N	\N	Formal	185092.99	2026-08-31	Approved	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-28 06:39:25.886806	f	2026-08-28 12:07:03.852307	2026-08-28 12:09:25.888867	2		\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase		\N
 285	2	2	EPAHS/PO-00007	69	3	\N	\N	\N	Formal	185092.99	2026-08-31	Approved	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-28 06:39:39.828742	f	2026-08-28 12:07:03.705958	2026-08-28 12:09:39.829873	2		\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase		\N
 213	3	3	PO-00048	53	1	\N	\N	\N	Informal	59815.35	2026-07-01	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	3	2026-08-28 12:40:35.655742	f	2026-06-10 18:09:04.764216	2026-08-28 18:10:35.656407	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+289	2	2	EPAHS/PO-00009	66	3	213	\N	\N	Formal	295000	2026-09-15	Closed	1. Bill/Invoices in the name of New Royal College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	12	3	2026-09-01 09:15:58.865222	f	2026-09-01 14:40:57.828513	2026-09-01 14:56:54.57624	2		\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase		\N
+290	2	2	EPAHS/PO-00010	69	3	214	\N	\N	Formal	6490	2026-09-15	Draft	1. Bill/Invoices in the name of New Royal College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-09-01 17:10:03.707614	2026-09-01 17:10:03.718861	1	\N	\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N	\N
 \.
 
 
@@ -16602,6 +16489,17 @@ COPY public.purchase_request_approvals (id, pr_id, approval_flow_id, approver_id
 56	210	12	3	{"629": {"quantity": 100.0, "remarks": null}}	\N	2026-08-19 17:52:48.228673
 57	210	17	3	{"629": {"quantity": 100.0, "remarks": null}}	\N	2026-08-19 17:52:54.751183
 58	210	51	3	{"629": {"quantity": 100.0, "remarks": null}}	\N	2026-08-19 17:52:54.751196
+59	213	19	3	{"632": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:34:41.343533
+60	213	99	3	{"632": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:34:41.343548
+61	213	17	3	{"632": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:34:46.805354
+62	213	30	3	{"632": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:34:46.805373
+63	214	19	3	{"633": {"quantity": 50.0, "remarks": null}}	\N	2026-09-01 17:09:26.827395
+64	214	99	3	{"633": {"quantity": 50.0, "remarks": null}}	\N	2026-09-01 17:09:26.827441
+65	214	17	3	{"633": {"quantity": 50.0, "remarks": null}}	\N	2026-09-01 17:09:32.607071
+66	214	30	3	{"633": {"quantity": 50.0, "remarks": null}}	\N	2026-09-01 17:09:32.607114
+67	215	141	7	{"634": {"quantity": 2.0, "remarks": null}}	\N	2026-09-01 17:59:14.07316
+68	215	17	3	{"634": {"quantity": 2.0, "remarks": null}}	\N	2026-09-01 17:59:39.996046
+69	215	30	3	{"634": {"quantity": 2.0, "remarks": null}}	\N	2026-09-01 17:59:39.996058
 \.
 
 
@@ -16695,6 +16593,9 @@ COPY public.purchase_request_items (id, pr_id, material_id, quantity, approved_q
 630	211	2435	20	\N
 629	210	2751	100	100
 631	212	3475	5	\N
+632	213	4878	5	5
+633	214	4880	50	50
+634	215	4881	2	2
 \.
 
 
@@ -16742,10 +16643,13 @@ COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, 
 208	2	2	PR-00015	3	\N	\N	Child Health Nursing	3	2026-08-19		Converted to PO	3	2026-08-18 06:08:43.17722	f	2026-08-18 11:35:51.789742	2026-08-18 12:40:59.719751	2	Purchase	\N	\N	\N	\N	\N	f	\N
 207	2	2	PR-00014	3	\N	\N	Nursing Foundation	3	2026-08-18		Converted to PO	3	2026-08-17 05:11:52.603847	f	2026-08-17 10:41:37.019811	2026-08-19 17:42:17.288135	2	Purchase	\N	\N	\N	\N	\N	f	\N
 211	2	2	PR-00018	3	\N	\N	Electrotherapy Lab	3	2026-08-26		Draft	\N	\N	f	2026-08-19 17:52:39.77309	2026-08-19 17:52:39.773103	1	Purchase	\N	\N	\N	\N	\N	f	\N
+215	2	2	PR-00022	9	\N	\N	Medical Surgical Nursing	3	2026-09-08		Converted to PO	3	2026-09-01 12:29:40.007282	f	2026-09-01 17:44:17.218331	2026-09-01 18:00:52.602871	2	Purchase	\N	\N	\N	\N	\N	f	\N
 210	2	2	PR-00017	3	\N	\N	Pharmacognosy	3	2026-08-21		Converted to PO	3	2026-08-19 12:22:54.898428	f	2026-08-19 17:52:11.12197	2026-08-19 17:53:15.23984	2	Purchase	\N	\N	\N	\N	\N	f	\N
 204	2	2	PR-00011	3	\N	\N	Biochemistry	3	2026-08-10	\n[Short Closed: none]	Short Closed	3	2026-08-03 10:21:59.342786	f	2026-08-03 15:51:29.219193	2026-08-19 17:53:45.592723	2	Purchase	\N	\N	\N	\N	\N	f	\N
 206	2	2	PR-00013	3	\N	7	HEALTH 	3	2026-08-14		Converted to PO	3	2026-08-14 07:10:05.305418	f	2026-08-14 12:37:45.391061	2026-08-19 19:10:17.630922	2	Rental	Standard Rental	\N	Months	\N	\N	f	\N
 212	2	2	PR-00019	12	\N	\N	Biochemistry	3	2026-08-31		Submitted	\N	\N	f	2026-08-28 12:04:38.176645	2026-08-28 12:04:38.17669	1	Purchase	\N	\N	\N	\N	\N	f	\N
+213	2	2	PR-00020	3	\N	\N	Nursing Foundation	3	2026-09-08		Converted to PO	3	2026-09-01 09:04:46.829735	f	2026-09-01 14:33:45.814682	2026-09-01 14:40:57.899906	2	Purchase	\N	\N	\N	\N	\N	f	\N
+214	2	2	PR-00021	10	\N	\N	Medical Surgical Nursing	3	2026-09-01		Converted to PO	3	2026-09-01 11:39:32.639898	f	2026-09-01 17:09:00.521663	2026-09-01 17:10:03.717183	2	Purchase	\N	\N	\N	\N	\N	f	\N
 \.
 
 
@@ -20869,7 +20773,6 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1098	23	materials	t	t	t	t	{}
 1099	23	categories	t	t	t	t	{}
 1100	23	subcategories	t	t	t	t	{}
-712	16	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
 1941	17	returns	t	t	t	t	{"can_issue": true, "can_print": true, "can_return": true, "receive": true}
 1942	17	transfers	t	t	t	t	{"can_issue": true, "can_print": true, "can_transfer": true}
 1943	17	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": false, "can_reject": false, "can_convert_to_po": false, "can_hold": false, "can_short_close": false}
@@ -20878,33 +20781,11 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1946	17	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
 1947	17	report_issue_summary	t	f	f	f	{}
 1948	17	report_receipt_summary	t	f	f	f	{}
-722	18	returns	t	t	t	t	{}
-723	18	transfers	t	t	t	t	{}
-724	18	dashboard	t	f	f	f	{}
-725	18	materials	t	t	t	t	{}
-726	18	categories	t	t	t	t	{}
-727	18	vendors	t	t	t	t	{}
-728	18	warehouses	t	t	t	t	{}
-729	18	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
-730	18	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
-731	18	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
-732	18	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
-733	18	gate_entry	t	t	t	t	{}
-734	18	invoice	t	t	t	t	{}
-735	18	grn	t	t	t	t	{}
-736	18	issues	t	t	t	t	{}
-737	18	acknowledgements	t	t	t	t	{}
-738	18	inventory	t	t	t	t	{}
-739	18	intelligence	t	f	f	f	{}
-740	18	reports	t	f	f	f	{}
-741	18	admin_users	t	t	t	t	{}
-742	18	admin_roles	t	t	t	t	{}
-743	18	approval_flows	t	t	t	t	{}
-744	18	projects	t	t	t	t	{}
-745	18	organizations	t	t	t	t	{}
-746	18	departments	t	t	t	t	{}
-747	18	terms	t	t	t	t	{}
-748	18	gate_passes	t	t	t	t	{}
+2122	19	indents	t	t	t	t	{"can_acknowledge": false, "can_approve": false, "can_reject": false, "can_convert_to_po": false}
+2123	19	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+2124	19	complaints	t	t	t	t	{}
+2125	19	purchase_requests	t	t	t	f	{"can_submit": true}
+2126	19	returns	t	t	t	f	{"can_return": true}
 1101	23	uom	t	t	t	t	{}
 1102	23	vendors	t	t	t	t	{}
 1103	23	warehouses	t	t	t	t	{}
@@ -20925,41 +20806,12 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1957	17	uom	t	f	f	f	{}
 1958	17	warehouses	t	f	f	f	{}
 1959	17	vendors	t	f	f	f	{}
-2008	11	dashboard	t	f	f	f	{}
-2009	11	materials	t	t	t	t	{}
-2010	11	categories	t	t	t	t	{}
-2011	11	subcategories	t	t	t	t	{}
-2012	11	uom	t	t	t	t	{}
-2013	11	vendors	t	t	t	t	{"can_approve": true, "can_reject": true}
-2014	11	warehouses	t	t	t	t	{}
-2015	11	equipment	t	t	t	t	{"create_po": true, "print_qr": true, "update_serial": true, "complete_install": true, "request_install": true, "upload_docs": true, "log_usage": true, "relocate": true}
-2016	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
-2017	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
-2018	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
-2019	11	contracts	t	t	t	t	{"can_approve": true, "can_reject": true}
-2020	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
-2021	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
-2022	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
-2023	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
-2024	11	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
-2025	11	returns	t	t	t	t	{"can_return": true, "receive": true}
-2026	11	transfers	t	t	t	t	{"can_transfer": true}
-2027	11	write_offs	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true}
-2028	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
-934	19	indents	t	t	t	t	{"can_acknowledge": false, "can_approve": false, "can_reject": false, "can_convert_to_po": false}
-935	19	acknowledgements	t	t	t	t	{"can_acknowledge": true}
-936	19	complaints	t	t	t	t	{}
 1104	23	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
 1105	23	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
 1106	23	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
-2029	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
-2030	11	inventory	t	t	t	t	{}
-2031	11	complaints	t	t	t	t	{"can_assign": true, "can_approve_level1": true, "can_approve_level2": true}
 1107	23	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
 1108	23	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
 1109	23	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
-2032	11	pm_schedule	t	t	t	t	{"generate_calls": true}
-2033	11	calibration_schedule	t	t	t	t	{"generate_calls": true}
 1110	23	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
 1111	23	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
 1112	23	returns	t	t	t	t	{"can_return": true, "receive": true}
@@ -20999,7 +20851,6 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1228	10	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1230	14	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1231	15	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
-1233	18	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1236	23	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1472	7	vendor_work_orders	t	t	t	t	{}
 1473	3	vendor_work_orders	t	t	t	t	{}
@@ -21011,15 +20862,7 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1479	6	vendor_work_orders	t	t	t	t	{}
 1480	14	vendor_work_orders	t	t	t	t	{}
 1481	15	vendor_work_orders	t	t	t	t	{}
-1482	16	vendor_work_orders	t	t	t	t	{}
-1484	18	vendor_work_orders	t	t	t	t	{}
-1485	19	vendor_work_orders	t	t	t	t	{}
 1490	23	vendor_work_orders	t	t	t	t	{}
-1775	13	indents	t	f	f	f	{"can_approve": true, "can_reject": true, "can_convert_to_po": false, "can_acknowledge": false}
-1776	13	purchase_requests	t	f	f	f	{"can_submit": false, "can_approve": true, "can_reject": true, "can_convert_to_po": false, "can_hold": true, "can_short_close": true}
-1777	13	acknowledgements	t	t	t	t	{"can_acknowledge": true}
-1778	13	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
-1779	13	vendor_work_orders	t	t	t	t	{}
 1542	20	finance_invoices	t	t	t	t	{"can_send_hard_copy": false, "can_send_for_payment": true, "can_receive_hard_copy": true, "can_mark_paid": true}
 1543	20	vendor_work_orders	t	t	t	t	{}
 1544	22	complaints	t	t	t	f	{}
@@ -21060,28 +20903,90 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1579	21	terms	t	t	t	t	{}
 1580	21	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1581	21	vendor_work_orders	t	t	t	t	{}
-2034	11	intelligence	t	f	f	f	{}
-2035	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
-2036	11	report_finance	t	f	f	f	{}
-2037	11	reports	t	f	f	f	{}
-2038	11	report_issue_summary	t	f	f	f	{}
-2039	11	report_rate_analysis	t	f	f	f	{}
-2040	11	report_equipment_count	t	f	f	f	{}
-2041	11	report_receipt_summary	t	f	f	f	{}
-2042	11	report_dept_inventory	t	t	t	t	{}
-2043	11	report_pending_gatepass	t	f	f	f	{}
-2044	11	report_equipment	t	f	f	f	{}
-2045	11	admin_users	t	t	t	t	{}
-2046	11	admin_roles	t	t	t	t	{}
-2047	11	audit_logs	t	f	f	f	{}
-2048	11	approval_flows	t	t	t	t	{}
-2049	11	material_allowances	t	t	t	t	{}
-2050	11	configurations	t	t	t	t	{}
-2051	11	locations	t	t	t	t	{}
-2052	11	projects	t	t	t	t	{}
-2053	11	terms	t	t	t	t	{}
-2054	11	company_addresses	t	t	t	t	{}
-2055	11	credit_note	t	t	t	t	{"can_approve": true, "can_reject": true, "can_print": true}
+2132	13	indents	t	f	f	f	{"can_approve": true, "can_reject": true, "can_convert_to_po": false, "can_acknowledge": false}
+2133	13	purchase_requests	t	t	t	f	{"can_submit": false, "can_approve": true, "can_reject": true, "can_convert_to_po": false, "can_hold": true, "can_short_close": true}
+2134	13	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+2135	13	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
+2086	18	returns	t	t	t	t	{}
+2087	18	transfers	t	t	t	t	{}
+2088	18	dashboard	t	f	f	f	{}
+2089	18	materials	t	t	t	t	{}
+2090	18	categories	t	t	t	t	{}
+2091	18	vendors	t	t	t	t	{}
+2092	18	warehouses	t	t	t	t	{}
+2093	18	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
+2094	18	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
+2095	18	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
+2096	18	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
+2097	18	gate_entry	t	t	t	t	{}
+2098	18	invoice	t	t	t	t	{}
+2099	18	grn	t	t	t	t	{}
+2100	18	issues	t	t	t	t	{}
+2101	18	acknowledgements	t	t	t	t	{}
+2102	18	inventory	t	t	t	t	{}
+2103	18	intelligence	t	f	f	f	{}
+2104	18	reports	t	f	f	f	{}
+2105	18	admin_users	t	t	t	t	{}
+2106	18	admin_roles	t	t	t	t	{}
+2107	18	approval_flows	t	t	t	t	{}
+2108	18	projects	t	t	t	t	{}
+2109	18	organizations	t	t	t	t	{}
+2110	18	departments	t	t	t	t	{}
+2111	18	terms	t	t	t	t	{}
+2112	18	gate_passes	t	t	t	t	{}
+2113	18	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
+2114	18	vendor_work_orders	t	t	t	t	{}
+2115	18	write_offs	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true}
+2136	16	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
+2137	11	dashboard	t	f	f	f	{}
+2138	11	materials	t	t	t	t	{}
+2139	11	categories	t	t	t	t	{}
+2140	11	subcategories	t	t	t	t	{}
+2141	11	uom	t	t	t	t	{}
+2142	11	vendors	t	t	t	t	{"can_approve": true, "can_reject": true}
+2143	11	warehouses	t	t	t	t	{}
+2144	11	equipment	t	t	t	t	{"create_po": true, "print_qr": true, "update_serial": true, "complete_install": true, "request_install": true, "upload_docs": true, "log_usage": true, "relocate": true}
+2145	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
+2146	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
+2147	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
+2148	11	contracts	t	t	t	t	{"can_approve": true, "can_reject": true}
+2149	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
+2150	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
+2151	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
+2152	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
+2153	11	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
+2154	11	returns	t	t	t	t	{"can_return": true, "receive": true}
+2155	11	transfers	t	t	t	t	{"can_transfer": true}
+2156	11	write_offs	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true}
+2157	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
+2158	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+2159	11	inventory	t	t	t	t	{}
+2160	11	complaints	t	t	t	t	{"can_assign": true, "can_approve_level1": true, "can_approve_level2": true}
+2161	11	pm_schedule	t	t	t	t	{"generate_calls": true}
+2162	11	calibration_schedule	t	t	t	t	{"generate_calls": true}
+2163	11	intelligence	t	f	f	f	{}
+2164	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
+2165	11	report_finance	t	f	f	f	{}
+2166	11	reports	t	f	f	f	{}
+2167	11	report_issue_summary	t	f	f	f	{}
+2168	11	report_rate_analysis	t	f	f	f	{}
+2169	11	report_equipment_count	t	f	f	f	{}
+2170	11	report_receipt_summary	t	f	f	f	{}
+2171	11	report_dept_inventory	t	t	t	t	{}
+2172	11	report_pending_gatepass	t	f	f	f	{}
+2173	11	report_equipment	t	f	f	f	{}
+2174	11	admin_users	t	t	t	t	{}
+2175	11	admin_roles	t	t	t	t	{}
+2176	11	audit_logs	t	f	f	f	{}
+2177	11	approval_flows	t	t	t	t	{}
+2178	11	material_allowances	t	t	t	t	{}
+2179	11	configurations	t	t	t	t	{}
+2180	11	locations	t	t	t	t	{}
+2181	11	projects	t	t	t	t	{}
+2182	11	terms	t	t	t	t	{}
+2183	11	company_addresses	t	t	t	t	{}
+2184	11	credit_note	t	t	t	t	{"can_approve": true, "can_reject": true, "can_print": true}
+2185	11	credit_notes	t	t	t	t	{}
 \.
 
 
@@ -24189,6 +24094,17 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 4304	2	2	2564	62	GRN	1	36	GRN	223	GRN-00020	3	\N	\N	10	2026-08-28 12:24:47.297494
 4305	2	2	2423	62	Issue	-5	6	Issue	256	ISS-00026	3	\N	\N	12	2026-08-28 12:37:52.406924
 4306	2	2	2435	62	Issue	-2	182	Issue	257	ISS-00027	1	237	\N	3	2026-08-28 18:35:32.219778
+4307	2	2	4878	62	GRN	5	5	GRN	224	GRN-00021	3	\N	\N	10	2026-09-01 14:56:54.470321
+4308	2	2	4879	62	GRN	10	10	GRN	225	GRN-00022	3	\N	\N	3	2026-09-01 15:08:37.202324
+4309	2	2	4879	62	Return	1	11	Return	27	RET-00005	3	\N	\N	3	2026-09-01 15:35:11.649263
+4310	2	2	4879	62	Write Off	-1	10	WriteOff	21	WO-00012	\N	\N	\N	12	2026-09-01 15:47:23.917199
+4311	2	2	4880	62	GRN	100	100	GRN	226	GRN-00023	3	\N	\N	3	2026-09-01 17:06:05.723607
+4312	2	2	4880	62	GRN	50	150	GRN	227	GRN-00024	3	\N	\N	10	2026-09-01 17:15:41.273638
+4313	2	2	4880	62	Issue	-5	145	Issue	267	ISS-00028	3	\N	\N	3	2026-09-01 17:25:05.029194
+4314	2	2	4880	62	Issue	-5	140	Issue	268	ISS-00029	3	\N	\N	3	2026-09-01 17:25:32.395594
+4315	2	2	4880	62	Transfer Out	-40	100	Transfer	42	TRF-00005	3	\N	\N	12	2026-09-01 17:30:19.748334
+4316	2	2	4880	63	Transfer In	40	40	Transfer	42	TRF-00005	3	\N	\N	12	2026-09-01 17:30:19.759866
+4317	2	2	4880	62	Write Off	-5	95	WriteOff	22	WO-00013	\N	\N	\N	3	2026-09-01 17:33:00.060744
 \.
 
 
@@ -24210,6 +24126,7 @@ COPY public.stock_transfer_items (id, transfer_id, material_id, quantity, remark
 9	20	2565	5		4	-1	proceed
 12	39	2564	10	needs	10	0	
 13	41	2435	50		\N	\N	\N
+14	42	4880	40		40	0	
 \.
 
 
@@ -24230,6 +24147,7 @@ COPY public.stock_transfers (id, tenant_id, site_id, transfer_number, from_wareh
 20	2	2	TRF-00002	63	62	3	Partially Received		3	f	2026-06-12 02:02:28.867836	\N	3	2026-08-12 06:06:54.95339
 39	2	2	TRF-00003	62	63	3	Completed	need	3	f	2026-08-17 11:27:11.257558	2026-08-17 05:57:19.33041	3	2026-08-17 05:57:19.330482
 41	2	2	TRF-00004	62	77	3	Initiated		3	f	2026-08-18 11:23:09.168032	\N	\N	\N
+42	2	2	TRF-00005	62	63	3	Completed		12	f	2026-09-01 17:30:10.070744	2026-09-01 12:00:19.756502	12	2026-09-01 12:00:19.756565
 \.
 
 
@@ -27119,45 +27037,6 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 
 
 --
--- Data for Name: work_order_approvals; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.work_order_approvals (id, wo_id, approval_flow_id, approver_id, approved_quantities, remarks, approved_at) FROM stdin;
-\.
-
-
---
--- Data for Name: work_order_items; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.work_order_items (id, wo_id, material_id, quantity, rate, amount, received_quantity, approved_quantity, discount_percent, cgst_percentage, sgst_percentage, igst_percentage, is_gst_inclusive, remarks) FROM stdin;
-1	1	2564	4	16526.16	66105	0	\N	0	6	6	0	t	\N
-4	6	2564	100	23	2499	0	\N	3	6	6	0	f	\N
-5	7	2564	100	23	2524	0	\N	2	6	6	0	f	\N
-6	8	2564	100	23	2473	0	\N	4	6	6	0	f	\N
-7	9	2565	5	26703.28	145052	0	\N	3	6	6	0	f	\N
-8	10	2751	10	10443.43	118303	0	\N	4	9	9	0	f	\N
-9	11	2751	4	10443.43	47814	0	\N	3	9	9	0	f	\N
-\.
-
-
---
--- Data for Name: work_orders; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.work_orders (id, tenant_id, site_id, wo_number, vendor_id, project_id, institution_id, contract_id, equipment_id, wo_type, advance_percentage, total_amount, target_completion_date, status, current_approval_level, terms, remarks, annexure, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at) FROM stdin;
-1	2	2	WO-00001	69	3	11	\N	1605	AMC	0	66105	\N	Sent to Vendor	1	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-12 08:23:56.194158	f	2026-08-12 11:26:55.501055	2026-08-12 13:54:54.028142
-6	2	2	WO-00002	66	3	10	3	1604	AMC	0	2499	\N	Approved	1	1. Bill/Invoices in the name of East Point College of Physiotherapy managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-17 05:21:07.90497	f	2026-08-17 10:50:58.117879	2026-08-17 10:51:07.905554
-7	2	2	WO-00003	66	3	12	3	1608	CMC	0	2524	\N	Submitted	1	1. Bill/Invoices in the name of East Point Pre-University College managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	\N	\N	f	2026-08-17 12:52:36.985471	2026-08-17 12:52:36.98552
-8	2	2	WO-00004	66	3	11	3	\N	AMC	0	2473	\N	Submitted	1	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	\N	\N	f	2026-08-17 12:53:18.241895	2026-08-17 12:53:18.241937
-9	2	2	WO-00005	66	3	12	3	\N	AMC	0	145052	\N	Submitted	1	1. Bill/Invoices in the name of East Point Pre-University College managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	\N	\N	f	2026-08-17 12:53:55.611555	2026-08-17 12:53:55.611599
-10	2	2	WO-00006	63	3	9	2	\N	AMC	0	118303	\N	Approved	1	1. Bill/Invoices in the name of New Royal College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-17 07:25:28.080236	f	2026-08-17 12:54:58.988485	2026-08-17 12:55:28.08275
-11	2	2	WO-00007	63	3	10	2	\N	AMC	0	47814	\N	Approved	1	1. Bill/Invoices in the name of East Point College of Physiotherapy managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-18 06:22:55.464803	f	2026-08-18 11:52:24.877197	2026-08-18 11:52:55.465517
-12	2	2	WO-00008	63	3	11	2	1	AMC	0	1545454	\N	Approved	1	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-18 17:59:07.164155	f	2026-08-18 23:25:51.645155	2026-08-18 23:29:07.164849
-\.
-
-
---
 -- Data for Name: write_off_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -27175,6 +27054,8 @@ COPY public.write_off_items (id, write_off_id, material_id, warehouse_id, quanti
 13	14	2564	62	1	16526.16	16526.16	f	0	\N	\N
 14	18	4608	62	1	460	460	f	0	1611	79
 15	19	2565	62	1	26703.28	26703.28	f	0	\N	\N
+16	21	4879	62	1	70000	70000	f	0	\N	\N
+17	22	4880	62	5	110	550	f	0	\N	\N
 \.
 
 
@@ -27196,6 +27077,8 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 14	2	2	WO-00010	2026-08-17	product expired	Approved	1	3	3	2026-08-17 07:08:21.843444	f	2026-08-17 12:38:07.43634	2026-08-17 12:38:21.859441	Expired / Shelf-life	/api/uploads/write_offs/2/20260817_070731_5e50efd2.pdf	Biochemistry	/api/uploads/write_offs/2/20260817_070740_771c2d16.pdf
 18	2	2	EWO-00002	2026-08-17	Equipment Write Off	Approved	1	3	3	2026-08-17 09:09:06.563911	f	2026-08-17 14:38:54.402781	2026-08-17 14:39:06.615689	Damaged in Handling	/api/uploads/write_offs/2/20260817_090846_274e2fbb.pdf		/api/uploads/write_offs/2/20260817_090851_dd1b7c8e.pdf
 19	2	2	WO-00011	2026-08-18	damaged	Approved	1	3	3	2026-08-18 06:01:10.247606	f	2026-08-18 11:30:51.049822	2026-08-18 11:31:10.261171	Damaged in Handling	/api/uploads/write_offs/2/20260818_060034_6192c0e4.pdf	Admin	/api/uploads/write_offs/2/20260818_060043_8b013ed9.pdf
+21	2	2	WO-00012	2026-09-01	end of life	Approved	1	12	12	2026-09-01 10:17:23.914498	f	2026-09-01 15:47:13.884129	2026-09-01 15:47:23.918355	Expired / Shelf-life	/api/uploads/write_offs/2/20260901_101647_c563117d.pdf	Admin	/api/uploads/write_offs/2/20260901_101657_2b778453.pdf
+22	2	2	WO-00013	2026-09-01	DAMAGED BY WATER	Approved	1	12	3	2026-09-01 12:03:00.058191	f	2026-09-01 17:32:37.969045	2026-09-01 17:33:00.061422	Damaged in Handling		Admin	
 \.
 
 
@@ -27203,14 +27086,14 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 130, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 135, true);
 
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.approval_flows_id_seq', 139, true);
+SELECT pg_catalog.setval('public.approval_flows_id_seq', 141, true);
 
 
 --
@@ -27315,7 +27198,7 @@ SELECT pg_catalog.setval('public.credit_notes_id_seq', 8, true);
 -- Name: current_stock_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.current_stock_id_seq', 4404, true);
+SELECT pg_catalog.setval('public.current_stock_id_seq', 4408, true);
 
 
 --
@@ -27336,7 +27219,7 @@ SELECT pg_catalog.setval('public.departments_id_seq', 335, true);
 -- Name: document_sequences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.document_sequences_id_seq', 152, true);
+SELECT pg_catalog.setval('public.document_sequences_id_seq', 154, true);
 
 
 --
@@ -27350,7 +27233,7 @@ SELECT pg_catalog.setval('public.equipment_history_id_seq', 20, true);
 -- Name: equipment_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.equipment_items_id_seq', 1617, true);
+SELECT pg_catalog.setval('public.equipment_items_id_seq', 1622, true);
 
 
 --
@@ -27371,7 +27254,7 @@ SELECT pg_catalog.setval('public.floors_id_seq', 30, true);
 -- Name: gate_entries_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_entries_id_seq', 210, true);
+SELECT pg_catalog.setval('public.gate_entries_id_seq', 211, true);
 
 
 --
@@ -27392,35 +27275,35 @@ SELECT pg_catalog.setval('public.gate_passes_id_seq', 24, true);
 -- Name: grn_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_id_seq', 223, true);
+SELECT pg_catalog.setval('public.grn_id_seq', 227, true);
 
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_items_id_seq', 526, true);
+SELECT pg_catalog.setval('public.grn_items_id_seq', 530, true);
 
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_approvals_id_seq', 142, true);
+SELECT pg_catalog.setval('public.indent_approvals_id_seq', 151, true);
 
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_items_id_seq', 540, true);
+SELECT pg_catalog.setval('public.indent_items_id_seq', 543, true);
 
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indents_id_seq', 256, true);
+SELECT pg_catalog.setval('public.indents_id_seq', 259, true);
 
 
 --
@@ -27455,35 +27338,35 @@ SELECT pg_catalog.setval('public.location_master_id_seq', 149, true);
 -- Name: material_issue_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issue_items_id_seq', 237, true);
+SELECT pg_catalog.setval('public.material_issue_items_id_seq', 239, true);
 
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issues_id_seq', 257, true);
+SELECT pg_catalog.setval('public.material_issues_id_seq', 268, true);
 
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_return_items_id_seq', 17, true);
+SELECT pg_catalog.setval('public.material_return_items_id_seq', 18, true);
 
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_returns_id_seq', 26, true);
+SELECT pg_catalog.setval('public.material_returns_id_seq', 27, true);
 
 
 --
 -- Name: materials_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.materials_id_seq', 4877, true);
+SELECT pg_catalog.setval('public.materials_id_seq', 4881, true);
 
 
 --
@@ -27525,42 +27408,42 @@ SELECT pg_catalog.setval('public.projects_id_seq', 9, true);
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 141, true);
+SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 144, true);
 
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 1760, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 1764, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 288, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 291, true);
 
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 58, true);
+SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 69, true);
 
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 631, true);
+SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 634, true);
 
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_requests_id_seq', 212, true);
+SELECT pg_catalog.setval('public.purchase_requests_id_seq', 215, true);
 
 
 --
@@ -27630,7 +27513,7 @@ SELECT pg_catalog.setval('public.repair_work_orders_id_seq', 1, false);
 -- Name: role_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.role_permissions_id_seq', 2055, true);
+SELECT pg_catalog.setval('public.role_permissions_id_seq', 2185, true);
 
 
 --
@@ -27658,21 +27541,21 @@ SELECT pg_catalog.setval('public.sites_id_seq', 4, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4306, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4317, true);
 
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_transfer_items_id_seq', 13, true);
+SELECT pg_catalog.setval('public.stock_transfer_items_id_seq', 14, true);
 
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_transfers_id_seq', 41, true);
+SELECT pg_catalog.setval('public.stock_transfers_id_seq', 42, true);
 
 
 --
@@ -27788,38 +27671,17 @@ SELECT pg_catalog.setval('public.warehouses_id_seq', 77, true);
 
 
 --
--- Name: work_order_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.work_order_approvals_id_seq', 1, false);
-
-
---
--- Name: work_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.work_order_items_id_seq', 9, true);
-
-
---
--- Name: work_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.work_orders_id_seq', 12, true);
-
-
---
 -- Name: write_off_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.write_off_items_id_seq', 15, true);
+SELECT pg_catalog.setval('public.write_off_items_id_seq', 17, true);
 
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.write_offs_id_seq', 19, true);
+SELECT pg_catalog.setval('public.write_offs_id_seq', 22, true);
 
 
 --
@@ -28767,14 +28629,6 @@ ALTER TABLE ONLY public.warehouses
 
 
 --
--- Name: work_orders uq_wo_per_tenant; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_orders
-    ADD CONSTRAINT uq_wo_per_tenant UNIQUE (tenant_id, wo_number);
-
-
---
 -- Name: write_offs uq_write_off_per_tenant; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -28860,30 +28714,6 @@ ALTER TABLE ONLY public.vendors
 
 ALTER TABLE ONLY public.warehouses
     ADD CONSTRAINT warehouses_pkey PRIMARY KEY (id);
-
-
---
--- Name: work_order_approvals work_order_approvals_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_order_approvals
-    ADD CONSTRAINT work_order_approvals_pkey PRIMARY KEY (id);
-
-
---
--- Name: work_order_items work_order_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_order_items
-    ADD CONSTRAINT work_order_items_pkey PRIMARY KEY (id);
-
-
---
--- Name: work_orders work_orders_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_orders
-    ADD CONSTRAINT work_orders_pkey PRIMARY KEY (id);
 
 
 --
@@ -29652,34 +29482,6 @@ CREATE INDEX ix_warehouses_id ON public.warehouses USING btree (id);
 
 
 --
--- Name: ix_work_order_approvals_id; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX ix_work_order_approvals_id ON public.work_order_approvals USING btree (id);
-
-
---
--- Name: ix_work_order_items_id; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX ix_work_order_items_id ON public.work_order_items USING btree (id);
-
-
---
--- Name: ix_work_orders_id; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX ix_work_orders_id ON public.work_orders USING btree (id);
-
-
---
--- Name: ix_work_orders_wo_number; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX ix_work_orders_wo_number ON public.work_orders USING btree (wo_number);
-
-
---
 -- Name: ix_write_off_items_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -30109,35 +29911,11 @@ ALTER TABLE ONLY public.credit_note_items
 
 
 --
--- Name: credit_note_items credit_note_items_grn_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.credit_note_items
-    ADD CONSTRAINT credit_note_items_grn_item_id_fkey FOREIGN KEY (grn_item_id) REFERENCES public.grn_items(id);
-
-
---
--- Name: credit_note_items credit_note_items_invoice_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.credit_note_items
-    ADD CONSTRAINT credit_note_items_invoice_item_id_fkey FOREIGN KEY (invoice_item_id) REFERENCES public.invoice_items(id);
-
-
---
 -- Name: credit_note_items credit_note_items_material_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.credit_note_items
     ADD CONSTRAINT credit_note_items_material_id_fkey FOREIGN KEY (material_id) REFERENCES public.materials(id);
-
-
---
--- Name: credit_note_items credit_note_items_po_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.credit_note_items
-    ADD CONSTRAINT credit_note_items_po_item_id_fkey FOREIGN KEY (po_item_id) REFERENCES public.purchase_order_items(id);
 
 
 --
@@ -30173,27 +29951,11 @@ ALTER TABLE ONLY public.credit_notes
 
 
 --
--- Name: credit_notes credit_notes_grn_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.credit_notes
-    ADD CONSTRAINT credit_notes_grn_id_fkey FOREIGN KEY (grn_id) REFERENCES public.grn(id);
-
-
---
 -- Name: credit_notes credit_notes_invoice_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.credit_notes
     ADD CONSTRAINT credit_notes_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id);
-
-
---
--- Name: credit_notes credit_notes_purchase_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.credit_notes
-    ADD CONSTRAINT credit_notes_purchase_order_id_fkey FOREIGN KEY (purchase_order_id) REFERENCES public.purchase_orders(id);
 
 
 --
@@ -32261,118 +32023,6 @@ ALTER TABLE ONLY public.warehouses
 
 
 --
--- Name: work_order_approvals work_order_approvals_approval_flow_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_order_approvals
-    ADD CONSTRAINT work_order_approvals_approval_flow_id_fkey FOREIGN KEY (approval_flow_id) REFERENCES public.approval_flows(id);
-
-
---
--- Name: work_order_approvals work_order_approvals_approver_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_order_approvals
-    ADD CONSTRAINT work_order_approvals_approver_id_fkey FOREIGN KEY (approver_id) REFERENCES public.users(id);
-
-
---
--- Name: work_order_approvals work_order_approvals_wo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_order_approvals
-    ADD CONSTRAINT work_order_approvals_wo_id_fkey FOREIGN KEY (wo_id) REFERENCES public.work_orders(id) ON DELETE CASCADE;
-
-
---
--- Name: work_order_items work_order_items_material_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_order_items
-    ADD CONSTRAINT work_order_items_material_id_fkey FOREIGN KEY (material_id) REFERENCES public.materials(id);
-
-
---
--- Name: work_order_items work_order_items_wo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_order_items
-    ADD CONSTRAINT work_order_items_wo_id_fkey FOREIGN KEY (wo_id) REFERENCES public.work_orders(id);
-
-
---
--- Name: work_orders work_orders_approved_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_orders
-    ADD CONSTRAINT work_orders_approved_by_id_fkey FOREIGN KEY (approved_by_id) REFERENCES public.users(id);
-
-
---
--- Name: work_orders work_orders_contract_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_orders
-    ADD CONSTRAINT work_orders_contract_id_fkey FOREIGN KEY (contract_id) REFERENCES public.contracts(id);
-
-
---
--- Name: work_orders work_orders_created_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_orders
-    ADD CONSTRAINT work_orders_created_by_id_fkey FOREIGN KEY (created_by_id) REFERENCES public.users(id);
-
-
---
--- Name: work_orders work_orders_equipment_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_orders
-    ADD CONSTRAINT work_orders_equipment_id_fkey FOREIGN KEY (equipment_id) REFERENCES public.equipment_items(id);
-
-
---
--- Name: work_orders work_orders_institution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_orders
-    ADD CONSTRAINT work_orders_institution_id_fkey FOREIGN KEY (institution_id) REFERENCES public.institutions(id);
-
-
---
--- Name: work_orders work_orders_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_orders
-    ADD CONSTRAINT work_orders_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id);
-
-
---
--- Name: work_orders work_orders_site_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_orders
-    ADD CONSTRAINT work_orders_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.sites(id) ON DELETE CASCADE;
-
-
---
--- Name: work_orders work_orders_tenant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_orders
-    ADD CONSTRAINT work_orders_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
-
-
---
--- Name: work_orders work_orders_vendor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.work_orders
-    ADD CONSTRAINT work_orders_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id);
-
-
---
 -- Name: write_off_items write_off_items_equipment_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -32456,5 +32106,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict HNZbhGmNaqcev7YA84Oe7tVrG5wf2DNI7cxthGfaAuvKikjr2h5QIGfmcs32g01
+\unrestrict eczA1tJHPFKsJ3gx0AQZTtIMQUOENnpHJxzObxJrsYQ1lQrXUwUavRJANyAQysf
 

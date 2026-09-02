@@ -27,7 +27,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _remarksController = TextEditingController();
-  final _costCenterController = TextEditingController();
+
 
   List<dynamic> _institutions = [];
   List<dynamic> _allDepartments = [];
@@ -46,7 +46,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   String? _selectedRoomId;
   String? _selectedStoreId;
   String? _selectedStoreName;
-  String _selectedPriority = 'Routine';
+
   File? _attachment;
 
   final List<Map<String, dynamic>> _addedItems = [];
@@ -367,7 +367,6 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   @override
   void dispose() {
     _remarksController.dispose();
-    _costCenterController.dispose();
     super.dispose();
   }
 
@@ -443,9 +442,6 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
       'store_id':
           _selectedStoreId != null ? int.tryParse(_selectedStoreId!) : null,
       'remarks': _remarksController.text.trim(),
-      'priority': _selectedPriority,
-      if (_costCenterController.text.trim().isNotEmpty)
-        'cost_center': _costCenterController.text.trim(),
       if (widget.linkedComplaintId != null)
         'complaint_id': widget.linkedComplaintId,
       'items': validItems
@@ -677,37 +673,6 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                     ),
                   ),
                 ],
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: _selectedPriority,
-                  decoration: const InputDecoration(
-                    labelText: 'Priority',
-                    prefixIcon: Icon(Icons.priority_high),
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                  items: ['Routine', 'High', 'Urgent'].map((String priority) {
-                    return DropdownMenuItem<String>(
-                      value: priority,
-                      child: Text(priority),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedPriority = newValue!;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _costCenterController,
-                  decoration: const InputDecoration(
-                    labelText: 'Cost Center / Project Code (Optional)',
-                    prefixIcon: Icon(Icons.account_balance_wallet_outlined),
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                ),
                 const SizedBox(height: 16),
                 InkWell(
                   onTap: _pickImage,

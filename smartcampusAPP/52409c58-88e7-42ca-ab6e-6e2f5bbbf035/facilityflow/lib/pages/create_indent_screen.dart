@@ -1,10 +1,12 @@
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
+
+
 import 'package:facilityflow/widgets/forms/app_dropdown_field.dart';
 import 'package:facilityflow/widgets/forms/bottom_picker_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:facilityflow/globals/app_state.dart';
+import 'package:provider/provider.dart';
 import 'package:facilityflow/services/api_service.dart';
 
 import 'package:facilityflow/models/indent.dart';
@@ -12,7 +14,8 @@ import 'package:facilityflow/models/indent.dart';
 @NowaGenerated()
 class CreateIndentScreen extends StatefulWidget {
   @NowaGenerated({'loader': 'auto-constructor'})
-  const CreateIndentScreen({super.key, this.linkedComplaintId, this.cloneFrom});
+  const CreateIndentScreen({super.key, this.linkedComplaintId, this.cloneFrom, this.indentId});
+  final int? indentId;
 
   final int? linkedComplaintId;
   final Indent? cloneFrom;
@@ -26,7 +29,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _remarksController = TextEditingController();
-  final _costCenterController = TextEditingController();
+
 
   List<dynamic> _institutions = [];
   List<dynamic> _allDepartments = [];
@@ -35,18 +38,15 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   List<dynamic> _buildingsList = [];
   List<dynamic> _floorsList = [];
   List<dynamic> _roomsList = [];
-  List<dynamic> _materialsList = [];
-  List<dynamic> _storesList = [];
+
 
   String? _selectedInstitutionId;
   String? _selectedDepartmentName;
   String? _selectedBuildingId;
   String? _selectedFloorId;
   String? _selectedRoomId;
-  String? _selectedStoreId;
-  String? _selectedStoreName;
-  String _selectedPriority = 'Routine';
-  File? _attachment;
+  
+  
 
   final List<Map<String, dynamic>> _addedItems = [];
 
@@ -55,22 +55,43 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.cloneFrom != null) {
-      _remarksController.text = widget.cloneFrom!.remarks;
-      for (var item in widget.cloneFrom!.items) {
-        _addedItems.add({
-          'material_id': item.materialId,
-          'requestedQuantity': item.requestedQuantity,
-          'materialName': item.materialName,
-          'materialCode': item.materialCode,
-          'uom': item.uomName,
+    
+    // Defer the reading of AppState to avoid issues in initState
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Indent? draftIndent;
+      if (widget.indentId != null) {
+        try {
+          draftIndent = Provider.of<AppState>(context, listen: false).indents.firstWhere((i) => i.id == widget.indentId);
+        } catch (_) {}
+      }
+      final sourceIndent = widget.cloneFrom ?? draftIndent;
+      
+      if (sourceIndent != null) {
+        setState(() {
+          _remarksController.text = sourceIndent.remarks;
+          _selectedInstitutionId = sourceIndent.institutionId?.toString();
+          _selectedDepartmentName = sourceIndent.department;
+          _selectedBuildingId = sourceIndent.buildingId?.toString();
+          _selectedFloorId = sourceIndent.floor.isNotEmpty ? sourceIndent.floor : null; 
+          _selectedRoomId = sourceIndent.roomId?.toString();
+          
+          for (var item in sourceIndent.items) {
+            _addedItems.add({
+              'material_id': item.materialId,
+              'requestedQuantity': item.requestedQuantity,
+              'materialName': item.materialName,
+              'materialCode': item.materialCode,
+              'uom': item.uomName,
+            });
+          }
         });
       }
-    }
+    });
+
     if (_addedItems.isEmpty) {
       _addedItems.add({
         'material_id': null,
-        'requestedQuantity': 1.0,
+        'requestedQuantity': null,
         'materialName': null,
         'materialCode': null,
         'uom': null
@@ -85,24 +106,14 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
       final instRes = await api.getInstitutions();
       final deptRes = await api.getDepartments();
       final bldgRes = await api.getBuildings();
-      final matRes = await api.getMaterials();
-
-      // Fetch Stores if available
-      List<dynamic> fetchedStores = [];
-      try {
-        final storeRes = await api.getStores();
-        fetchedStores = storeRes.data ?? [];
-      } catch (_) {
-        // Ignore if endpoint doesn't exist
-      }
-
+      
       if (mounted) {
         setState(() {
           _institutions = instRes.data ?? [];
           _allDepartments = deptRes.data ?? [];
           _allBuildings = bldgRes.data ?? [];
-          _materialsList = (matRes.data['items'] ?? []) as List<dynamic>;
-          _storesList = fetchedStores;
+          
+
 
           if (_institutions.length == 1) {
             _selectedInstitutionId = _institutions[0]['id'].toString();
@@ -121,6 +132,96 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
         const SnackBar(content: Text('Failed to load form data')),
       );
     }
+  }
+
+
+  Future<void> _showMaterialSearchDialog(int index) async {
+    final api = ApiService();
+    List<dynamic> results = [];
+    bool isSearching = false;
+    
+    // Initial fetch
+    try {
+      final res = await api.getMaterials(limit: 50);
+      results = res.data['items'] ?? [];
+    } catch (_) {}
+
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Search Material'),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 400,
+                child: Column(
+                  children: [
+                    TextField(
+                      decoration: const InputDecoration(
+                        hintText: 'Search...',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                      onChanged: (val) async {
+                        setDialogState(() => isSearching = true);
+                        try {
+                          final res = await api.getMaterials(limit: 50, search: val);
+                          setDialogState(() {
+                            results = res.data['items'] ?? [];
+                            isSearching = false;
+                          });
+                        } catch (_) {
+                          setDialogState(() => isSearching = false);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: isSearching 
+                        ? const Center(child: CircularProgressIndicator())
+                        : ListView.builder(
+                            itemCount: results.length,
+                            itemBuilder: (context, i) {
+                              final m = results[i];
+                              return ListTile(
+                                title: Text('[${m['code'] ?? ''}] ${m['name']}'),
+                                subtitle: Text('Unit: ${m['uom_name'] ?? m['uom'] ?? ''}'),
+                                onTap: () {
+                                  Navigator.pop(context, m);
+                                },
+                              );
+                            },
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    ).then((selected) {
+      if (selected != null && mounted) {
+        setState(() {
+          _addedItems[index]['material_id'] = selected['id'];
+          _addedItems[index]['materialName'] = selected['name'];
+          _addedItems[index]['materialCode'] = selected['code'] ?? '';
+          _addedItems[index]['uom'] = selected['uom_name'] ?? selected['uom'] ?? '';
+          _addedItems[index]['uom_allow_decimal'] = selected['uom_allow_decimal'] ?? true;
+        });
+      }
+    });
   }
 
   void _handleInstitutionChange(String instId) {
@@ -239,20 +340,10 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     });
   }
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _attachment = File(pickedFile.path);
-      });
-    }
-  }
 
   @override
   void dispose() {
     _remarksController.dispose();
-    _costCenterController.dispose();
     super.dispose();
   }
 
@@ -260,7 +351,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     setState(() {
       _addedItems.add({
         'material_id': null,
-        'requestedQuantity': 1.0,
+        'requestedQuantity': null,
         'materialName': null,
         'materialCode': null,
         'uom': null
@@ -279,7 +370,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
 
 
 
-  Future<void> _submitIndent() async {
+  Future<void> _submitIndent({bool isDraft = false}) async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -325,12 +416,8 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
       'location': selectedRoom != null ? selectedRoom['name'] : '',
       'room_id':
           _selectedRoomId != null ? int.tryParse(_selectedRoomId!) : null,
-      'store_id':
-          _selectedStoreId != null ? int.tryParse(_selectedStoreId!) : null,
       'remarks': _remarksController.text.trim(),
-      'priority': _selectedPriority,
-      if (_costCenterController.text.trim().isNotEmpty)
-        'cost_center': _costCenterController.text.trim(),
+      'status': isDraft ? 'Draft' : 'Submitted',
       if (widget.linkedComplaintId != null)
         'complaint_id': widget.linkedComplaintId,
       'items': validItems
@@ -364,14 +451,13 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     try {
       final api = ApiService();
 
-      if (_attachment != null) {
-        final uploadRes = await api.uploadComplaintImage(_attachment!);
-        if (uploadRes.data != null && uploadRes.data['path'] != null) {
-          payload['attachment_url'] = uploadRes.data['path'];
-        }
-      }
+      
 
-      await api.dio.post('/api/indents', data: payload);
+      if (widget.indentId != null) {
+        await api.dio.put('/api/indents/${widget.indentId}', data: payload);
+      } else {
+        await api.dio.post('/api/indents', data: payload);
+      }
 
       if (!mounted) return;
       final appState = AppState.of(context, listen: false);
@@ -538,91 +624,6 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                     onSelect: (val) => setState(() => _selectedRoomId = val),
                   ),
                 ),
-                if (_storesList.isNotEmpty) ...[
-                  AppDropdownField(
-                    label: 'Store / Warehouse',
-                    icon: Icons.store,
-                    selectedName: _selectedStoreName,
-                    disabled: false,
-                    onTap: () => showBottomPicker(
-                    context: context,
-                      title: 'Select Store',
-                      items: _storesList,
-                      selectedValue: _selectedStoreId,
-                      idField: 'id',
-                      nameField: 'name',
-                      onSelect: (val) {
-                        setState(() {
-                          _selectedStoreId = val;
-                          _selectedStoreName = _storesList.firstWhere(
-                              (s) => s['id'].toString() == val,
-                              orElse: () => null)?['name'];
-                        });
-                      },
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: _selectedPriority,
-                  decoration: const InputDecoration(
-                    labelText: 'Priority',
-                    prefixIcon: Icon(Icons.priority_high),
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                  items: ['Routine', 'High', 'Urgent'].map((String priority) {
-                    return DropdownMenuItem<String>(
-                      value: priority,
-                      child: Text(priority),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedPriority = newValue!;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _costCenterController,
-                  decoration: const InputDecoration(
-                    labelText: 'Cost Center / Project Code (Optional)',
-                    prefixIcon: Icon(Icons.account_balance_wallet_outlined),
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                InkWell(
-                  onTap: _pickImage,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: Colors.grey.shade400,
-                          style: BorderStyle.solid),
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.grey.shade50,
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(Icons.camera_alt_outlined,
-                            color: Colors.grey.shade600, size: 32),
-                        const SizedBox(height: 8),
-                        Text(
-                          _attachment != null
-                              ? 'Image Attached: ${_attachment!.path.split('/').last}'
-                              : 'Attach Photo (Optional)',
-                          style: TextStyle(
-                              color: Colors.grey.shade700, fontSize: 14),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _remarksController,
@@ -688,39 +689,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                               selectedName: item['material_id'] != null
                                   ? '[${item['materialCode'] ?? ''}] ${item['materialName']}'
                                   : null,
-                              onTap: () {
-                                final displayItems = _materialsList
-                                    .map((m) => {
-                                          'id': m['id'],
-                                          'display_name':
-                                              '[${m['code'] ?? ''}] ${m['name']} (${m['uom_name'] ?? m['uom'] ?? ''})'
-                                        })
-                                    .toList();
-
-                                showBottomPicker(
-                    context: context,
-                                  title: 'Select Material',
-                                  items: displayItems,
-                                  selectedValue:
-                                      item['material_id']?.toString(),
-                                  idField: 'id',
-                                  nameField: 'display_name',
-                                  onSelect: (val) {
-                                    final m = _materialsList.firstWhere(
-                                        (mat) => mat['id'].toString() == val);
-                                    setState(() {
-                                      _addedItems[index]['material_id'] =
-                                          m['id'];
-                                      _addedItems[index]['materialName'] =
-                                          m['name'];
-                                      _addedItems[index]['materialCode'] =
-                                          m['code'] ?? '';
-                                      _addedItems[index]['uom'] =
-                                          m['uom_name'] ?? m['uom'] ?? '';
-                                    });
-                                  },
-                                );
-                              },
+                              onTap: () => _showMaterialSearchDialog(index),
                             ),
                             Padding(
                               padding:
@@ -734,9 +703,17 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                               ),
                             ),
                             TextFormField(
-                              initialValue:
-                                  item['requestedQuantity'].toString(),
-                              keyboardType: TextInputType.number,
+                              initialValue: item['requestedQuantity'] == null 
+                                  ? ''
+                                  : (item['uom_allow_decimal'] == false 
+                                      ? (item['requestedQuantity'] as num).toInt().toString()
+                                      : item['requestedQuantity'].toString()),
+                              keyboardType: TextInputType.numberWithOptions(
+                                decimal: item['uom_allow_decimal'] ?? true,
+                              ),
+                              inputFormatters: (item['uom_allow_decimal'] ?? true) 
+                                  ? [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))]
+                                  : [FilteringTextInputFormatter.digitsOnly],
                               decoration: const InputDecoration(
                                 labelText: 'Quantity',
                                 filled: true,
@@ -765,17 +742,34 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _submitIndent,
-                    child: const Text(
-                      'Submit Indent Request',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => _submitIndent(isDraft: true),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text('Save as Draft'),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => _submitIndent(isDraft: false),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text('Submit'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

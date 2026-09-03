@@ -43,15 +43,47 @@ class _GateEntryScreenState extends State<GateEntryScreen> {
   bool _isSubmitting = false;
 
   Future<void> _pickImage(String type) async {
-    final XFile? image =
-        await _picker.pickImage(source: ImageSource.camera, imageQuality: 50);
-    if (image != null) {
-      setState(() {
-        if (type == 'invoice') _invoiceImage = File(image.path);
-        if (type == 'dc') _dcImage = File(image.path);
-        if (type == 'weight') _weightReportImage = File(image.path);
-      });
-    }
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: <Widget>[
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Upload File (Gallery)'),
+              onTap: () async {
+                Navigator.of(context).pop();
+                final XFile? image = await _picker.pickImage(
+                    source: ImageSource.gallery, imageQuality: 50);
+                if (image != null) {
+                  setState(() {
+                    if (type == 'invoice') _invoiceImage = File(image.path);
+                    if (type == 'dc') _dcImage = File(image.path);
+                    if (type == 'weight') _weightReportImage = File(image.path);
+                  });
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Take Photo (Camera)'),
+              onTap: () async {
+                Navigator.of(context).pop();
+                final XFile? image = await _picker.pickImage(
+                    source: ImageSource.camera, imageQuality: 50);
+                if (image != null) {
+                  setState(() {
+                    if (type == 'invoice') _invoiceImage = File(image.path);
+                    if (type == 'dc') _dcImage = File(image.path);
+                    if (type == 'weight') _weightReportImage = File(image.path);
+                  });
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _selectDate(BuildContext context, String type) async {
@@ -266,7 +298,7 @@ class _GateEntryScreenState extends State<GateEntryScreen> {
                     const SizedBox(height: 12),
                     _buildImagePicker('DC Scan', _dcImage, 'dc'),
                     const SizedBox(height: 24),
-                    const Text('Transport Details',
+                    const Text('Delivery Details',
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),

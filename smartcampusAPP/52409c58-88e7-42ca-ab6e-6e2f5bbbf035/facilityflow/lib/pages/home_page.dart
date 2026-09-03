@@ -4,6 +4,7 @@ import 'package:facilityflow/pages/maintenance_home_screen.dart';
 import 'package:facilityflow/pages/acknowledgements_screen.dart';
 import 'package:facilityflow/pages/profile_screen.dart';
 import 'package:facilityflow/pages/gate_entries_list_screen.dart';
+import 'package:facilityflow/widgets/exploding_nav_icon.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 
 @NowaGenerated()
@@ -35,54 +36,59 @@ class _HomePageState extends State<HomePage> {
       body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
+          color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
           ],
         ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: Colors.teal,
-          unselectedItemColor: Colors.grey,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.receipt_long_outlined),
-              activeIcon: Icon(Icons.receipt_long),
-              label: 'Indents',
+        child: SafeArea(
+          child: SizedBox(
+            height: 60,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ExplodingNavItem(
+                  icon: Icons.receipt_long_outlined,
+                  activeIcon: Icons.receipt_long,
+                  label: 'Indents',
+                  isSelected: _currentIndex == 0,
+                  onTap: () => setState(() => _currentIndex = 0),
+                ),
+                ExplodingNavItem(
+                  icon: Icons.handyman_outlined,
+                  activeIcon: Icons.handyman,
+                  label: 'Maintain',
+                  isSelected: _currentIndex == 1,
+                  onTap: () => setState(() => _currentIndex = 1),
+                ),
+                ExplodingNavItem(
+                  icon: Icons.assignment_turned_in_outlined,
+                  activeIcon: Icons.assignment_turned_in,
+                  label: 'Receipts',
+                  isSelected: _currentIndex == 2,
+                  onTap: () => setState(() => _currentIndex = 2),
+                ),
+                ExplodingNavItem(
+                  icon: Icons.local_shipping_outlined,
+                  activeIcon: Icons.local_shipping,
+                  label: 'Gate',
+                  isSelected: _currentIndex == 3,
+                  onTap: () => setState(() => _currentIndex = 3),
+                ),
+                ExplodingNavItem(
+                  icon: Icons.person_outline,
+                  activeIcon: Icons.person,
+                  label: 'Profile',
+                  isSelected: _currentIndex == 4,
+                  onTap: () => setState(() => _currentIndex = 4),
+                ),
+              ],
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.handyman_outlined),
-              activeIcon: Icon(Icons.handyman),
-              label: 'Maintain',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.assignment_turned_in_outlined),
-              activeIcon: Icon(Icons.assignment_turned_in),
-              label: 'Receipts', // Shortened to prevent wrapping
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.local_shipping_outlined),
-              activeIcon: Icon(Icons.local_shipping),
-              label: 'Gate',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-          ],
+          ),
         ),
       ),
     );

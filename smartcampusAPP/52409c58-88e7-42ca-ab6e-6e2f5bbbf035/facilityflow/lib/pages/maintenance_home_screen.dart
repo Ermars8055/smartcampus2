@@ -32,7 +32,7 @@ class MaintenanceHomeScreen extends StatelessWidget {
               // Complaints Card
               _buildModuleCard(
                 context,
-                title: 'Complaints',
+                title: 'Complaint',
                 description: 'View and manage all maintenance complaints',
                 icon: Icons.handyman,
                 color: const Color(0xFF0284C7),

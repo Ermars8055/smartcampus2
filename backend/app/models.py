@@ -808,6 +808,7 @@ class PurchaseRequest(Base):
     building_id = Column(Integer, ForeignKey("buildings.id"), nullable=True)
     department_name = Column(String(255), nullable=True)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
     required_date = Column(Date, nullable=False)
     remarks = Column(Text)
     
@@ -833,6 +834,7 @@ class PurchaseRequest(Base):
     room = relationship("Room")
     building = relationship("Building")
     project = relationship("Project")
+    institution = relationship("Institution")
     items = relationship("PurchaseRequestItem", back_populates="purchase_request", cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint("tenant_id", "pr_number", name="uq_pr_per_tenant"),)
 
@@ -1685,10 +1687,11 @@ class PurchaseRequestApproval(Base):
     __tablename__ = "purchase_request_approvals"
     id = Column(Integer, primary_key=True, index=True)
     pr_id = Column(Integer, ForeignKey("purchase_requests.id", ondelete="CASCADE"), nullable=False)
-    approval_flow_id = Column(Integer, ForeignKey("approval_flows.id"), nullable=False)
+    approval_flow_id = Column(Integer, ForeignKey("approval_flows.id"), nullable=True)
     approver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     approved_quantities = Column(JSON, default=dict)
     remarks = Column(Text, nullable=True)
+    status = Column(String(50), default="Approved")
     approved_at = Column(DateTime, default=_get_now)
     
     purchase_request = relationship("PurchaseRequest")

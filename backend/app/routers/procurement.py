@@ -57,7 +57,7 @@ def list_purchase_requests(search: Optional[str]=None, status: Optional[str]=Non
             total_amount = sum((item.quantity * (item.material.standard_cost or 0) for item in pr.items if item.material))
             applicable_flows = [f for f in flows if f.level == pr.current_approval_level and f.min_amount <= total_amount and (f.max_amount is None or f.max_amount >= total_amount) and (can_override or f.user_id == current_user.id or (not f.user_id and f.role_name in user_roles))]
             can_user_approve = len(applicable_flows) > 0
-        result.append(PROut(id=pr.id, pr_number=pr.pr_number, required_for_room_id=pr.required_for_room_id, building_id=pr.building_id, department_name=pr.department_name, project_id=pr.project_id, required_date=pr.required_date, remarks=pr.remarks, requester_id=pr.requester_id, status=pr.status, current_approval_level=pr.current_approval_level or 1, created_at=pr.created_at, updated_at=pr.updated_at, approved_by_id=pr.approved_by_id, approved_at=pr.approved_at, requester_name=pr.requester.full_name if pr.requester else None, room_name=pr.room.name if pr.room else None, project_name=pr.project.name if pr.project else None, building_name=pr.building.name if pr.building else None, items=items, can_user_approve=can_user_approve))
+        result.append(PROut(id=pr.id, pr_number=pr.pr_number, required_for_room_id=pr.required_for_room_id, building_id=pr.building_id, department_name=pr.department_name, project_id=pr.project_id, institution_id=pr.institution_id, required_date=pr.required_date, remarks=pr.remarks, requester_id=pr.requester_id, status=pr.status, current_approval_level=pr.current_approval_level or 1, created_at=pr.created_at, updated_at=pr.updated_at, approved_by_id=pr.approved_by_id, approved_at=pr.approved_at, requester_name=pr.requester.full_name if pr.requester else None, room_name=pr.room.name if pr.room else None, project_name=pr.project.name if pr.project else None, institution_name=pr.institution.name if pr.institution else None, building_name=pr.building.name if pr.building else None, items=items, can_user_approve=can_user_approve))
     return result
 
 @router.get('/pr/{id}')
@@ -68,11 +68,11 @@ def get_purchase_request(id: int, db: Session=Depends(get_db), current_user: Use
     items = []
     for it in pr.items:
         items.append({'id': it.id, 'material_id': it.material_id, 'quantity': it.quantity, 'approved_quantity': it.approved_quantity, 'material_name': it.material.name if it.material else None, 'material_code': it.material.code if it.material else None, 'uom_name': it.material.uom.abbreviation if it.material and it.material.uom else None, 'uom_allow_decimal': it.material.uom.allow_decimal if it.material and it.material.uom else False, 'last_purchase_price': get_lpp(db, it.material_id, tenant_id, site_id)})
-    return PROut(id=pr.id, pr_number=pr.pr_number, required_for_room_id=pr.required_for_room_id, building_id=pr.building_id, department_name=pr.department_name, project_id=pr.project_id, required_date=pr.required_date, remarks=pr.remarks, requester_id=pr.requester_id, status=pr.status, current_approval_level=pr.current_approval_level or 1, created_at=pr.created_at, updated_at=pr.updated_at, approved_by_id=pr.approved_by_id, approved_at=pr.approved_at, requester_name=pr.requester.full_name if pr.requester else None, room_name=pr.room.name if pr.room else None, project_name=pr.project.name if pr.project else None, building_name=pr.building.name if pr.building else None, items=items)
+    return PROut(id=pr.id, pr_number=pr.pr_number, required_for_room_id=pr.required_for_room_id, building_id=pr.building_id, department_name=pr.department_name, project_id=pr.project_id, institution_id=pr.institution_id, required_date=pr.required_date, remarks=pr.remarks, requester_id=pr.requester_id, status=pr.status, current_approval_level=pr.current_approval_level or 1, created_at=pr.created_at, updated_at=pr.updated_at, approved_by_id=pr.approved_by_id, approved_at=pr.approved_at, requester_name=pr.requester.full_name if pr.requester else None, room_name=pr.room.name if pr.room else None, project_name=pr.project.name if pr.project else None, institution_name=pr.institution.name if pr.institution else None, building_name=pr.building.name if pr.building else None, items=items)
 
 @router.post('/pr')
 def create_purchase_request(data: PRCreate, db: Session=Depends(get_db), current_user: User=Depends(require_permission('purchase_requests', 'create')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
-    pr = PurchaseRequest(pr_number=get_next_number(db, tenant_id, site_id, 'PURCHASE_REQUEST', 'PR'), requester_id=current_user.id, project_id=data.project_id, required_for_room_id=data.required_for_room_id, building_id=data.building_id, department_name=data.department_name, required_date=data.required_date, remarks=data.remarks, procurement_type=data.procurement_type, rental_type=data.rental_type, rental_duration=data.rental_duration, rental_duration_unit=data.rental_duration_unit, estimated_rental_cost=data.estimated_rental_cost, cost_per_test=data.cost_per_test, reagent_rental_required=data.reagent_rental_required, justification=data.justification, status=data.status or 'Draft', tenant_id=tenant_id, site_id=site_id)
+    pr = PurchaseRequest(pr_number=get_next_number(db, tenant_id, site_id, 'PURCHASE_REQUEST', 'PR'), requester_id=current_user.id, project_id=data.project_id, institution_id=data.institution_id, required_for_room_id=data.required_for_room_id, building_id=data.building_id, department_name=data.department_name, required_date=data.required_date, remarks=data.remarks, procurement_type=data.procurement_type, rental_type=data.rental_type, rental_duration=data.rental_duration, rental_duration_unit=data.rental_duration_unit, estimated_rental_cost=data.estimated_rental_cost, cost_per_test=data.cost_per_test, reagent_rental_required=data.reagent_rental_required, justification=data.justification, status=data.status or 'Draft', tenant_id=tenant_id, site_id=site_id)
     db.add(pr)
     db.flush()
     for item in data.items:
@@ -107,7 +107,7 @@ def full_update_purchase_request(id: int, data: PRFullUpdate, db: Session=Depend
     update_data = data.model_dump(exclude_unset=True)
     if 'status' in update_data:
         pr.status = update_data['status']
-    for k in ['project_id', 'required_date', 'priority', 'remarks', 'required_for_room_id', 'building_id', 'department_name']:
+    for k in ['project_id', 'institution_id', 'required_date', 'priority', 'remarks', 'required_for_room_id', 'building_id', 'department_name']:
         if k in update_data:
             setattr(pr, k, update_data[k])
     if 'items' in update_data:
@@ -221,14 +221,15 @@ def get_pr_approval_history(id: int, db: Session=Depends(get_db), current_user: 
                 qty = qty_val
                 item_rem = None
             items.append({'material_id': item.material_id, 'material_name': item.material.name if item.material else None, 'material_code': item.material.code if item.material else None, 'uom_name': item.material.uom.abbreviation if item.material and item.material.uom else None, 'requested_quantity': item.quantity, 'approved_quantity': qty, 'remarks': item_rem})
-        status = 'Approved'
-        for item in pr.items:
-            item_id_str = str(item.id)
-            qty_val = (approval.approved_quantities or {}).get(item_id_str)
-            qty = qty_val.get('quantity') if isinstance(qty_val, dict) else qty_val
-            if qty is not None and qty != item.quantity:
-                status = 'Modified'
-                break
+        status = approval.status or 'Approved'
+        if status == 'Approved':
+            for item in pr.items:
+                item_id_str = str(item.id)
+                qty_val = (approval.approved_quantities or {}).get(item_id_str)
+                qty = qty_val.get('quantity') if isinstance(qty_val, dict) else qty_val
+                if qty is not None and qty != item.quantity:
+                    status = 'Modified'
+                    break
         entries.append({'level': flow.level if flow else 0, 'approver_name': approver.full_name if approver else 'Unknown', 'role_name': flow.role_name if flow else 'Unknown', 'approved_at': approval.approved_at, 'remarks': approval.remarks, 'status': status, 'items': items})
     deduped = {}
     for entry in entries:
@@ -245,9 +246,32 @@ def reject_pr(id: int, body: RejectBody=RejectBody(), db: Session=Depends(get_db
     pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == id, PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id).first()
     if not pr:
         raise HTTPException(status_code=404, detail='PR not found')
+        
+    total_amount = 0
+    for item in pr.items:
+        if item.material and item.material.standard_cost:
+            total_amount += item.quantity * item.material.standard_cost
+            
+    flows = db.query(ApprovalFlow).filter(ApprovalFlow.tenant_id == tenant_id, ApprovalFlow.site_id == site_id, ApprovalFlow.document_type == 'PURCHASE_REQUEST', ApprovalFlow.level == pr.current_approval_level, ApprovalFlow.is_active == True, ApprovalFlow.min_amount <= total_amount, (ApprovalFlow.max_amount == None) | (ApprovalFlow.max_amount >= total_amount)).all()
+    flow_id = None
+    if flows:
+        user_roles = getattr(current_user, '_roles', [])
+        is_admin = getattr(current_user, '_is_platform_admin', False)
+        can_override = is_admin or getattr(current_user, '_data_access_scope', '') == 'Full Administrative Access'
+        applicable_flows = [f for f in flows if can_override or f.user_id == current_user.id or (not f.user_id and f.role_name in user_roles)]
+        if applicable_flows:
+            flow_id = applicable_flows[0].id
+
+    db.add(PurchaseRequestApproval(
+        pr_id=id, 
+        approval_flow_id=flow_id, 
+        approver_id=current_user.id, 
+        approved_quantities={}, 
+        status="Rejected",
+        remarks=body.remarks
+    ))
+    
     pr.status = 'Rejected'
-    if body.remarks:
-        pr.remarks = (pr.remarks or '') + f'\n[Rejected: {body.remarks}]'
     db.commit()
     return {'message': 'PR rejected'}
 

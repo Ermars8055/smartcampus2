@@ -39,6 +39,9 @@ SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", "")
 SMTP_FROM_NAME = os.getenv("SMTP_FROM_NAME", "Eastpoint Smart Campus")
 
+# Frontend URL used in password reset emails (never trust client-supplied URL)
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8080")
+
 # Testing: Override all vendor emails to this address
 TEST_EMAIL_OVERRIDE = os.getenv("TEST_EMAIL_OVERRIDE", "")
 

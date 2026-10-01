@@ -8,8 +8,7 @@ from app.database import get_db
 from app.models import User, Tenant, TenantMembership, Role, RolePermission, UserRoleAssignment, Site, DataAccessScope, PasswordResetToken
 from app.auth import verify_password, get_password_hash, create_access_token, get_current_user
 from app.models import AuditLog
-import random
-import string
+import secrets
 from datetime import timedelta
 from app.utils.tz import get_now_ist
 from app.utils.email_utils import send_html_email
@@ -250,6 +249,8 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
 def change_password(req: ChangePasswordRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not verify_password(req.current_password, current_user.hashed_password):
         raise HTTPException(400, "Current password incorrect")
+    if len(req.new_password) < 8:
+        raise HTTPException(400, "Password must be at least 8 characters")
     current_user.hashed_password = get_password_hash(req.new_password)
     db.commit()
     return {"message": "Password changed"}
@@ -258,10 +259,10 @@ def change_password(req: ChangePasswordRequest, current_user: User = Depends(get
 def forgot_password(req: ForgotPasswordRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     user = db.query(User).filter(func.lower(User.email) == req.email.lower(), User.is_deleted == False).first()
     if not user:
-        raise HTTPException(404, "User not found")
-        
-    # Generate 10-char alphanumeric token
-    token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        return {"message": "A password reset link has been sent to your email address"}
+
+    # Generate secure token
+    token = secrets.token_urlsafe(32)
     
     # Invalidate previous tokens
     db.query(PasswordResetToken).filter(PasswordResetToken.user_id == user.id).delete()
@@ -276,7 +277,8 @@ def forgot_password(req: ForgotPasswordRequest, background_tasks: BackgroundTask
     db.commit()
     
     # Send Email
-    reset_link = f"{req.frontend_url}/reset-password?token={token}&email={user.email}"
+    from app.config import FRONTEND_URL
+    reset_link = f"{FRONTEND_URL}/reset-password?token={token}&email={user.email}"
     subject = "Password Reset - Eastpoint Smart Campus"
     html_body = f"""
     <p>Dear {user.full_name},</p>
@@ -308,6 +310,8 @@ def reset_password(req: ResetPasswordRequest, background_tasks: BackgroundTasks,
         raise HTTPException(400, "Reset link has expired")
         
     # Reset password
+    if len(req.new_password) < 8:
+        raise HTTPException(400, "Password must be at least 8 characters")
     user.hashed_password = get_password_hash(req.new_password)
     db.query(PasswordResetToken).filter(PasswordResetToken.user_id == user.id).delete()
     db.commit()

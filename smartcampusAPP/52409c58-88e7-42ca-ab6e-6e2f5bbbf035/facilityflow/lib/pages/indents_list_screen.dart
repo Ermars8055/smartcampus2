@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:facilityflow/globals/app_state.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:facilityflow/pages/indent_detail_screen.dart';
 import 'package:facilityflow/pages/create_indent_screen.dart';
 import 'package:facilityflow/pages/material_issues_screen.dart';
@@ -34,6 +35,16 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
 
   DateTime? _startDate;
   DateTime? _endDate;
+
+  @override
+  void initState() {
+    super.initState();
+    // Auto-fetch fresh data as soon as the screen opens (silent = no spinner if cache exists)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final appState = context.read<AppState>();
+      appState.fetchIndents(isSilentUpdate: appState.indents.isNotEmpty);
+    });
+  }
 
   Color _getStatusColor(String status) {
     switch (status) {

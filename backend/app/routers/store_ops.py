@@ -104,7 +104,7 @@ def list_issues(
         floor_name = iss.room.floor.name if iss.room and iss.room.floor else None
         building_name = iss.room.floor.building.name if iss.room and iss.room.floor and iss.room.floor.building else (iss.building.name if iss.building else None)
 
-        dept_name = iss.issued_to_department or (iss.room.department_name if iss.room else None) or (iss.indent.department_name if getattr(iss, 'indent', None) else None)
+        dept_name = iss.issued_to_department or (iss.room.department_name if iss.room else None) or (iss.indent.department if getattr(iss, 'indent', None) else None)
 
         inst_name = None
         if iss.indent and iss.indent.institution:

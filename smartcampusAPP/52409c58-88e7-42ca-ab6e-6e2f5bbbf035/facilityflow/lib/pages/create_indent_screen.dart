@@ -1,12 +1,11 @@
-
-
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:facilityflow/widgets/forms/app_dropdown_field.dart';
 import 'package:facilityflow/widgets/forms/bottom_picker_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:facilityflow/globals/app_state.dart';
-import 'package:provider/provider.dart';
 import 'package:facilityflow/services/api_service.dart';
 
 import 'package:facilityflow/models/indent.dart';
@@ -14,8 +13,7 @@ import 'package:facilityflow/models/indent.dart';
 @NowaGenerated()
 class CreateIndentScreen extends StatefulWidget {
   @NowaGenerated({'loader': 'auto-constructor'})
-  const CreateIndentScreen({super.key, this.linkedComplaintId, this.cloneFrom, this.indentId});
-  final int? indentId;
+  const CreateIndentScreen({super.key, this.linkedComplaintId, this.cloneFrom});
 
   final int? linkedComplaintId;
   final Indent? cloneFrom;
@@ -38,15 +36,18 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   List<dynamic> _buildingsList = [];
   List<dynamic> _floorsList = [];
   List<dynamic> _roomsList = [];
-
+  List<dynamic> _materialsList = [];
+  List<dynamic> _storesList = [];
 
   String? _selectedInstitutionId;
   String? _selectedDepartmentName;
   String? _selectedBuildingId;
   String? _selectedFloorId;
   String? _selectedRoomId;
-  
-  
+  String? _selectedStoreId;
+  String? _selectedStoreName;
+
+  File? _attachment;
 
   final List<Map<String, dynamic>> _addedItems = [];
 
@@ -55,39 +56,18 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   @override
   void initState() {
     super.initState();
-    
-    // Defer the reading of AppState to avoid issues in initState
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Indent? draftIndent;
-      if (widget.indentId != null) {
-        try {
-          draftIndent = Provider.of<AppState>(context, listen: false).indents.firstWhere((i) => i.id == widget.indentId);
-        } catch (_) {}
-      }
-      final sourceIndent = widget.cloneFrom ?? draftIndent;
-      
-      if (sourceIndent != null) {
-        setState(() {
-          _remarksController.text = sourceIndent.remarks;
-          _selectedInstitutionId = sourceIndent.institutionId?.toString();
-          _selectedDepartmentName = sourceIndent.department;
-          _selectedBuildingId = sourceIndent.buildingId?.toString();
-          _selectedFloorId = sourceIndent.floor.isNotEmpty ? sourceIndent.floor : null; 
-          _selectedRoomId = sourceIndent.roomId?.toString();
-          
-          for (var item in sourceIndent.items) {
-            _addedItems.add({
-              'material_id': item.materialId,
-              'requestedQuantity': item.requestedQuantity,
-              'materialName': item.materialName,
-              'materialCode': item.materialCode,
-              'uom': item.uomName,
-            });
-          }
+    if (widget.cloneFrom != null) {
+      _remarksController.text = widget.cloneFrom!.remarks;
+      for (var item in widget.cloneFrom!.items) {
+        _addedItems.add({
+          'material_id': item.materialId,
+          'requestedQuantity': item.requestedQuantity,
+          'materialName': item.materialName,
+          'materialCode': item.materialCode,
+          'uom': item.uomName,
         });
       }
-    });
-
+    }
     if (_addedItems.isEmpty) {
       _addedItems.add({
         'material_id': null,
@@ -107,11 +87,23 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
       final deptRes = await api.getDepartments();
       final bldgRes = await api.getBuildings();
       
+
+      // Fetch Stores if available
+      List<dynamic> fetchedStores = [];
+      try {
+        final storeRes = await api.getStores();
+        fetchedStores = storeRes.data ?? [];
+      } catch (_) {
+        // Ignore if endpoint doesn't exist
+      }
+
       if (mounted) {
         setState(() {
           _institutions = instRes.data ?? [];
           _allDepartments = deptRes.data ?? [];
           _allBuildings = bldgRes.data ?? [];
+          
+          _storesList = fetchedStores;
           
 
 
@@ -340,6 +332,37 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     });
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Camera'),
+              onTap: () => Navigator.of(context).pop(ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Gallery'),
+              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source != null) {
+      final pickedFile = await picker.pickImage(source: source);
+      if (pickedFile != null) {
+        setState(() {
+          _attachment = File(pickedFile.path);
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -370,7 +393,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
 
 
 
-  Future<void> _submitIndent({bool isDraft = false}) async {
+  Future<void> _submitIndent() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -416,8 +439,9 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
       'location': selectedRoom != null ? selectedRoom['name'] : '',
       'room_id':
           _selectedRoomId != null ? int.tryParse(_selectedRoomId!) : null,
+      'store_id':
+          _selectedStoreId != null ? int.tryParse(_selectedStoreId!) : null,
       'remarks': _remarksController.text.trim(),
-      'status': isDraft ? 'Draft' : 'Submitted',
       if (widget.linkedComplaintId != null)
         'complaint_id': widget.linkedComplaintId,
       'items': validItems
@@ -451,13 +475,14 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     try {
       final api = ApiService();
 
-      
-
-      if (widget.indentId != null) {
-        await api.dio.put('/api/indents/${widget.indentId}', data: payload);
-      } else {
-        await api.dio.post('/api/indents', data: payload);
+      if (_attachment != null) {
+        final uploadRes = await api.uploadComplaintImage(_attachment!);
+        if (uploadRes.data != null && uploadRes.data['path'] != null) {
+          payload['attachment_url'] = uploadRes.data['path'];
+        }
       }
+
+      await api.dio.post('/api/indents', data: payload);
 
       if (!mounted) return;
       final appState = AppState.of(context, listen: false);
@@ -624,6 +649,60 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                     onSelect: (val) => setState(() => _selectedRoomId = val),
                   ),
                 ),
+                if (_storesList.isNotEmpty) ...[
+                  AppDropdownField(
+                    label: 'Store / Warehouse',
+                    icon: Icons.store,
+                    selectedName: _selectedStoreName,
+                    disabled: false,
+                    onTap: () => showBottomPicker(
+                    context: context,
+                      title: 'Select Store',
+                      items: _storesList,
+                      selectedValue: _selectedStoreId,
+                      idField: 'id',
+                      nameField: 'name',
+                      onSelect: (val) {
+                        setState(() {
+                          _selectedStoreId = val;
+                          _selectedStoreName = _storesList.firstWhere(
+                              (s) => s['id'].toString() == val,
+                              orElse: () => null)?['name'];
+                        });
+                      },
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: _pickImage,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                          color: Colors.grey.shade400,
+                          style: BorderStyle.solid),
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey.shade50,
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.camera_alt_outlined,
+                            color: Colors.grey.shade600, size: 32),
+                        const SizedBox(height: 8),
+                        Text(
+                          _attachment != null
+                              ? 'Image Attached: ${_attachment!.path.split('/').last}'
+                              : 'Attach Photo (Optional)',
+                          style: TextStyle(
+                              color: Colors.grey.shade700, fontSize: 14),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _remarksController,
@@ -712,7 +791,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                                 decimal: item['uom_allow_decimal'] ?? true,
                               ),
                               inputFormatters: (item['uom_allow_decimal'] ?? true) 
-                                  ? [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))]
+                                  ? [] 
                                   : [FilteringTextInputFormatter.digitsOnly],
                               decoration: const InputDecoration(
                                 labelText: 'Quantity',
@@ -742,34 +821,17 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => _submitIndent(isDraft: true),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                        child: const Text('Save as Draft'),
-                      ),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _submitIndent,
+                    child: const Text(
+                      'Submit Indent Request',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => _submitIndent(isDraft: false),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.colorScheme.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                        child: const Text('Submit'),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),

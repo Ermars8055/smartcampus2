@@ -25,9 +25,7 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
   late TabController _tabController;
   final List<String> _tabs = [
     'All',
-    'Registered',
-    'Open',
-    'Assigned',
+    'Open / Assigned',
     'Under Inspection',
     'Material Pending',
     'Pending Approval',
@@ -64,15 +62,13 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
   String? _getApiStatusForTab(int index) {
     switch (index) {
       case 0: return null; // All
-      case 1: return 'Registered';
-      case 2: return 'Open';
-      case 3: return 'Assigned';
-      case 4: return 'Under Inspection';
-      case 5: return 'Material Pending';
-      case 6: return 'Pending Approval';
-      case 7: return 'In Progress';
-      case 8: return 'Reopened';
-      case 9: return 'Closed,Rejected';
+      case 1: return 'Registered,Open,Assigned';
+      case 2: return 'Under Inspection';
+      case 3: return 'Material Pending';
+      case 4: return 'Pending Approval';
+      case 5: return 'In Progress';
+      case 6: return 'Reopened';
+      case 7: return 'Closed,Resolved,Rejected';
       default: return null;
     }
   }
@@ -304,7 +300,7 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
                                                 fontWeight: FontWeight.bold,
                                                 color: theme.colorScheme.primary,
                                               ),
-                                              softWrap: true,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                           const SizedBox(width: 8),
@@ -483,10 +479,10 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
                       ),
                     ],
                   ),
-                  // Right side: Raise Complaint button
+                  // Right side: Log Issue button
                   ElevatedButton.icon(
                     icon: const Icon(Icons.add_comment, size: 16),
-                    label: const Text('Raise Complaint', style: TextStyle(fontSize: 12)),
+                    label: const Text('Log Issue', style: TextStyle(fontSize: 12)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
                       foregroundColor: Colors.white,

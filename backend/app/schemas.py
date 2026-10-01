@@ -1614,6 +1614,9 @@ class IndentBase(BaseModel):
     floor: Optional[str] = None
     location: Optional[str] = None
     remarks: Optional[str] = Field(None, max_length=255)
+    priority: Optional[str] = "Normal"
+    cost_center: Optional[str] = None
+    attachment_url: Optional[str] = None
     total_amount: float = 0
     items: List[IndentItemBase] = []
 
@@ -1638,6 +1641,9 @@ class IndentOut(BaseModel):
     building_name: Optional[str] = None
     institution_name: Optional[str] = None
     remarks: Optional[str] = Field(None, max_length=255)
+    priority: Optional[str] = "Normal"
+    cost_center: Optional[str] = None
+    attachment_url: Optional[str] = None
     status: str
     current_approval_level: int
     approved_by_id: Optional[int] = None
@@ -2324,9 +2330,9 @@ class EquipmentItemCreate(BaseModel):
     model: Optional[str] = None
     equipment_cost: Optional[float] = None
     equipment_category: Optional[str] = None
-    warranty_available: bool = False
+    warranty_available: Optional[bool] = False
     warranty_expiry_date: Optional[date] = None
-    amc_cmc_required: bool = False
+    amc_cmc_required: Optional[bool] = False
     amc_cmc_start_date: Optional[date] = None
     amc_cmc_status: Optional[str] = None
     amc_cmc_end_date: Optional[date] = None
@@ -2383,9 +2389,9 @@ class EquipmentItemOut(BaseModel):
     equipment_category: Optional[str] = None
     serial_number_photo_url: Optional[str] = None
     equipment_photo_url: Optional[str] = None
-    warranty_available: bool = False
+    warranty_available: Optional[bool] = False
     warranty_expiry_date: Optional[date] = None
-    amc_cmc_required: bool = False
+    amc_cmc_required: Optional[bool] = False
     amc_cmc_start_date: Optional[date] = None
     amc_cmc_end_date: Optional[date] = None
     amc_po_number: Optional[str] = None

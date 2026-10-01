@@ -14,7 +14,7 @@ from app.auth import get_current_user, require_permission, get_tenant_id, get_si
 from app.utils.sequences import get_next_number
 from pydantic import BaseModel
 from typing import Optional
-
+from app.ws_manager import manager
 router = APIRouter(prefix="/api/indents", tags=["Indents"])
 
 def generate_indent_number(db: Session, tenant_id: int, site_id: int) -> str:
@@ -25,6 +25,9 @@ def list_indents(
     search: str = None,
     complaint_id: Optional[int] = None,
     rwo_id: Optional[int] = None,
+    skip: int = 0,
+    limit: int = 10000,
+    status: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("indents", "read")),
     tenant_id: int = Depends(get_tenant_id),
@@ -35,6 +38,10 @@ def list_indents(
         query = query.filter(Indent.complaint_id == complaint_id)
     if rwo_id:
         query = query.filter(Indent.rwo_id == rwo_id)
+    
+    if status and status != 'All':
+        status_list = [s.strip() for s in status.split(',')]
+        query = query.filter(Indent.status.in_(status_list))
     
     # --- ROW-LEVEL SECURITY / DATA SCOPING ---
     is_platform_admin = getattr(current_user, "_is_platform_admin", False)
@@ -67,7 +74,7 @@ def list_indents(
             (User.full_name.ilike(search_term))
         )
     
-    indents = query.order_by(Indent.created_at.desc()).all()
+    indents = query.order_by(Indent.created_at.desc()).offset(skip).limit(limit).all()
     
     # Pre-fetch approval flows to calculate can_user_approve
     flows = db.query(ApprovalFlow).filter(
@@ -185,6 +192,9 @@ def create_indent(
             location=data.location,
             department=data.department,
             remarks=data.remarks,
+            priority=data.priority,
+            cost_center=data.cost_center,
+            attachment_url=data.attachment_url,
             total_amount=round(total, 2),
             status=IndentStatus.DRAFT.value if data.is_draft else IndentStatus.SUBMITTED.value,
             current_approval_level=1
@@ -208,6 +218,7 @@ def create_indent(
         
         db.commit()
         db.refresh(indent)
+        manager.broadcast_sync({'event': 'INDENTS_UPDATED'})
     except HTTPException:
         db.rollback()
         raise
@@ -372,6 +383,7 @@ def handle_next_level(db, indent, tenant_id, site_id, user_id=None):
     if has_more:
         indent.current_approval_level = next_level
         db.commit()
+        manager.broadcast_sync({'event': 'INDENTS_UPDATED'})
         return {"message": f"Moved to level {next_level}", "status": indent.status, "current_level": indent.current_approval_level}
     else:
         indent.status = IndentStatus.APPROVED.value
@@ -397,6 +409,7 @@ def handle_next_level(db, indent, tenant_id, site_id, user_id=None):
         db.add(alert)
         
         db.commit()
+        manager.broadcast_sync({'event': 'INDENTS_UPDATED'})
         return {"message": "Fully Approved", "status": indent.status, "current_level": indent.current_approval_level}
 
 @router.get("/{id}/approval-history")
@@ -502,6 +515,7 @@ def reject_indent(
     if data and data.remarks:
         indent.remarks = (indent.remarks or '') + f'\n[Rejected: {data.remarks}]'
     db.commit()
+    manager.broadcast_sync({'event': 'INDENTS_UPDATED'})
     return {"message": "Rejected", "status": indent.status}
 
 @router.post("/{id}/acknowledge")
@@ -624,7 +638,7 @@ def update_draft_indent(
 
     db.commit()
     db.refresh(indent)
-    
+    manager.broadcast_sync({'event': 'INDENTS_UPDATED'})
     indent.requester_name = current_user.full_name
     indent.room_name = indent.room.name if indent.room else None
     for item in indent.items:

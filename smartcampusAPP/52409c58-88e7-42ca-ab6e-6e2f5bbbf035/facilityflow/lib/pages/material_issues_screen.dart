@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:facilityflow/globals/app_state.dart';
+import 'package:provider/provider.dart';
 
 class MaterialIssuesScreen extends StatefulWidget {
   const MaterialIssuesScreen({super.key});
@@ -9,6 +10,15 @@ class MaterialIssuesScreen extends StatefulWidget {
 }
 
 class _MaterialIssuesScreenState extends State<MaterialIssuesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final appState = Provider.of<AppState>(context, listen: false);
+      appState.fetchIssues();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final appState = AppState.of(context, listen: true);

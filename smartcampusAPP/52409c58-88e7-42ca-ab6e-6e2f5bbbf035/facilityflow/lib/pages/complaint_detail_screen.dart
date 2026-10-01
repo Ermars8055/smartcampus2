@@ -785,9 +785,8 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final statusColor = _getStatusColor(widget.complaint.status);
-    final dateStr = DateFormat('dd MMM yyyy').format(widget.complaint.complaintDate);
-    final timeStr = widget.complaint.complaintTime ?? DateFormat('hh:mm a').format(widget.complaint.complaintDate);
-    final formattedDate = '$dateStr, $timeStr';
+    final formattedDate = DateFormat('dd MMM yyyy, hh:mm a')
+        .format(widget.complaint.complaintDate);
 
     final appState = AppState.of(context);
     final materialIssues = appState.materialIssues
@@ -802,18 +801,14 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
     final isUnderInspection = widget.complaint.status == 'Under Inspection';
     final isMaterialPending = widget.complaint.status == 'Material Pending';
     final isInProgress = widget.complaint.status == 'In Progress';
-    final isPendingApproval = widget.complaint.status == 'Pending Approval';
 
     return Scaffold(
       appBar: AppBar(
-        title: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(widget.complaint.docketNo,
-              style: const TextStyle(fontWeight: FontWeight.bold)),
-        ),
+        title: Text(widget.complaint.docketNo,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
       bottomNavigationBar: _buildBottomActionBar(
-          isRegistered, isAssigned, isUnderInspection, isMaterialPending, isInProgress, isPendingApproval),
+          isRegistered, isAssigned, isUnderInspection, isMaterialPending, isInProgress),
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -859,7 +854,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                                 style: theme.textTheme.titleMedium
                                     ?.copyWith(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 12),
-                            Text('LOCATION / DEPT',
+                            Text('LOCATION / ROOM',
                                 style: theme.textTheme.bodySmall
                                     ?.copyWith(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
@@ -1209,8 +1204,9 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                         ),
                       ),
                     ],
-                    if ((widget.complaint.resolutionEntered != null && widget.complaint.resolutionEntered!.isNotEmpty) ||
-                        widget.complaint.resolutionRemarks.isNotEmpty || widget.complaint.closureReason != null) ...[
+                    if (widget.complaint.status == 'Closed' &&
+                        (widget.complaint.resolutionEntered != null ||
+                            widget.complaint.resolutionRemarks.isNotEmpty)) ...[
                       Text('Closure Details',
                           style: theme.textTheme.titleSmall
                               ?.copyWith(color: const Color(0xFF059669))),
@@ -1533,14 +1529,14 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   }
 
   Widget? _buildBottomActionBar(bool isRegistered, bool isAssigned, bool isUnderInspection,
-      bool isMaterialPending, bool isInProgress, bool isPendingApproval) {
-    if (!isRegistered && !isAssigned && !isUnderInspection && !isMaterialPending && !isInProgress && !isPendingApproval) {
+      bool isMaterialPending, bool isInProgress) {
+    if (!isRegistered && !isAssigned && !isUnderInspection && !isMaterialPending && !isInProgress) {
       return null;
     }
 
     bool canStartRepair = _rwo != null ||
         _materialIssues.isNotEmpty ||
-        (_materialIndents.isNotEmpty && _materialIndents.every((i) => i['status'] == 'Rejected'));
+        _materialIndents.every((i) => i['status'] == 'Rejected');
     bool canClose = true;
     if (_materialIndents.isNotEmpty) {
       canClose = _materialIndents.every((ind) =>
@@ -1634,26 +1630,6 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                       ),
                     ),
                   ),
-                if (isPendingApproval) ...[
-                  if (widget.complaint.adminApprovedById == null)
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _showApproveDialog('admin'),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                        icon: const Icon(Icons.thumb_up),
-                        label: const Text('Level 1 Approve'),
-                      ),
-                    ),
-                  if (widget.complaint.adminApprovedById != null && widget.complaint.managerApprovedById == null)
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _showApproveDialog('manager'),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                        icon: const Icon(Icons.verified),
-                        label: const Text('Level 2 Approve'),
-                      ),
-                    ),
-                ],
               ],
             ),
             if (isMaterialPending || isInProgress) ...[

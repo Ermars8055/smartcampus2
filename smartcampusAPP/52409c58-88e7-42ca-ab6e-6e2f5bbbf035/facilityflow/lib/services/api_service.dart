@@ -122,8 +122,10 @@ class ApiService {
     return await dio.get('/api/configurations/lookups/ComplaintType');
   }
 
-  Future<Response> getMaterials({int limit = 10000}) async {
-    return await dio.get('/api/materials', queryParameters: {'limit': limit});
+  Future<Response> getMaterials({int skip = 0, int limit = 50, String? search}) async {
+    final query = <String, dynamic>{"skip": skip, "limit": limit};
+    if (search != null && search.isNotEmpty) query["search"] = search;
+    return await dio.get("/api/materials", queryParameters: query);
   }
 
   Future<Response> getStores() async {

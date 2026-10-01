@@ -1,3 +1,6 @@
+import 'package:flutter/foundation.dart';
+import 'package:facilityflow/globals/parse_indents.dart';
+
 import 'package:flutter/material.dart';
 import 'package:facilityflow/globals/themes.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
@@ -12,11 +15,13 @@ import 'package:dio/dio.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:facilityflow/services/api_service.dart';
+import 'package:facilityflow/services/websocket_service.dart';
 
 @NowaGenerated()
 class AppState extends ChangeNotifier {
   AppState() {
     // Lazy loading: endpoints will be hit when their respective screens are opened
+    WebSocketService().connect(this);
   }
 
   Future<void> fetchAllData() async {
@@ -41,17 +46,33 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchIndents() async {
-    _isLoadingIndents = true;
-    notifyListeners();
+  Future<void> fetchIndents({bool isSilentUpdate = false}) async {
+    if (!isSilentUpdate) {
+      _isLoadingIndents = true;
+      notifyListeners();
+    }
+    
+    final box = Hive.box('offline_cache');
+    if (box.containsKey('indents')) {
+      try {
+        final cachedData = box.get('indents') as List<dynamic>;
+        final List<Indent> parsedIndents = await compute(parseIndents, cachedData);
+        _indents.clear();
+        _indents.addAll(parsedIndents);
+        _isLoadingIndents = false;
+        notifyListeners();
+      } catch (e) {
+        debugPrint('Error loading cached indents: $e');
+      }
+    }
+    
     try {
       final response = await ApiService().dio.get('/api/indents');
       final List data = response.data;
+      final List<Indent> parsedIndents = await compute(parseIndents, data);
       _indents.clear();
-      _indents.addAll(data
-          .map((json) => Indent.fromJson(json))
-          .where((indent) => indent.status != 'Converted to PO')
-          .toList());
+      _indents.addAll(parsedIndents);
+      box.put('indents', data);
     } catch (e) {
       debugPrint('Error fetching indents: $e');
     } finally {
@@ -80,7 +101,7 @@ class AppState extends ChangeNotifier {
     }
 
     try {
-      final queryParams = {
+      final Map<String, dynamic> queryParams = {
         'skip': skip,
         'limit': limit,
       };
@@ -160,9 +181,6 @@ class AppState extends ChangeNotifier {
     return List.unmodifiable(_complaints);
   }
 
-  bool get isLoadingComplaints {
-    return _isLoadingComplaints;
-  }
 
   final List<RepairWorkOrder> _rwos = [];
 

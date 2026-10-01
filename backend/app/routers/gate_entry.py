@@ -122,7 +122,7 @@ def create_gate_entry(
         driver_name=data.driver_name,
         driver_phone=data.driver_phone,
         delivery_person_name=data.delivery_person_name,
-        entry_type="Standard",
+        entry_type=data.entry_type,
         invoice_number=data.invoice_number,
         invoice_date=data.invoice_date,
         invoice_amount=data.invoice_amount,

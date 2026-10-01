@@ -76,7 +76,7 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
           ? (_startDate ?? DateTime.now())
           : (_endDate ?? DateTime.now()),
       firstDate: DateTime(2020),
-      lastDate: DateTime(2101),
+      lastDate: DateTime.now(),
     );
     if (picked != null) {
       setState(() {
@@ -130,7 +130,7 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
               .contains(_searchQuery.toLowerCase()));
       final matchesStatus =
           _selectedStatus == 'All' || indent.status == _selectedStatus;
-      final matchesInst = _selectedInstitution == 'All' ||
+      final matchesInst = _selectedInstitution.toUpperCase() == 'ALL' ||
           indent.institutionName == _selectedInstitution;
       final matchesDept = _selectedDepartment == 'All' ||
           indent.department == _selectedDepartment;
@@ -504,7 +504,7 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                       itemBuilder: (context, index) {
                         final indent = filteredIndents[index];
                         final formattedDate = DateFormat(
-                          'dd MMM yyyy, hh:mm a',
+                          'dd-MMM-yyyy',
                         ).format(indent.date);
                         final statusColor = _getStatusColor(indent.status);
                         final displayStatus = indent.status == 'Submitted'
@@ -515,13 +515,23 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                           child: InkWell(
                             borderRadius: BorderRadius.circular(12),
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      IndentDetailScreen(indent: indent),
-                                ),
-                              );
+                              if (indent.status == 'Draft') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        CreateIndentScreen(indentId: indent.id),
+                                  ),
+                                );
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        IndentDetailScreen(indent: indent),
+                                  ),
+                                );
+                              }
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(16),
@@ -567,6 +577,26 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                                     ],
                                   ),
                                   const SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.account_balance,
+                                        size: 16,
+                                        color: Colors.grey,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          indent.institutionName.isNotEmpty ? indent.institutionName : 'N/A',
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.grey[800],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
                                   Row(
                                     children: [
                                       const Icon(

@@ -39,6 +39,9 @@ class Indent {
     required this.date,
     this.requesterName = '',
     this.institutionName = '',
+    this.institutionId,
+    this.roomId,
+    this.buildingId,
     this.buildingName = '',
     this.floor = '',
     this.roomName = '',
@@ -64,6 +67,9 @@ class Indent {
           : DateTime.now(),
       requesterName: json['requester_name'] as String? ?? '',
       institutionName: json['institution_name'] as String? ?? '',
+      institutionId: json['institution_id'] as int?,
+      roomId: json['room_id'] as int?,
+      buildingId: json['building_id'] as int?,
       buildingName: json['building_name'] as String? ?? '',
       floor: json['floor'] as String? ?? '',
       roomName: json['room_name'] as String? ?? '',
@@ -86,6 +92,9 @@ class Indent {
   final DateTime date;
 
   final String requesterName;
+  final int? institutionId;
+  final int? roomId;
+  final int? buildingId;
   final String institutionName;
   final String buildingName;
   final String floor;

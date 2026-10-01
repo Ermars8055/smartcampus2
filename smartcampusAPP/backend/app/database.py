@@ -15,7 +15,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 class Base(DeclarativeBase):
-    pass
+    pass 
 
 
 def get_db():

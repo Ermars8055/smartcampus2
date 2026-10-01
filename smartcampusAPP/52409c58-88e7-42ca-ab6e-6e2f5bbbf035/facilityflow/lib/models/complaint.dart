@@ -7,6 +7,7 @@ class Complaint {
     required this.id,
     required this.docketNo,
     required this.complaintDate,
+    this.complaintTime,
     required this.location,
     required this.natureOfComplaint,
     required this.individualDetailed,
@@ -51,7 +52,10 @@ class Complaint {
       complaintDate: json['complaint_date'] != null
           ? DateTime.parse(json['complaint_date'] as String)
           : DateTime.now(),
-      location: json['location'] as String? ?? '',
+      complaintTime: json['complaint_time'] as String?,
+      location: (json['location'] as String?)?.isNotEmpty == true 
+          ? json['location'] as String 
+          : (json['department_name'] as String? ?? ''),
       natureOfComplaint: json['nature_of_complaint'] as String? ?? '',
       individualDetailed: json['individual_detailed'] as String? ?? '',
       status: json['status'] as String? ?? 'Registered',
@@ -114,6 +118,7 @@ class Complaint {
   final int id;
   final String docketNo;
   final DateTime complaintDate;
+  final String? complaintTime;
   final String location;
   final String natureOfComplaint;
   final String individualDetailed;

@@ -12,7 +12,9 @@ DATABASE_URL = os.getenv(
 )
 
 # JWT Settings — fail fast if SECRET_KEY not set in production
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-change-in-production")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY environment variable is not set. Refusing to start.")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))
 

@@ -47,32 +47,79 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
 
   Future<void> _handleAction(String action) async {
     if (action == 'Reject' || action == 'Cancel') {
-      final confirm = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text('Confirm $action'),
-          content: Text(
-              'Are you sure you want to ${action.toLowerCase()} this indent?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('No'),
+      String? remarks;
+      
+      if (action == 'Reject') {
+        final reasonController = TextEditingController();
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Reject Indent?'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Are you sure you want to reject ${widget.indent.indentNumber}?'),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: reasonController,
+                  decoration: const InputDecoration(
+                    labelText: 'Reason (required) *',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+              ],
             ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Yes'),
-            ),
-          ],
-        ),
-      );
-      if (confirm != true) return;
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () {
+                  if (reasonController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a reason for rejection')));
+                    return;
+                  }
+                  remarks = reasonController.text.trim();
+                  Navigator.pop(ctx, true);
+                },
+                child: const Text('Yes, Reject'),
+              ),
+            ],
+          ),
+        );
+        if (confirm != true) return;
+      } else {
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text('Confirm $action'),
+            content: Text(
+                'Are you sure you want to ${action.toLowerCase()} this indent?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('No'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Yes'),
+              ),
+            ],
+          ),
+        );
+        if (confirm != true) return;
+      }
 
       setState(() => _isLoading = true);
       try {
         final api = ApiService();
         if (action == 'Reject') {
-          await api.rejectIndent(widget.indent.id);
+          await api.rejectIndent(widget.indent.id, remarks: remarks);
         } else {
           await api.cancelIndent(widget.indent.id);
         }
@@ -566,14 +613,10 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                                     _buildDivider(),
                                     _buildQtyColumn(
                                         context,
-                                        'Recd',
-                                        _formatQty(item.acknowledgedQuantity,
+                                        'Pending',
+                                        _formatQty((item.approvedQuantity - item.issuedQuantity) < 0 ? 0 : (item.approvedQuantity - item.issuedQuantity),
                                             item.uomName, item.uomAllowDecimal),
-                                        item.acknowledgedQuantity ==
-                                                    item.issuedQuantity &&
-                                                item.issuedQuantity > 0
-                                            ? Colors.green
-                                            : Colors.grey),
+                                        Colors.red),
                                   ],
                                 ),
                               ],
@@ -690,7 +733,7 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.outbox),
-                  label: const Text('Dispatch Materials'),
+                  label: const Text('Issue Material'),
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[900]),
                   onPressed: () {

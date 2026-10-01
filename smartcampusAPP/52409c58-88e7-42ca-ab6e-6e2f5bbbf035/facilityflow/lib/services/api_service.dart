@@ -69,17 +69,28 @@ class ApiService {
     });
   }
 
+  // Lookups cache
+  static Response? _instCache;
+  static Response? _deptCache;
+  static Response? _bldgCache;
+
   // Lookups
   Future<Response> getInstitutions() async {
-    return await dio.get('/api/institutions');
+    if (_instCache != null) return _instCache!;
+    _instCache = await dio.get('/api/institutions');
+    return _instCache!;
   }
 
   Future<Response> getDepartments() async {
-    return await dio.get('/api/departments');
+    if (_deptCache != null) return _deptCache!;
+    _deptCache = await dio.get('/api/departments');
+    return _deptCache!;
   }
 
   Future<Response> getBuildings() async {
-    return await dio.get('/api/buildings');
+    if (_bldgCache != null) return _bldgCache!;
+    _bldgCache = await dio.get('/api/buildings');
+    return _bldgCache!;
   }
 
   Future<Response> getEquipment() async {
@@ -174,8 +185,8 @@ class ApiService {
     });
   }
 
-  Future<Response> rejectIndent(int id) async {
-    return await dio.post('/api/indents/$id/reject');
+  Future<Response> rejectIndent(int id, {String? remarks}) async {
+    return await dio.post('/api/indents/$id/reject', data: remarks != null ? {'remarks': remarks} : null);
   }
 
   Future<Response> cancelIndent(int id) async {

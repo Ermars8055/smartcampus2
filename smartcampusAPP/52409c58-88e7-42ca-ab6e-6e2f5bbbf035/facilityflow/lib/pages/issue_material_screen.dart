@@ -50,8 +50,9 @@ class _IssueMaterialScreenState extends State<IssueMaterialScreen> {
       if (qty > 0) {
         hasValidQty = true;
         payloadItems.add({
-          'indent_item_id': widget.indent.items[i].id,
-          widget.isReturn ? 'returned_quantity' : 'issued_quantity': qty,
+          'material_id': widget.indent.items[i].materialId, // Correctly point to material_id
+          'quantity': qty,
+          'rate': 0, // Rate is required by IssueItemBase
         });
       }
     }
@@ -68,11 +69,16 @@ class _IssueMaterialScreenState extends State<IssueMaterialScreen> {
 
     try {
       final api = ApiService();
-      final endpoint = widget.isReturn
-          ? '/api/indents/${widget.indent.id}/return'
-          : '/api/indents/${widget.indent.id}/issue';
-
-      await api.dio.post(endpoint, data: {'items': payloadItems});
+      if (widget.isReturn) {
+         // Return logic if it was implemented (not focusing on returns for this fix)
+         await api.dio.post('/api/indents/${widget.indent.id}/return', data: {'items': payloadItems});
+      } else {
+         final payload = {
+           'indent_id': widget.indent.id,
+           'items': payloadItems
+         };
+         await api.dio.post('/api/issues', data: payload);
+      }
 
       if (!mounted) return;
       await AppState.of(context, listen: false).fetchIndents();
@@ -81,7 +87,7 @@ class _IssueMaterialScreenState extends State<IssueMaterialScreen> {
         SnackBar(
           content: Text(widget.isReturn
               ? 'Materials returned successfully!'
-              : 'Materials dispatched successfully!'),
+              : 'Materials issued successfully!'),
           backgroundColor: Colors.green,
         ),
       );
@@ -103,7 +109,7 @@ class _IssueMaterialScreenState extends State<IssueMaterialScreen> {
     return Scaffold(
       appBar: AppBar(
         title:
-            Text(widget.isReturn ? 'Return Materials' : 'Dispatch Materials'),
+            Text(widget.isReturn ? 'Return Materials' : 'Issue Material'),
       ),
       body: SafeArea(
         child: Column(
@@ -183,7 +189,7 @@ class _IssueMaterialScreenState extends State<IssueMaterialScreen> {
                         : Text(
                             widget.isReturn
                                 ? 'Confirm Return'
-                                : 'Confirm Dispatch',
+                                : 'Confirm Issue',
                             style: const TextStyle(
                                 fontSize: 16, color: Colors.white)),
                   ),

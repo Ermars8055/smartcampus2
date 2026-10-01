@@ -45,12 +45,13 @@ async def lifespan(app: FastAPI):
     shutdown_scheduler()
 
 
+_is_production = os.getenv("ENV", "development") == "production"
 app = FastAPI(
     title=APP_TITLE,
     description=APP_SUBTITLE,
     version=APP_VERSION,
-    docs_url="/api/docs",
-    redoc_url="/api/redoc",
+    docs_url=None if _is_production else "/api/docs",
+    redoc_url=None if _is_production else "/api/redoc",
     lifespan=lifespan,
 )
 

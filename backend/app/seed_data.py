@@ -1,4 +1,5 @@
 """Minimal seed: creates only a platform super-admin so the system can be bootstrapped via UI."""
+import os
 from sqlalchemy.orm import Session
 from app.models import User
 from app.auth import get_password_hash
@@ -28,14 +29,18 @@ def seed_database(db: Session):
     if db.query(User).count() > 0:
         return  # already bootstrapped
 
+    superadmin_password = os.getenv("SUPERADMIN_PASSWORD")
+    if not superadmin_password:
+        raise RuntimeError("SUPERADMIN_PASSWORD environment variable is not set. Refusing to seed.")
+
     print("Creating platform super-admin …")
     db.add(User(
         username="superadmin",
         email="super@nissigrid.com",
         full_name="Super Admin",
-        hashed_password=get_password_hash("admin123"),
+        hashed_password=get_password_hash(superadmin_password),
         is_platform_admin=True,
     ))
     db.commit()
-    print("Done — log in at /platform/login with superadmin / admin123")
+    print("Done — log in at /platform/login with superadmin and your configured SUPERADMIN_PASSWORD")
 

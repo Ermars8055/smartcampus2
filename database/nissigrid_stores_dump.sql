@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict eczA1tJHPFKsJ3gx0AQZTtIMQUOENnpHJxzObxJrsYQ1lQrXUwUavRJANyAQysf
+\restrict xUu6txV2RURMbVecQx4BktA6hY45vkgFaxgdyIa2OEDYSXPTsJVNZTC0ttOlobJ
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -2454,11 +2454,12 @@ ALTER SEQUENCE public.purchase_orders_id_seq OWNED BY public.purchase_orders.id;
 CREATE TABLE public.purchase_request_approvals (
     id integer NOT NULL,
     pr_id integer NOT NULL,
-    approval_flow_id integer NOT NULL,
+    approval_flow_id integer,
     approver_id integer NOT NULL,
     approved_quantities json,
     remarks text,
-    approved_at timestamp without time zone
+    approved_at timestamp without time zone,
+    status character varying(50)
 );
 
 
@@ -2553,7 +2554,8 @@ CREATE TABLE public.purchase_requests (
     estimated_rental_cost double precision,
     cost_per_test double precision,
     reagent_rental_required boolean,
-    justification text
+    justification text,
+    institution_id integer
 );
 
 
@@ -4618,7 +4620,7 @@ ALTER TABLE ONLY public.write_offs ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-aa1f5111513e
+773def207b36
 \.
 
 
@@ -5861,7 +5863,7 @@ COPY public.company_addresses (id, tenant_id, site_id, address_type, address, gs
 1	3	3	Billing	Jnana Prabha Campus,\nBidarahalli, Virgonagar	29AAAAA0000A1Z5	29 - Karnataka	t	f	2026-06-02 16:41:32.765533	MG Charitable Trust	ADDR-00001	pradnesh	9842003333	mgcharitabletrust@gmail.com		Bangalore	560049				2026-06-02 17:38:37.233401
 4	2	2	Billing	Jnana Prabha Campus,\nBidarahalli, Virgonagar	29AAAAA0000A1Z5	29 - Karnataka	t	f	2026-06-11 19:06:31.637393	MG Charitable Trust	ADDR-00001	MGCTrust	9898989898	MGCTrust@MGCTrust.com		Bangalore	560049				2026-06-11 19:06:31.637437
 5	2	2	Billing	113, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR POST	29AAAAA0000A1Z5	29 - Karnataka	t	f	2026-06-11 19:07:27.428128	EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER	ADDR-00002					Bangalore	560049				2026-06-11 19:07:27.428172
-6	2	2	Billing	Jnana Prabha Campus,\nBidarahalli, Virgonagar	29AAAAA0000A1Z5	29 - Karnataka	t	f	2026-06-11 19:08:42.935422	Helios Construction LLP	ADDR-00003					Bangalore	560049				2026-06-11 19:08:42.93545
+6	2	2	Billing	Jnana Prabha Campus,\nBidarahalli, Virgonagar	29AAAAA0000A1Z5	29 - Karnataka	t	t	2026-06-11 19:08:42.935422	Helios Construction LLP	ADDR-00003					Bangalore	560049				2026-09-02 18:50:19.760091
 \.
 
 
@@ -6400,6 +6402,8 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 467	2	2	CMP-00031	2026-08-19	17:33	Mental Health Nursing	\N	\N		not working	not working	suraj	Closed	35	\N	3	\N	f	2026-08-19 17:33:59.011076	2026-08-19 17:34:51.469115	\N	f	\N	\N	\N	done	\N	\N	\N	\N	Machine Not Working	f	3	2026-08-19 12:04:51.006803	3	2026-08-19 12:04:51.468779	done	fixed	\N	\N	\N	\N	\N
 468	2	2	CMP-00032	2026-08-26	15:19	HEALTH 	8	\N		pc not working	pc not working	Pradnesh A	Closed	34	\N	3	\N	f	2026-08-26 15:19:11.721592	2026-08-26 15:38:54.435465	\N	f	\N	\N	\N		\N	\N	\N	1607	General Complaint	f	3	2026-08-26 10:08:49.606651	3	2026-08-26 10:08:54.434811	\nResolution Entered (Action Taken) \n	Closure Reason \n	\N	\N	\N	\N	\N
 475	2	2	CMP-00039	2026-08-28	13:02	102	\N	\N	\N	Request for Equipment Installation: EPCMS-102-ESA-001	\N	\N	Closed	34	\N	3	\N	f	2026-08-28 18:32:09.667193	2026-08-28 18:38:21.478368	\N	t	\N	\N	\N		\N	\N	\N	805	Installation	f	3	2026-08-28 13:08:20.504843	3	2026-08-28 13:08:21.475858	Resolution Entered \n	Closure Reason \n	work completed	t	2026-08-28	18:35	{}
+476	2	2	CMP-00040	2026-09-02	17:53	Child Health Nursing	\N	\N		not working properly	not working		Registered	\N	\N	3	\N	f	2026-09-02 17:53:49.932652	2026-09-02 17:54:37.728848	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N
+478	2	2	CMP-00042	2026-09-02	12:36	102	\N	\N	\N	Request for Equipment Installation: EPCMS-102-BPA-001	\N	\N	Registered	\N	\N	3	\N	f	2026-09-02 18:06:58.206114	2026-09-02 18:06:58.206123	\N	f	\N	\N	\N	\N	\N	\N	\N	804	Installation	f	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N
 460	2	2	CMP-00024	2026-08-19	16:47	HEALTH 	7	237		Machine is not working	Machine is not working		Closed	35	\N	3	\N	f	2026-08-19 16:47:03.774388	2026-08-19 17:02:48.628912	\N	f	\N	\N	\N	test	\N	\N	\N	1607	Machine Not Working	f	3	2026-08-19 11:32:47.035294	3	2026-08-19 11:32:48.626632	test	test	\N	\N	\N	\N	\N
 462	2	2	CMP-00026	2026-08-19	16:48	HEALTH 	\N	\N		Installation required	Installation required		Material Pending	35	\N	3	\N	f	2026-08-19 16:48:25.180005	2026-08-19 17:04:24.782105	\N	t	\N	\N	\N		\N	\N	\N	1607	Installation	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 465	2	2	CMP-00029	2026-08-19	17:04	MICU/EICU	\N	\N		not working	not working properly	rio	Closed	34	\N	3	\N	f	2026-08-19 17:04:18.049899	2026-08-19 17:10:04.960124	\N	t	\N	\N	\N	not working	\N	\N	\N	1608	Machine Not Working	f	3	2026-08-19 11:40:04.214735	3	2026-08-19 11:40:04.958474	yes	work done	\N	\N	\N	\N	\N
@@ -6408,6 +6412,7 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 470	2	2	CMP-00034	2026-08-27	14:56	Medical-Surgical Nursing	\N	\N		need installation	need installation\n		Material Pending	34	\N	3	\N	f	2026-08-27 14:56:42.343441	2026-08-27 15:13:35.469717	\N	t	\N	\N	\N		\N	\N	\N	\N	Installation	f	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N
 472	2	2	CMP-00036	2026-08-27	15:41	HEALTH 	7	237		AC problem	macine problem 	Pradnesh A	Material Pending	34	\N	3	\N	f	2026-08-27 15:41:43.135145	2026-08-27 15:42:35.763186	\N	t	\N	\N	\N		\N	\N	\N	1609	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N
 474	2	2	CMP-00038	2026-08-28	16:16	Chemistry	12	\N		v	 v	tesst	Registered	\N	\N	17	\N	f	2026-08-28 16:16:23.02756	2026-08-28 16:16:23.027591	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Installation	f	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N
+477	2	2	CMP-00041	2026-09-02	17:57	Child Health Nursing	\N	\N		DOOR IS NOT LOCKING PROPERLY	DOOR IS NOT LOCKING PROPERLY		Registered	\N	\N	3	\N	f	2026-09-02 17:57:49.32015	2026-09-02 17:57:49.320164	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Machine Not Working	f	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N
 \.
 
 
@@ -10372,9 +10377,8 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 71	2	2	GATE_ENTRY	GE	16
 70	2	2	QUOTATION_REQUEST	QR	43
 73	2	2	TRANSFER	TRF	5
-78	2	2	COMPLAINT	CMP	39
+78	2	2	COMPLAINT	CMP	42
 69	2	2	PURCHASE_ORDER	PO	39
-68	2	2	PURCHASE_REQUEST	PR	22
 152	2	2	CREDIT_NOTE	CN	8
 96	2	2	CONTRACT	CNT	17
 153	2	2	MATERIAL_82	TML	1
@@ -10385,6 +10389,7 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 154	2	2	MATERIAL_81	ELC	1
 97	2	2	EQP	EQP	7
 66	2	2	INDENT	IND	44
+68	2	2	PURCHASE_REQUEST	PR	23
 67	2	2	ISSUE	ISS	29
 94	2	2	PURCHASE_ORDER_11	EPAHS/PO	11
 \.
@@ -10827,7 +10832,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1606	2	2	EQP-00002	3910	219	522	2002004	Captured	f	f	Not Required	\N	\N	\N	62	3	In Store	2026-08-17 12:13:02.027106	2026-08-18 15:24:06.655791	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1610	2	2	EPCP-110-18AF-00002	3507	\N	\N	NA	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 14:31:33.62432	2026-08-18 15:19:47.842241	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1611	2	2	NRCN-109-ACET-00001	4608	\N	\N	2002002	Captured	f	f	Not Required	\N	\N	\N	62	\N	Written Off	2026-08-17 14:38:26.121154	2026-08-18 20:45:38.547385	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	79	\N	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-804	2	2	EPCMS-102-BPA-001	3895	\N	\N	13660	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.195829	2026-08-05 19:04:39.195839	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 806	2	2	EPCMS-102-GEN-001	3897	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.223687	2026-08-05 19:04:39.223696	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	MURPHY	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 807	2	2	EPCMS-104-BPA-002	3895	\N	\N	62551	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.241769	2026-08-05 19:04:39.241777	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	77	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 808	2	2	EPCMS-104-INP-001	3898	\N	\N	160110574	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.265772	2026-08-05 19:04:39.265781	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	77	\N	\N	\N	FRESINIOUS KABI	INFUSIA VP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -10862,6 +10866,7 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1607	2	2	EPCET-BME-3OTG-00001	3993	\N	\N	2002003	Captured	f	t	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 12:44:55.931347	2026-08-26 15:23:26.318092	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	97	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 837	2	2	EPCMS-213-BPA-016	3903	\N	\N	BPM 202105 3102878	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.491005	2026-08-05 19:04:39.491014	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	MI EVIDA	MI HEART 101	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 838	2	2	EPCMS-213-VBOX-007	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.491018	2026-08-05 19:04:39.491021	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+804	2	2	EPCMS-102-BPA-001	3895	\N	\N	13660	Captured	t	t	Installation Requested	\N	\N	\N	62	\N	Pending Installation	2026-08-05 19:04:39.195829	2026-09-02 18:06:58.20551	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 839	2	2	EPCMS-214-ECG-003	3902	\N	\N	DETE3A26885	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.495765	2026-08-05 19:04:39.495774	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	90	\N	\N	\N	BPL	CARIDO HEART 6208	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 840	2	2	EPCMS-216-BPA-017	3895	\N	\N	RH014060	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.502132	2026-08-05 19:04:39.50214	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 841	2	2	EPCMS-216-ECG-004	3902	\N	\N	106759-M13804740003	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.502144	2026-08-05 19:04:39.502147	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	EDAN	SE1200	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -16430,76 +16435,77 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 -- Data for Name: purchase_request_approvals; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.purchase_request_approvals (id, pr_id, approval_flow_id, approver_id, approved_quantities, remarks, approved_at) FROM stdin;
-1	180	5	4	{"538": {"quantity": 100.0, "remarks": "R1"}, "539": {"quantity": 110.0, "remarks": "R2"}}	G1	2026-06-08 15:31:24.548194
-2	180	6	4	{"538": {"quantity": 101.0, "remarks": "R21"}, "539": {"quantity": 100.0, "remarks": "R22"}}	G2	2026-06-08 15:35:05.237457
-3	180	7	4	{"538": {"quantity": 100.0, "remarks": "R31"}, "539": {"quantity": 110.0, "remarks": "R32"}}	G3	2026-06-08 15:35:58.178751
-4	181	5	4	{"540": {"quantity": 120.0, "remarks": null}, "541": {"quantity": 110.0, "remarks": null}, "542": {"quantity": 170.0, "remarks": null}, "543": {"quantity": 70.0, "remarks": null}}	\N	2026-06-08 15:54:14.206965
-5	194	12	12	{"595": {"quantity": 8.0, "remarks": null}}	\N	2026-06-12 00:28:43.062721
-6	194	19	12	{"595": {"quantity": 8.0, "remarks": null}}	\N	2026-06-12 00:28:43.062749
-7	194	13	3	{"595": {"quantity": 8.0, "remarks": null}}	\N	2026-06-12 00:59:40.518724
-8	194	17	3	{"595": {"quantity": 8.0, "remarks": null}}	\N	2026-06-12 00:59:40.518745
-9	197	12	3	{"598": {"quantity": 15.0, "remarks": null}}	\N	2026-06-12 01:10:01.884886
-10	197	19	3	{"598": {"quantity": 15.0, "remarks": null}}	\N	2026-06-12 01:10:01.884899
-11	197	17	11	{"598": {"quantity": 15.0, "remarks": null}}	\N	2026-06-12 01:10:57.027555
-12	196	19	12	{"597": {"quantity": 6.0, "remarks": null}}	\N	2026-06-12 01:23:17.659059
-13	195	19	12	{"596": {"quantity": 6.0, "remarks": null}}	\N	2026-06-12 01:23:48.840384
-14	197	13	3	{"598": {"quantity": 15.0, "remarks": null}}	\N	2026-06-12 01:28:16.867367
-15	195	13	3	{"596": {"quantity": 6.0, "remarks": null}}	\N	2026-06-12 01:28:30.025948
-16	195	17	3	{"596": {"quantity": 6.0, "remarks": null}}	\N	2026-06-12 01:28:30.025982
-17	199	19	3	{"600": {"quantity": 4.0, "remarks": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sit amet ipsum a urna consectetur pellentesque. Etiam quis rutrum arcu. Cras purus neque, varius nec ornare ac, malesuada non elit. Praesent accumsan arcu nec fermentum ultrices. Integer eget est lorem. Morbi dictum nunc at leo pulvinar, eget dictum purus efficitur. Sed consequat facilisis justo, ac gravida turpis congue vehicula. Nam eget ligula bibendum, mattis lacus ut, efficitur diam. Fusce ac faucibus ante. Mauris iaculis, ipsum et imperdiet lobortis, dolor lacus auctor mi, ultricies suscipit metus arcu nec est. Morbi ut pulvinar turpis.  Suspendisse egestas felis vel euismod fringilla. Nam gravida neque tellus, ac tempus enim scelerisque at. Nam congue, velit ac facilisis aliquet, enim orci consequat dolor, eget ultricies eros arcu eget lorem. Ut a magna vel diam vehicula congue quis vitae tellus. Sed porta facilisis magna nec varius. Praesent tempor diam neque, at rhoncus augue interdum at. Morbi consequat a dolor nec interdum. Cras congue sagittis quam vitae pulvinar. Suspendisse at est dapibus, tempus orci ut, posuere nisl. Donec vitae diam elit. Donec ultrices pellentesque augue sed iaculis. Vestibulum faucibus ultrices odio in molestie.  Nunc rutrum ultricies velit a blandit. Curabitur aliquam tortor sit amet mauris bibendum, commodo egestas urna dictum. Suspendisse potenti. Mauris eget metus rhoncus, blandit ante sit amet, auctor dolor. Proin iaculis tellus sit amet diam dapibus consequat. Donec accumsan magna lacus, a pretium est accumsan eget. Maecenas sed enim tempus, rhoncus leo ac, ornare mauris.  Vivamus sed ultricies diam. In cursus ipsum nunc, nec tincidunt risus volutpat sit amet. Suspendisse vel urna elit. Donec eget eros sapien. Sed dignissim convallis orci, eu imperdiet enim pretium sit amet. Aliquam et risus enim. Aliquam ornare metus at risus scelerisque, nec posuere ante luctus. Donec auctor lacus at justo elementum, sed sollicitudin turpis finibus. Pellentesque rutrum fermentum dignissim. Suspendisse porta massa nec vestibulum fringilla. Integer sit amet faucibus ex. Praesent euismod, sem nec malesuada interdum, ex nulla varius libero, ac gravida lectus odio eget enim. Aliquam malesuada ultricies mi. Nunc pellentesque dolor ac arcu maximus, at volutpat mauris convallis. Proin vel urna erat. Etiam venenatis mi ut ante tristique, id porta sem porttitor.  Sed massa lorem, porta nec ultrices nec, varius in enim. Fusce dictum posuere ullamcorper. Phasellus sodales ut ante non molestie. Nulla eget odio rhoncus tortor consequat consectetur. Nulla egestas, nisi in ultricies maximus, lacus ipsum fringilla dolor, vel rutrum purus tortor sit amet lectus. In nec ex eget tellus venenatis sollicitudin ac in eros. Aenean sed odio quam. Maecenas sit amet est placerat, pretium sem et, volutpat diam. Maecenas quis commodo urna. Sed varius odio at nisl vestibulum efficitur. Aenean sit amet molestie est, id faucibus metus. Morbi lacus quam, ornare bibendum tempor nec, tempor eget neque. Mauris quis luctus quam. Sed nec condimentum neque, eget accumsan mauris. Curabitur porta faucibus placerat. Pellentesque eget quam eu erat rhoncus varius eu ut massa."}}	Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sit amet ipsum a urna consectetur pellentesque. Etiam quis rutrum arcu. Cras purus neque, varius nec ornare ac, malesuada non elit. Praesent accumsan arcu nec fermentum ultrices. Integer eget est lorem. Morbi dictum nunc at leo pulvinar, eget dictum purus efficitur. Sed consequat facilisis justo, ac gravida turpis congue vehicula. Nam eget ligula bibendum, mattis lacus ut, efficitur diam. Fusce ac faucibus ante. Mauris iaculis, ipsum et imperdiet lobortis, dolor lacus auctor mi, ultricies suscipit metus arcu nec est. Morbi ut pulvinar turpis.\n\nSuspendisse egestas felis vel euismod fringilla. Nam gravida neque tellus, ac tempus enim scelerisque at. Nam congue, velit ac facilisis aliquet, enim orci consequat dolor, eget ultricies eros arcu eget lorem. Ut a magna vel diam vehicula congue quis vitae tellus. Sed porta facilisis magna nec varius. Praesent tempor diam neque, at rhoncus augue interdum at. Morbi consequat a dolor nec interdum. Cras congue sagittis quam vitae pulvinar. Suspendisse at est dapibus, tempus orci ut, posuere nisl. Donec vitae diam elit. Donec ultrices pellentesque augue sed iaculis. Vestibulum faucibus ultrices odio in molestie.\n\nNunc rutrum ultricies velit a blandit. Curabitur aliquam tortor sit amet mauris bibendum, commodo egestas urna dictum. Suspendisse potenti. Mauris eget metus rhoncus, blandit ante sit amet, auctor dolor. Proin iaculis tellus sit amet diam dapibus consequat. Donec accumsan magna lacus, a pretium est accumsan eget. Maecenas sed enim tempus, rhoncus leo ac, ornare mauris.\n\nVivamus sed ultricies diam. In cursus ipsum nunc, nec tincidunt risus volutpat sit amet. Suspendisse vel urna elit. Donec eget eros sapien. Sed dignissim convallis orci, eu imperdiet enim pretium sit amet. Aliquam et risus enim. Aliquam ornare metus at risus scelerisque, nec posuere ante luctus. Donec auctor lacus at justo elementum, sed sollicitudin turpis finibus. Pellentesque rutrum fermentum dignissim. Suspendisse porta massa nec vestibulum fringilla. Integer sit amet faucibus ex. Praesent euismod, sem nec malesuada interdum, ex nulla varius libero, ac gravida lectus odio eget enim. Aliquam malesuada ultricies mi. Nunc pellentesque dolor ac arcu maximus, at volutpat mauris convallis. Proin vel urna erat. Etiam venenatis mi ut ante tristique, id porta sem porttitor.\n\nSed massa lorem, porta nec ultrices nec, varius in enim. Fusce dictum posuere ullamcorper. Phasellus sodales ut ante non molestie. Nulla eget odio rhoncus tortor consequat consectetur. Nulla egestas, nisi in ultricies maximus, lacus ipsum fringilla dolor, vel rutrum purus tortor sit amet lectus. In nec ex eget tellus venenatis sollicitudin ac in eros. Aenean sed odio quam. Maecenas sit amet est placerat, pretium sem et, volutpat diam. Maecenas quis commodo urna. Sed varius odio at nisl vestibulum efficitur. Aenean sit amet molestie est, id faucibus metus. Morbi lacus quam, ornare bibendum tempor nec, tempor eget neque. Mauris quis luctus quam. Sed nec condimentum neque, eget accumsan mauris. Curabitur porta faucibus placerat. Pellentesque eget quam eu erat rhoncus varius eu ut massa.	2026-06-18 10:36:27.146235
-18	199	39	3	{"600": {"quantity": 4.0, "remarks": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sit amet ipsum a urna consectetur pellentesque. Etiam quis rutrum arcu. Cras purus neque, varius nec ornare ac, malesuada non elit. Praesent accumsan arcu nec fermentum ultrices. Integer eget est lorem. Morbi dictum nunc at leo pulvinar, eget dictum purus efficitur. Sed consequat facilisis justo, ac gravida turpis congue vehicula. Nam eget ligula bibendum, mattis lacus ut, efficitur diam. Fusce ac faucibus ante. Mauris iaculis, ipsum et imperdiet lobortis, dolor lacus auctor mi, ultricies suscipit metus arcu nec est. Morbi ut pulvinar turpis.  Suspendisse egestas felis vel euismod fringilla. Nam gravida neque tellus, ac tempus enim scelerisque at. Nam congue, velit ac facilisis aliquet, enim orci consequat dolor, eget ultricies eros arcu eget lorem. Ut a magna vel diam vehicula congue quis vitae tellus. Sed porta facilisis magna nec varius. Praesent tempor diam neque, at rhoncus augue interdum at. Morbi consequat a dolor nec interdum. Cras congue sagittis quam vitae pulvinar. Suspendisse at est dapibus, tempus orci ut, posuere nisl. Donec vitae diam elit. Donec ultrices pellentesque augue sed iaculis. Vestibulum faucibus ultrices odio in molestie.  Nunc rutrum ultricies velit a blandit. Curabitur aliquam tortor sit amet mauris bibendum, commodo egestas urna dictum. Suspendisse potenti. Mauris eget metus rhoncus, blandit ante sit amet, auctor dolor. Proin iaculis tellus sit amet diam dapibus consequat. Donec accumsan magna lacus, a pretium est accumsan eget. Maecenas sed enim tempus, rhoncus leo ac, ornare mauris.  Vivamus sed ultricies diam. In cursus ipsum nunc, nec tincidunt risus volutpat sit amet. Suspendisse vel urna elit. Donec eget eros sapien. Sed dignissim convallis orci, eu imperdiet enim pretium sit amet. Aliquam et risus enim. Aliquam ornare metus at risus scelerisque, nec posuere ante luctus. Donec auctor lacus at justo elementum, sed sollicitudin turpis finibus. Pellentesque rutrum fermentum dignissim. Suspendisse porta massa nec vestibulum fringilla. Integer sit amet faucibus ex. Praesent euismod, sem nec malesuada interdum, ex nulla varius libero, ac gravida lectus odio eget enim. Aliquam malesuada ultricies mi. Nunc pellentesque dolor ac arcu maximus, at volutpat mauris convallis. Proin vel urna erat. Etiam venenatis mi ut ante tristique, id porta sem porttitor.  Sed massa lorem, porta nec ultrices nec, varius in enim. Fusce dictum posuere ullamcorper. Phasellus sodales ut ante non molestie. Nulla eget odio rhoncus tortor consequat consectetur. Nulla egestas, nisi in ultricies maximus, lacus ipsum fringilla dolor, vel rutrum purus tortor sit amet lectus. In nec ex eget tellus venenatis sollicitudin ac in eros. Aenean sed odio quam. Maecenas sit amet est placerat, pretium sem et, volutpat diam. Maecenas quis commodo urna. Sed varius odio at nisl vestibulum efficitur. Aenean sit amet molestie est, id faucibus metus. Morbi lacus quam, ornare bibendum tempor nec, tempor eget neque. Mauris quis luctus quam. Sed nec condimentum neque, eget accumsan mauris. Curabitur porta faucibus placerat. Pellentesque eget quam eu erat rhoncus varius eu ut massa."}}	Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sit amet ipsum a urna consectetur pellentesque. Etiam quis rutrum arcu. Cras purus neque, varius nec ornare ac, malesuada non elit. Praesent accumsan arcu nec fermentum ultrices. Integer eget est lorem. Morbi dictum nunc at leo pulvinar, eget dictum purus efficitur. Sed consequat facilisis justo, ac gravida turpis congue vehicula. Nam eget ligula bibendum, mattis lacus ut, efficitur diam. Fusce ac faucibus ante. Mauris iaculis, ipsum et imperdiet lobortis, dolor lacus auctor mi, ultricies suscipit metus arcu nec est. Morbi ut pulvinar turpis.\n\nSuspendisse egestas felis vel euismod fringilla. Nam gravida neque tellus, ac tempus enim scelerisque at. Nam congue, velit ac facilisis aliquet, enim orci consequat dolor, eget ultricies eros arcu eget lorem. Ut a magna vel diam vehicula congue quis vitae tellus. Sed porta facilisis magna nec varius. Praesent tempor diam neque, at rhoncus augue interdum at. Morbi consequat a dolor nec interdum. Cras congue sagittis quam vitae pulvinar. Suspendisse at est dapibus, tempus orci ut, posuere nisl. Donec vitae diam elit. Donec ultrices pellentesque augue sed iaculis. Vestibulum faucibus ultrices odio in molestie.\n\nNunc rutrum ultricies velit a blandit. Curabitur aliquam tortor sit amet mauris bibendum, commodo egestas urna dictum. Suspendisse potenti. Mauris eget metus rhoncus, blandit ante sit amet, auctor dolor. Proin iaculis tellus sit amet diam dapibus consequat. Donec accumsan magna lacus, a pretium est accumsan eget. Maecenas sed enim tempus, rhoncus leo ac, ornare mauris.\n\nVivamus sed ultricies diam. In cursus ipsum nunc, nec tincidunt risus volutpat sit amet. Suspendisse vel urna elit. Donec eget eros sapien. Sed dignissim convallis orci, eu imperdiet enim pretium sit amet. Aliquam et risus enim. Aliquam ornare metus at risus scelerisque, nec posuere ante luctus. Donec auctor lacus at justo elementum, sed sollicitudin turpis finibus. Pellentesque rutrum fermentum dignissim. Suspendisse porta massa nec vestibulum fringilla. Integer sit amet faucibus ex. Praesent euismod, sem nec malesuada interdum, ex nulla varius libero, ac gravida lectus odio eget enim. Aliquam malesuada ultricies mi. Nunc pellentesque dolor ac arcu maximus, at volutpat mauris convallis. Proin vel urna erat. Etiam venenatis mi ut ante tristique, id porta sem porttitor.\n\nSed massa lorem, porta nec ultrices nec, varius in enim. Fusce dictum posuere ullamcorper. Phasellus sodales ut ante non molestie. Nulla eget odio rhoncus tortor consequat consectetur. Nulla egestas, nisi in ultricies maximus, lacus ipsum fringilla dolor, vel rutrum purus tortor sit amet lectus. In nec ex eget tellus venenatis sollicitudin ac in eros. Aenean sed odio quam. Maecenas sit amet est placerat, pretium sem et, volutpat diam. Maecenas quis commodo urna. Sed varius odio at nisl vestibulum efficitur. Aenean sit amet molestie est, id faucibus metus. Morbi lacus quam, ornare bibendum tempor nec, tempor eget neque. Mauris quis luctus quam. Sed nec condimentum neque, eget accumsan mauris. Curabitur porta faucibus placerat. Pellentesque eget quam eu erat rhoncus varius eu ut massa.	2026-06-18 10:36:27.146278
-19	200	19	3	{"601": {"quantity": 2.0, "remarks": null}}	\N	2026-06-18 11:28:17.00604
-20	200	39	3	{"601": {"quantity": 2.0, "remarks": null}}	\N	2026-06-18 11:28:17.006081
-21	200	17	3	{"601": {"quantity": 2.0, "remarks": null}}	\N	2026-06-18 11:28:23.830349
-22	200	42	3	{"601": {"quantity": 2.0, "remarks": null}}	\N	2026-06-18 11:28:23.830391
-23	201	19	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:03.145992
-24	201	54	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:03.146038
-25	201	17	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:24.925101
-26	201	57	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:24.925142
-27	203	19	3	{"618": {"quantity": 32.0, "remarks": null}, "619": {"quantity": 1.2, "remarks": null}}	\N	2026-07-07 19:02:38.405109
-28	203	60	3	{"618": {"quantity": 32.0, "remarks": null}, "619": {"quantity": 1.2, "remarks": null}}	\N	2026-07-07 19:02:38.405121
-29	203	17	3	{"618": {"quantity": 32.0, "remarks": null}, "619": {"quantity": 1.2, "remarks": null}}	\N	2026-07-07 19:03:09.792322
-30	203	63	3	{"618": {"quantity": 32.0, "remarks": null}, "619": {"quantity": 1.2, "remarks": null}}	\N	2026-07-07 19:03:09.792334
-31	199	17	3	{"600": {"quantity": 4.0, "remarks": "Packaging Charges"}}	\N	2026-07-07 19:05:58.582046
-32	199	63	3	{"600": {"quantity": 4.0, "remarks": "Packaging Charges"}}	\N	2026-07-07 19:05:58.582062
-33	204	19	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:48.404829
-34	204	78	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:48.404869
-35	204	17	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:59.305839
-36	204	82	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:59.30588
-37	205	19	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:43.552754
-38	205	78	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:43.552764
-39	205	17	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:53.735047
-40	205	82	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:53.735086
-41	198	19	3	{"599": {"quantity": 6.0, "remarks": "6"}}	\N	2026-08-12 11:22:20.654792
-42	198	107	3	{"599": {"quantity": 6.0, "remarks": "6"}}	\N	2026-08-12 11:22:20.654815
-43	206	19	3	{"622": {"quantity": 2.0, "remarks": "1"}}	\N	2026-08-14 12:39:50.924559
-44	206	107	3	{"622": {"quantity": 2.0, "remarks": "1"}}	\N	2026-08-14 12:39:50.92457
-45	206	17	3	{"622": {"quantity": 1.0, "remarks": null}}	\N	2026-08-14 12:40:05.275643
-46	206	109	3	{"622": {"quantity": 1.0, "remarks": null}}	\N	2026-08-14 12:40:05.275683
-47	207	19	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:46.387994
-48	207	107	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:46.388011
-49	207	17	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:52.588213
-50	207	109	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:52.588234
-51	208	19	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:36.135389
-52	208	107	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:36.135433
-53	208	17	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:43.146184
-54	208	109	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:43.146228
-55	210	19	3	{"629": {"quantity": 100.0, "remarks": null}}	\N	2026-08-19 17:52:48.22866
-56	210	12	3	{"629": {"quantity": 100.0, "remarks": null}}	\N	2026-08-19 17:52:48.228673
-57	210	17	3	{"629": {"quantity": 100.0, "remarks": null}}	\N	2026-08-19 17:52:54.751183
-58	210	51	3	{"629": {"quantity": 100.0, "remarks": null}}	\N	2026-08-19 17:52:54.751196
-59	213	19	3	{"632": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:34:41.343533
-60	213	99	3	{"632": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:34:41.343548
-61	213	17	3	{"632": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:34:46.805354
-62	213	30	3	{"632": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:34:46.805373
-63	214	19	3	{"633": {"quantity": 50.0, "remarks": null}}	\N	2026-09-01 17:09:26.827395
-64	214	99	3	{"633": {"quantity": 50.0, "remarks": null}}	\N	2026-09-01 17:09:26.827441
-65	214	17	3	{"633": {"quantity": 50.0, "remarks": null}}	\N	2026-09-01 17:09:32.607071
-66	214	30	3	{"633": {"quantity": 50.0, "remarks": null}}	\N	2026-09-01 17:09:32.607114
-67	215	141	7	{"634": {"quantity": 2.0, "remarks": null}}	\N	2026-09-01 17:59:14.07316
-68	215	17	3	{"634": {"quantity": 2.0, "remarks": null}}	\N	2026-09-01 17:59:39.996046
-69	215	30	3	{"634": {"quantity": 2.0, "remarks": null}}	\N	2026-09-01 17:59:39.996058
+COPY public.purchase_request_approvals (id, pr_id, approval_flow_id, approver_id, approved_quantities, remarks, approved_at, status) FROM stdin;
+1	180	5	4	{"538": {"quantity": 100.0, "remarks": "R1"}, "539": {"quantity": 110.0, "remarks": "R2"}}	G1	2026-06-08 15:31:24.548194	\N
+2	180	6	4	{"538": {"quantity": 101.0, "remarks": "R21"}, "539": {"quantity": 100.0, "remarks": "R22"}}	G2	2026-06-08 15:35:05.237457	\N
+3	180	7	4	{"538": {"quantity": 100.0, "remarks": "R31"}, "539": {"quantity": 110.0, "remarks": "R32"}}	G3	2026-06-08 15:35:58.178751	\N
+4	181	5	4	{"540": {"quantity": 120.0, "remarks": null}, "541": {"quantity": 110.0, "remarks": null}, "542": {"quantity": 170.0, "remarks": null}, "543": {"quantity": 70.0, "remarks": null}}	\N	2026-06-08 15:54:14.206965	\N
+5	194	12	12	{"595": {"quantity": 8.0, "remarks": null}}	\N	2026-06-12 00:28:43.062721	\N
+6	194	19	12	{"595": {"quantity": 8.0, "remarks": null}}	\N	2026-06-12 00:28:43.062749	\N
+7	194	13	3	{"595": {"quantity": 8.0, "remarks": null}}	\N	2026-06-12 00:59:40.518724	\N
+8	194	17	3	{"595": {"quantity": 8.0, "remarks": null}}	\N	2026-06-12 00:59:40.518745	\N
+9	197	12	3	{"598": {"quantity": 15.0, "remarks": null}}	\N	2026-06-12 01:10:01.884886	\N
+10	197	19	3	{"598": {"quantity": 15.0, "remarks": null}}	\N	2026-06-12 01:10:01.884899	\N
+11	197	17	11	{"598": {"quantity": 15.0, "remarks": null}}	\N	2026-06-12 01:10:57.027555	\N
+12	196	19	12	{"597": {"quantity": 6.0, "remarks": null}}	\N	2026-06-12 01:23:17.659059	\N
+13	195	19	12	{"596": {"quantity": 6.0, "remarks": null}}	\N	2026-06-12 01:23:48.840384	\N
+14	197	13	3	{"598": {"quantity": 15.0, "remarks": null}}	\N	2026-06-12 01:28:16.867367	\N
+15	195	13	3	{"596": {"quantity": 6.0, "remarks": null}}	\N	2026-06-12 01:28:30.025948	\N
+16	195	17	3	{"596": {"quantity": 6.0, "remarks": null}}	\N	2026-06-12 01:28:30.025982	\N
+17	199	19	3	{"600": {"quantity": 4.0, "remarks": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sit amet ipsum a urna consectetur pellentesque. Etiam quis rutrum arcu. Cras purus neque, varius nec ornare ac, malesuada non elit. Praesent accumsan arcu nec fermentum ultrices. Integer eget est lorem. Morbi dictum nunc at leo pulvinar, eget dictum purus efficitur. Sed consequat facilisis justo, ac gravida turpis congue vehicula. Nam eget ligula bibendum, mattis lacus ut, efficitur diam. Fusce ac faucibus ante. Mauris iaculis, ipsum et imperdiet lobortis, dolor lacus auctor mi, ultricies suscipit metus arcu nec est. Morbi ut pulvinar turpis.  Suspendisse egestas felis vel euismod fringilla. Nam gravida neque tellus, ac tempus enim scelerisque at. Nam congue, velit ac facilisis aliquet, enim orci consequat dolor, eget ultricies eros arcu eget lorem. Ut a magna vel diam vehicula congue quis vitae tellus. Sed porta facilisis magna nec varius. Praesent tempor diam neque, at rhoncus augue interdum at. Morbi consequat a dolor nec interdum. Cras congue sagittis quam vitae pulvinar. Suspendisse at est dapibus, tempus orci ut, posuere nisl. Donec vitae diam elit. Donec ultrices pellentesque augue sed iaculis. Vestibulum faucibus ultrices odio in molestie.  Nunc rutrum ultricies velit a blandit. Curabitur aliquam tortor sit amet mauris bibendum, commodo egestas urna dictum. Suspendisse potenti. Mauris eget metus rhoncus, blandit ante sit amet, auctor dolor. Proin iaculis tellus sit amet diam dapibus consequat. Donec accumsan magna lacus, a pretium est accumsan eget. Maecenas sed enim tempus, rhoncus leo ac, ornare mauris.  Vivamus sed ultricies diam. In cursus ipsum nunc, nec tincidunt risus volutpat sit amet. Suspendisse vel urna elit. Donec eget eros sapien. Sed dignissim convallis orci, eu imperdiet enim pretium sit amet. Aliquam et risus enim. Aliquam ornare metus at risus scelerisque, nec posuere ante luctus. Donec auctor lacus at justo elementum, sed sollicitudin turpis finibus. Pellentesque rutrum fermentum dignissim. Suspendisse porta massa nec vestibulum fringilla. Integer sit amet faucibus ex. Praesent euismod, sem nec malesuada interdum, ex nulla varius libero, ac gravida lectus odio eget enim. Aliquam malesuada ultricies mi. Nunc pellentesque dolor ac arcu maximus, at volutpat mauris convallis. Proin vel urna erat. Etiam venenatis mi ut ante tristique, id porta sem porttitor.  Sed massa lorem, porta nec ultrices nec, varius in enim. Fusce dictum posuere ullamcorper. Phasellus sodales ut ante non molestie. Nulla eget odio rhoncus tortor consequat consectetur. Nulla egestas, nisi in ultricies maximus, lacus ipsum fringilla dolor, vel rutrum purus tortor sit amet lectus. In nec ex eget tellus venenatis sollicitudin ac in eros. Aenean sed odio quam. Maecenas sit amet est placerat, pretium sem et, volutpat diam. Maecenas quis commodo urna. Sed varius odio at nisl vestibulum efficitur. Aenean sit amet molestie est, id faucibus metus. Morbi lacus quam, ornare bibendum tempor nec, tempor eget neque. Mauris quis luctus quam. Sed nec condimentum neque, eget accumsan mauris. Curabitur porta faucibus placerat. Pellentesque eget quam eu erat rhoncus varius eu ut massa."}}	Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sit amet ipsum a urna consectetur pellentesque. Etiam quis rutrum arcu. Cras purus neque, varius nec ornare ac, malesuada non elit. Praesent accumsan arcu nec fermentum ultrices. Integer eget est lorem. Morbi dictum nunc at leo pulvinar, eget dictum purus efficitur. Sed consequat facilisis justo, ac gravida turpis congue vehicula. Nam eget ligula bibendum, mattis lacus ut, efficitur diam. Fusce ac faucibus ante. Mauris iaculis, ipsum et imperdiet lobortis, dolor lacus auctor mi, ultricies suscipit metus arcu nec est. Morbi ut pulvinar turpis.\n\nSuspendisse egestas felis vel euismod fringilla. Nam gravida neque tellus, ac tempus enim scelerisque at. Nam congue, velit ac facilisis aliquet, enim orci consequat dolor, eget ultricies eros arcu eget lorem. Ut a magna vel diam vehicula congue quis vitae tellus. Sed porta facilisis magna nec varius. Praesent tempor diam neque, at rhoncus augue interdum at. Morbi consequat a dolor nec interdum. Cras congue sagittis quam vitae pulvinar. Suspendisse at est dapibus, tempus orci ut, posuere nisl. Donec vitae diam elit. Donec ultrices pellentesque augue sed iaculis. Vestibulum faucibus ultrices odio in molestie.\n\nNunc rutrum ultricies velit a blandit. Curabitur aliquam tortor sit amet mauris bibendum, commodo egestas urna dictum. Suspendisse potenti. Mauris eget metus rhoncus, blandit ante sit amet, auctor dolor. Proin iaculis tellus sit amet diam dapibus consequat. Donec accumsan magna lacus, a pretium est accumsan eget. Maecenas sed enim tempus, rhoncus leo ac, ornare mauris.\n\nVivamus sed ultricies diam. In cursus ipsum nunc, nec tincidunt risus volutpat sit amet. Suspendisse vel urna elit. Donec eget eros sapien. Sed dignissim convallis orci, eu imperdiet enim pretium sit amet. Aliquam et risus enim. Aliquam ornare metus at risus scelerisque, nec posuere ante luctus. Donec auctor lacus at justo elementum, sed sollicitudin turpis finibus. Pellentesque rutrum fermentum dignissim. Suspendisse porta massa nec vestibulum fringilla. Integer sit amet faucibus ex. Praesent euismod, sem nec malesuada interdum, ex nulla varius libero, ac gravida lectus odio eget enim. Aliquam malesuada ultricies mi. Nunc pellentesque dolor ac arcu maximus, at volutpat mauris convallis. Proin vel urna erat. Etiam venenatis mi ut ante tristique, id porta sem porttitor.\n\nSed massa lorem, porta nec ultrices nec, varius in enim. Fusce dictum posuere ullamcorper. Phasellus sodales ut ante non molestie. Nulla eget odio rhoncus tortor consequat consectetur. Nulla egestas, nisi in ultricies maximus, lacus ipsum fringilla dolor, vel rutrum purus tortor sit amet lectus. In nec ex eget tellus venenatis sollicitudin ac in eros. Aenean sed odio quam. Maecenas sit amet est placerat, pretium sem et, volutpat diam. Maecenas quis commodo urna. Sed varius odio at nisl vestibulum efficitur. Aenean sit amet molestie est, id faucibus metus. Morbi lacus quam, ornare bibendum tempor nec, tempor eget neque. Mauris quis luctus quam. Sed nec condimentum neque, eget accumsan mauris. Curabitur porta faucibus placerat. Pellentesque eget quam eu erat rhoncus varius eu ut massa.	2026-06-18 10:36:27.146235	\N
+18	199	39	3	{"600": {"quantity": 4.0, "remarks": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sit amet ipsum a urna consectetur pellentesque. Etiam quis rutrum arcu. Cras purus neque, varius nec ornare ac, malesuada non elit. Praesent accumsan arcu nec fermentum ultrices. Integer eget est lorem. Morbi dictum nunc at leo pulvinar, eget dictum purus efficitur. Sed consequat facilisis justo, ac gravida turpis congue vehicula. Nam eget ligula bibendum, mattis lacus ut, efficitur diam. Fusce ac faucibus ante. Mauris iaculis, ipsum et imperdiet lobortis, dolor lacus auctor mi, ultricies suscipit metus arcu nec est. Morbi ut pulvinar turpis.  Suspendisse egestas felis vel euismod fringilla. Nam gravida neque tellus, ac tempus enim scelerisque at. Nam congue, velit ac facilisis aliquet, enim orci consequat dolor, eget ultricies eros arcu eget lorem. Ut a magna vel diam vehicula congue quis vitae tellus. Sed porta facilisis magna nec varius. Praesent tempor diam neque, at rhoncus augue interdum at. Morbi consequat a dolor nec interdum. Cras congue sagittis quam vitae pulvinar. Suspendisse at est dapibus, tempus orci ut, posuere nisl. Donec vitae diam elit. Donec ultrices pellentesque augue sed iaculis. Vestibulum faucibus ultrices odio in molestie.  Nunc rutrum ultricies velit a blandit. Curabitur aliquam tortor sit amet mauris bibendum, commodo egestas urna dictum. Suspendisse potenti. Mauris eget metus rhoncus, blandit ante sit amet, auctor dolor. Proin iaculis tellus sit amet diam dapibus consequat. Donec accumsan magna lacus, a pretium est accumsan eget. Maecenas sed enim tempus, rhoncus leo ac, ornare mauris.  Vivamus sed ultricies diam. In cursus ipsum nunc, nec tincidunt risus volutpat sit amet. Suspendisse vel urna elit. Donec eget eros sapien. Sed dignissim convallis orci, eu imperdiet enim pretium sit amet. Aliquam et risus enim. Aliquam ornare metus at risus scelerisque, nec posuere ante luctus. Donec auctor lacus at justo elementum, sed sollicitudin turpis finibus. Pellentesque rutrum fermentum dignissim. Suspendisse porta massa nec vestibulum fringilla. Integer sit amet faucibus ex. Praesent euismod, sem nec malesuada interdum, ex nulla varius libero, ac gravida lectus odio eget enim. Aliquam malesuada ultricies mi. Nunc pellentesque dolor ac arcu maximus, at volutpat mauris convallis. Proin vel urna erat. Etiam venenatis mi ut ante tristique, id porta sem porttitor.  Sed massa lorem, porta nec ultrices nec, varius in enim. Fusce dictum posuere ullamcorper. Phasellus sodales ut ante non molestie. Nulla eget odio rhoncus tortor consequat consectetur. Nulla egestas, nisi in ultricies maximus, lacus ipsum fringilla dolor, vel rutrum purus tortor sit amet lectus. In nec ex eget tellus venenatis sollicitudin ac in eros. Aenean sed odio quam. Maecenas sit amet est placerat, pretium sem et, volutpat diam. Maecenas quis commodo urna. Sed varius odio at nisl vestibulum efficitur. Aenean sit amet molestie est, id faucibus metus. Morbi lacus quam, ornare bibendum tempor nec, tempor eget neque. Mauris quis luctus quam. Sed nec condimentum neque, eget accumsan mauris. Curabitur porta faucibus placerat. Pellentesque eget quam eu erat rhoncus varius eu ut massa."}}	Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sit amet ipsum a urna consectetur pellentesque. Etiam quis rutrum arcu. Cras purus neque, varius nec ornare ac, malesuada non elit. Praesent accumsan arcu nec fermentum ultrices. Integer eget est lorem. Morbi dictum nunc at leo pulvinar, eget dictum purus efficitur. Sed consequat facilisis justo, ac gravida turpis congue vehicula. Nam eget ligula bibendum, mattis lacus ut, efficitur diam. Fusce ac faucibus ante. Mauris iaculis, ipsum et imperdiet lobortis, dolor lacus auctor mi, ultricies suscipit metus arcu nec est. Morbi ut pulvinar turpis.\n\nSuspendisse egestas felis vel euismod fringilla. Nam gravida neque tellus, ac tempus enim scelerisque at. Nam congue, velit ac facilisis aliquet, enim orci consequat dolor, eget ultricies eros arcu eget lorem. Ut a magna vel diam vehicula congue quis vitae tellus. Sed porta facilisis magna nec varius. Praesent tempor diam neque, at rhoncus augue interdum at. Morbi consequat a dolor nec interdum. Cras congue sagittis quam vitae pulvinar. Suspendisse at est dapibus, tempus orci ut, posuere nisl. Donec vitae diam elit. Donec ultrices pellentesque augue sed iaculis. Vestibulum faucibus ultrices odio in molestie.\n\nNunc rutrum ultricies velit a blandit. Curabitur aliquam tortor sit amet mauris bibendum, commodo egestas urna dictum. Suspendisse potenti. Mauris eget metus rhoncus, blandit ante sit amet, auctor dolor. Proin iaculis tellus sit amet diam dapibus consequat. Donec accumsan magna lacus, a pretium est accumsan eget. Maecenas sed enim tempus, rhoncus leo ac, ornare mauris.\n\nVivamus sed ultricies diam. In cursus ipsum nunc, nec tincidunt risus volutpat sit amet. Suspendisse vel urna elit. Donec eget eros sapien. Sed dignissim convallis orci, eu imperdiet enim pretium sit amet. Aliquam et risus enim. Aliquam ornare metus at risus scelerisque, nec posuere ante luctus. Donec auctor lacus at justo elementum, sed sollicitudin turpis finibus. Pellentesque rutrum fermentum dignissim. Suspendisse porta massa nec vestibulum fringilla. Integer sit amet faucibus ex. Praesent euismod, sem nec malesuada interdum, ex nulla varius libero, ac gravida lectus odio eget enim. Aliquam malesuada ultricies mi. Nunc pellentesque dolor ac arcu maximus, at volutpat mauris convallis. Proin vel urna erat. Etiam venenatis mi ut ante tristique, id porta sem porttitor.\n\nSed massa lorem, porta nec ultrices nec, varius in enim. Fusce dictum posuere ullamcorper. Phasellus sodales ut ante non molestie. Nulla eget odio rhoncus tortor consequat consectetur. Nulla egestas, nisi in ultricies maximus, lacus ipsum fringilla dolor, vel rutrum purus tortor sit amet lectus. In nec ex eget tellus venenatis sollicitudin ac in eros. Aenean sed odio quam. Maecenas sit amet est placerat, pretium sem et, volutpat diam. Maecenas quis commodo urna. Sed varius odio at nisl vestibulum efficitur. Aenean sit amet molestie est, id faucibus metus. Morbi lacus quam, ornare bibendum tempor nec, tempor eget neque. Mauris quis luctus quam. Sed nec condimentum neque, eget accumsan mauris. Curabitur porta faucibus placerat. Pellentesque eget quam eu erat rhoncus varius eu ut massa.	2026-06-18 10:36:27.146278	\N
+19	200	19	3	{"601": {"quantity": 2.0, "remarks": null}}	\N	2026-06-18 11:28:17.00604	\N
+20	200	39	3	{"601": {"quantity": 2.0, "remarks": null}}	\N	2026-06-18 11:28:17.006081	\N
+21	200	17	3	{"601": {"quantity": 2.0, "remarks": null}}	\N	2026-06-18 11:28:23.830349	\N
+22	200	42	3	{"601": {"quantity": 2.0, "remarks": null}}	\N	2026-06-18 11:28:23.830391	\N
+23	201	19	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:03.145992	\N
+24	201	54	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:03.146038	\N
+25	201	17	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:24.925101	\N
+26	201	57	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:24.925142	\N
+27	203	19	3	{"618": {"quantity": 32.0, "remarks": null}, "619": {"quantity": 1.2, "remarks": null}}	\N	2026-07-07 19:02:38.405109	\N
+28	203	60	3	{"618": {"quantity": 32.0, "remarks": null}, "619": {"quantity": 1.2, "remarks": null}}	\N	2026-07-07 19:02:38.405121	\N
+29	203	17	3	{"618": {"quantity": 32.0, "remarks": null}, "619": {"quantity": 1.2, "remarks": null}}	\N	2026-07-07 19:03:09.792322	\N
+30	203	63	3	{"618": {"quantity": 32.0, "remarks": null}, "619": {"quantity": 1.2, "remarks": null}}	\N	2026-07-07 19:03:09.792334	\N
+31	199	17	3	{"600": {"quantity": 4.0, "remarks": "Packaging Charges"}}	\N	2026-07-07 19:05:58.582046	\N
+32	199	63	3	{"600": {"quantity": 4.0, "remarks": "Packaging Charges"}}	\N	2026-07-07 19:05:58.582062	\N
+33	204	19	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:48.404829	\N
+34	204	78	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:48.404869	\N
+35	204	17	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:59.305839	\N
+36	204	82	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:59.30588	\N
+37	205	19	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:43.552754	\N
+38	205	78	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:43.552764	\N
+39	205	17	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:53.735047	\N
+40	205	82	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:53.735086	\N
+41	198	19	3	{"599": {"quantity": 6.0, "remarks": "6"}}	\N	2026-08-12 11:22:20.654792	\N
+42	198	107	3	{"599": {"quantity": 6.0, "remarks": "6"}}	\N	2026-08-12 11:22:20.654815	\N
+43	206	19	3	{"622": {"quantity": 2.0, "remarks": "1"}}	\N	2026-08-14 12:39:50.924559	\N
+44	206	107	3	{"622": {"quantity": 2.0, "remarks": "1"}}	\N	2026-08-14 12:39:50.92457	\N
+45	206	17	3	{"622": {"quantity": 1.0, "remarks": null}}	\N	2026-08-14 12:40:05.275643	\N
+46	206	109	3	{"622": {"quantity": 1.0, "remarks": null}}	\N	2026-08-14 12:40:05.275683	\N
+47	207	19	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:46.387994	\N
+48	207	107	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:46.388011	\N
+49	207	17	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:52.588213	\N
+50	207	109	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:52.588234	\N
+51	208	19	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:36.135389	\N
+52	208	107	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:36.135433	\N
+53	208	17	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:43.146184	\N
+54	208	109	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:43.146228	\N
+55	210	19	3	{"629": {"quantity": 100.0, "remarks": null}}	\N	2026-08-19 17:52:48.22866	\N
+56	210	12	3	{"629": {"quantity": 100.0, "remarks": null}}	\N	2026-08-19 17:52:48.228673	\N
+57	210	17	3	{"629": {"quantity": 100.0, "remarks": null}}	\N	2026-08-19 17:52:54.751183	\N
+58	210	51	3	{"629": {"quantity": 100.0, "remarks": null}}	\N	2026-08-19 17:52:54.751196	\N
+59	213	19	3	{"632": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:34:41.343533	\N
+60	213	99	3	{"632": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:34:41.343548	\N
+61	213	17	3	{"632": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:34:46.805354	\N
+62	213	30	3	{"632": {"quantity": 5.0, "remarks": null}}	\N	2026-09-01 14:34:46.805373	\N
+63	214	19	3	{"633": {"quantity": 50.0, "remarks": null}}	\N	2026-09-01 17:09:26.827395	\N
+64	214	99	3	{"633": {"quantity": 50.0, "remarks": null}}	\N	2026-09-01 17:09:26.827441	\N
+65	214	17	3	{"633": {"quantity": 50.0, "remarks": null}}	\N	2026-09-01 17:09:32.607071	\N
+66	214	30	3	{"633": {"quantity": 50.0, "remarks": null}}	\N	2026-09-01 17:09:32.607114	\N
+67	215	141	7	{"634": {"quantity": 2.0, "remarks": null}}	\N	2026-09-01 17:59:14.07316	\N
+68	215	17	3	{"634": {"quantity": 2.0, "remarks": null}}	\N	2026-09-01 17:59:39.996046	\N
+69	215	30	3	{"634": {"quantity": 2.0, "remarks": null}}	\N	2026-09-01 17:59:39.996058	\N
+70	198	17	3	{}	Not Required	2026-09-02 18:00:04.008633	Rejected
 \.
 
 
@@ -16596,6 +16602,7 @@ COPY public.purchase_request_items (id, pr_id, material_id, quantity, approved_q
 632	213	4878	5	5
 633	214	4880	50	50
 634	215	4881	2	2
+635	216	2564	2	\N
 \.
 
 
@@ -16603,53 +16610,54 @@ COPY public.purchase_request_items (id, pr_id, material_id, quantity, approved_q
 -- Data for Name: purchase_requests; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, required_for_room_id, building_id, department_name, project_id, required_date, remarks, status, approved_by_id, approved_at, is_deleted, created_at, updated_at, current_approval_level, procurement_type, rental_type, rental_duration, rental_duration_unit, estimated_rental_cost, cost_per_test, reagent_rental_required, justification) FROM stdin;
-176	3	3	PR-00007	4	\N	2	Civil	1	2026-05-02	\N	Converted to PO	\N	\N	f	2026-04-22 18:52:30.375564	2026-05-15 18:52:30.43899	\N	\N	\N	\N	\N	\N	\N	\N	\N
-177	3	3	PR-00008	4	\N	2	Civil	1	2026-05-03	\N	Submitted	\N	\N	f	2026-04-23 18:52:30.375564	2026-05-15 18:52:30.442117	\N	\N	\N	\N	\N	\N	\N	\N	\N
-182	3	3	PR-00013	4	\N	1	Civil	1	2026-05-08	\N	Converted to PO	\N	\N	f	2026-04-28 18:52:30.375564	2026-05-15 18:52:30.455874	\N	\N	\N	\N	\N	\N	\N	\N	\N
-170	3	3	PR-00001	4	\N	1	Civil	1	2026-04-26	\N	Converted to PO	\N	\N	f	2026-04-16 18:52:30.375564	2026-05-15 18:52:30.416644	\N	\N	\N	\N	\N	\N	\N	\N	\N
-171	3	3	PR-00002	4	\N	3	Civil	1	2026-04-27	\N	Submitted	\N	\N	f	2026-04-17 18:52:30.375564	2026-05-15 18:52:30.421314	\N	\N	\N	\N	\N	\N	\N	\N	\N
-172	3	3	PR-00003	4	\N	1	Civil	1	2026-04-28	\N	Submitted	\N	\N	f	2026-04-18 18:52:30.375564	2026-05-15 18:52:30.426352	\N	\N	\N	\N	\N	\N	\N	\N	\N
-173	3	3	PR-00004	4	\N	2	Civil	1	2026-04-29	\N	Converted to PO	\N	\N	f	2026-04-19 18:52:30.375564	2026-05-15 18:52:30.429889	\N	\N	\N	\N	\N	\N	\N	\N	\N
-174	3	3	PR-00005	4	\N	2	Civil	1	2026-04-30	\N	Submitted	\N	\N	f	2026-04-20 18:52:30.375564	2026-05-15 18:52:30.432731	\N	\N	\N	\N	\N	\N	\N	\N	\N
-175	3	3	PR-00006	4	\N	1	Civil	1	2026-05-01	\N	Approved	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.43576	\N	\N	\N	\N	\N	\N	\N	\N	\N
-183	3	3	PR-00014	4	\N	2	Civil	1	2026-05-09	\N	Submitted	\N	\N	f	2026-04-29 18:52:30.375564	2026-05-15 18:52:30.458309	\N	\N	\N	\N	\N	\N	\N	\N	\N
-184	3	3	PR-00015	4	\N	2	Civil	1	2026-05-10	\N	Converted to PO	\N	\N	f	2026-04-30 18:52:30.375564	2026-05-15 18:52:30.460726	\N	\N	\N	\N	\N	\N	\N	\N	\N
-185	3	3	PR-00020	4	\N	1	CIVIL	1	2026-06-03		Converted to PO	4	2026-05-20 06:57:55.499327	f	2026-05-20 12:27:38.929279	2026-05-20 12:31:17.850162	\N	\N	\N	\N	\N	\N	\N	\N	\N
-179	3	3	PR-00010	4	\N	2	Civil	1	2026-05-05	\N	Converted to PO	\N	\N	f	2026-04-25 18:52:30.375564	2026-06-01 15:23:31.656676	\N	\N	\N	\N	\N	\N	\N	\N	\N
-178	3	3	PR-00009	4	\N	3	Civil	1	2026-05-04	\N	Converted to PO	\N	\N	f	2026-04-24 18:52:30.375564	2026-06-01 16:39:26.947196	\N	\N	\N	\N	\N	\N	\N	\N	\N
-188	3	3	PR-00023	4	\N	1	CIVIL	1	2026-06-15		Converted to PO	4	2026-06-01 11:17:45.135642	f	2026-06-01 16:47:36.211265	2026-06-01 17:03:57.438438	\N	\N	\N	\N	\N	\N	\N	\N	\N
-187	3	3	PR-00022	4	\N	1	ADMIN	1	2026-06-15		Converted to PO	4	2026-06-01 11:17:10.199457	f	2026-06-01 16:47:00.870149	2026-06-01 17:32:30.435217	\N	\N	\N	\N	\N	\N	\N	\N	\N
-189	3	3	PR-00024	4	\N	1	BIOCHEMISTRY MEDICAL COLLEGE	1	2026-06-17		Converted to PO	4	2026-06-03 09:00:37.495367	f	2026-06-03 14:30:29.971745	2026-06-03 14:31:01.94332	\N	\N	\N	\N	\N	\N	\N	\N	\N
-180	3	3	PR-00011	4	\N	3	Civil	1	2026-05-06	\N	Approved	4	2026-06-08 10:05:58.206107	f	2026-04-26 18:52:30.375564	2026-06-08 15:35:58.208066	3	\N	\N	\N	\N	\N	\N	\N	\N
-181	3	3	PR-00012	4	\N	2	Civil	1	2026-05-07	\N	Submitted	\N	\N	f	2026-04-27 18:52:30.375564	2026-06-08 15:54:14.266406	2	\N	\N	\N	\N	\N	\N	\N	\N
-186	3	3	PR-00021	4	\N	1	CIVIL	1	2026-06-03		Converted to PO	4	2026-06-08 07:06:20.77098	f	2026-05-20 14:06:53.134145	2026-06-08 16:14:50.273921	\N	\N	\N	\N	\N	\N	\N	\N	\N
-190	3	3	PR-00025	4	\N	1	ADMIN BLOCK	1	2026-06-22		Submitted	\N	\N	f	2026-06-08 16:47:30.328866	2026-06-08 17:05:19.224985	1	\N	\N	\N	\N	\N	\N	\N	\N
-192	3	3	PR-00027	4	\N	1	ART CENTRE	1	2026-06-22		Submitted	\N	\N	f	2026-06-08 17:55:00.531189	2026-06-08 17:59:01.111296	1	\N	\N	\N	\N	\N	\N	\N	\N
-191	3	3	PR-00026	4	\N	1	ADMIN BLOCK	1	2026-06-22	\n[Short Closed: Not Required]	Short Closed	\N	\N	f	2026-06-08 17:06:00.229077	2026-06-08 18:04:14.067753	1	\N	\N	\N	\N	\N	\N	\N	\N
-193	3	3	PR-00028	4	\N	2	IP GENERIC PHARMACY MAIN STORE	1	2026-06-23		Draft	\N	\N	f	2026-06-08 18:05:29.772886	2026-06-08 18:06:38.06265	1	\N	\N	\N	\N	\N	\N	\N	\N
-194	2	2	PR-00001	10	\N	\N	Mechanical	3	2026-06-26		Converted to PO	3	2026-06-11 19:29:40.555686	f	2026-06-12 00:19:47.597691	2026-06-12 01:00:29.667038	2	\N	\N	\N	\N	\N	\N	\N	\N
-195	2	2	PR-00002	3	\N	\N	Mechanical	3	2026-06-26		Converted to PO	3	2026-06-11 19:58:30.051646	f	2026-06-12 00:40:52.805513	2026-06-12 01:40:11.473288	2	\N	\N	\N	\N	\N	\N	\N	\N
-197	2	2	PR-00004	10	\N	8	HEALTH 	3	2026-06-26		Converted to PO	3	2026-06-11 19:58:16.903903	f	2026-06-12 00:57:22.512377	2026-06-12 01:40:11.47332	2	\N	\N	\N	\N	\N	\N	\N	\N
-200	2	2	PR-00007	3	\N	\N	CSE - Data Science	3	2026-07-02		Converted to PO	3	2026-06-18 05:58:23.857592	f	2026-06-18 11:28:07.704199	2026-06-18 12:45:51.597369	2	\N	\N	\N	\N	\N	\N	\N	\N
-203	2	2	PR-00010	3	\N	7	HEALTH 	3	2026-07-21		Converted to PO	3	2026-07-07 13:33:09.809097	f	2026-07-07 19:00:03.750122	2026-07-07 19:04:31.298846	2	\N	\N	\N	\N	\N	\N	\N	\N
-196	2	2	PR-00003	10	\N	\N	Mechanical	3	2026-06-26	\n[Rejected: no needed now]	Rejected	\N	\N	f	2026-06-12 00:56:37.980796	2026-07-08 11:21:18.029881	2	\N	\N	\N	\N	\N	\N	\N	\N
-199	2	2	PR-00006	3	\N	\N	\N	3	2026-06-30	\n[Short Closed: already pr raised ]	Short Closed	3	2026-07-07 13:35:58.620752	f	2026-06-16 11:01:07.031945	2026-07-08 11:22:24.991438	2	\N	\N	\N	\N	\N	\N	\N	\N
-201	2	2	PR-00008	3	\N	8	HEALTH 	3	2026-07-14		Converted to PO	3	2026-07-01 09:57:24.949598	f	2026-06-30 18:33:51.277817	2026-07-13 13:23:47.302281	2	\N	\N	\N	\N	\N	\N	\N	\N
-205	2	2	PR-00012	3	\N	8	HEALTH 	3	2026-08-15		Approved	3	2026-08-03 11:33:53.755286	f	2026-08-03 16:57:20.120584	2026-08-03 17:03:53.757181	2	Purchase	\N	\N	\N	\N	\N	f	\N
-198	2	2	PR-00005	3	\N	7	HEALTH 	3	2026-06-30		Submitted	\N	\N	f	2026-06-16 10:57:43.196702	2026-08-12 11:22:20.71394	2	\N	\N	\N	\N	\N	\N	\N	\N
-202	2	2	PR-00009	3	\N	12	Chemistry	3	2026-08-21		Submitted	\N	\N	f	2026-07-03 11:46:40.099177	2026-08-14 12:44:56.275727	1	\N	\N	\N	\N	\N	\N	\N	\N
-209	2	2	PR-00016	3	\N	7	HEALTH 	3	2026-08-18		Submitted	\N	\N	f	2026-08-18 12:23:32.937762	2026-08-18 12:23:32.937775	1	Purchase	\N	\N	\N	\N	\N	f	\N
-208	2	2	PR-00015	3	\N	\N	Child Health Nursing	3	2026-08-19		Converted to PO	3	2026-08-18 06:08:43.17722	f	2026-08-18 11:35:51.789742	2026-08-18 12:40:59.719751	2	Purchase	\N	\N	\N	\N	\N	f	\N
-207	2	2	PR-00014	3	\N	\N	Nursing Foundation	3	2026-08-18		Converted to PO	3	2026-08-17 05:11:52.603847	f	2026-08-17 10:41:37.019811	2026-08-19 17:42:17.288135	2	Purchase	\N	\N	\N	\N	\N	f	\N
-211	2	2	PR-00018	3	\N	\N	Electrotherapy Lab	3	2026-08-26		Draft	\N	\N	f	2026-08-19 17:52:39.77309	2026-08-19 17:52:39.773103	1	Purchase	\N	\N	\N	\N	\N	f	\N
-215	2	2	PR-00022	9	\N	\N	Medical Surgical Nursing	3	2026-09-08		Converted to PO	3	2026-09-01 12:29:40.007282	f	2026-09-01 17:44:17.218331	2026-09-01 18:00:52.602871	2	Purchase	\N	\N	\N	\N	\N	f	\N
-210	2	2	PR-00017	3	\N	\N	Pharmacognosy	3	2026-08-21		Converted to PO	3	2026-08-19 12:22:54.898428	f	2026-08-19 17:52:11.12197	2026-08-19 17:53:15.23984	2	Purchase	\N	\N	\N	\N	\N	f	\N
-204	2	2	PR-00011	3	\N	\N	Biochemistry	3	2026-08-10	\n[Short Closed: none]	Short Closed	3	2026-08-03 10:21:59.342786	f	2026-08-03 15:51:29.219193	2026-08-19 17:53:45.592723	2	Purchase	\N	\N	\N	\N	\N	f	\N
-206	2	2	PR-00013	3	\N	7	HEALTH 	3	2026-08-14		Converted to PO	3	2026-08-14 07:10:05.305418	f	2026-08-14 12:37:45.391061	2026-08-19 19:10:17.630922	2	Rental	Standard Rental	\N	Months	\N	\N	f	\N
-212	2	2	PR-00019	12	\N	\N	Biochemistry	3	2026-08-31		Submitted	\N	\N	f	2026-08-28 12:04:38.176645	2026-08-28 12:04:38.17669	1	Purchase	\N	\N	\N	\N	\N	f	\N
-213	2	2	PR-00020	3	\N	\N	Nursing Foundation	3	2026-09-08		Converted to PO	3	2026-09-01 09:04:46.829735	f	2026-09-01 14:33:45.814682	2026-09-01 14:40:57.899906	2	Purchase	\N	\N	\N	\N	\N	f	\N
-214	2	2	PR-00021	10	\N	\N	Medical Surgical Nursing	3	2026-09-01		Converted to PO	3	2026-09-01 11:39:32.639898	f	2026-09-01 17:09:00.521663	2026-09-01 17:10:03.717183	2	Purchase	\N	\N	\N	\N	\N	f	\N
+COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, required_for_room_id, building_id, department_name, project_id, required_date, remarks, status, approved_by_id, approved_at, is_deleted, created_at, updated_at, current_approval_level, procurement_type, rental_type, rental_duration, rental_duration_unit, estimated_rental_cost, cost_per_test, reagent_rental_required, justification, institution_id) FROM stdin;
+176	3	3	PR-00007	4	\N	2	Civil	1	2026-05-02	\N	Converted to PO	\N	\N	f	2026-04-22 18:52:30.375564	2026-05-15 18:52:30.43899	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+177	3	3	PR-00008	4	\N	2	Civil	1	2026-05-03	\N	Submitted	\N	\N	f	2026-04-23 18:52:30.375564	2026-05-15 18:52:30.442117	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+182	3	3	PR-00013	4	\N	1	Civil	1	2026-05-08	\N	Converted to PO	\N	\N	f	2026-04-28 18:52:30.375564	2026-05-15 18:52:30.455874	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+170	3	3	PR-00001	4	\N	1	Civil	1	2026-04-26	\N	Converted to PO	\N	\N	f	2026-04-16 18:52:30.375564	2026-05-15 18:52:30.416644	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+171	3	3	PR-00002	4	\N	3	Civil	1	2026-04-27	\N	Submitted	\N	\N	f	2026-04-17 18:52:30.375564	2026-05-15 18:52:30.421314	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+172	3	3	PR-00003	4	\N	1	Civil	1	2026-04-28	\N	Submitted	\N	\N	f	2026-04-18 18:52:30.375564	2026-05-15 18:52:30.426352	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+173	3	3	PR-00004	4	\N	2	Civil	1	2026-04-29	\N	Converted to PO	\N	\N	f	2026-04-19 18:52:30.375564	2026-05-15 18:52:30.429889	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+174	3	3	PR-00005	4	\N	2	Civil	1	2026-04-30	\N	Submitted	\N	\N	f	2026-04-20 18:52:30.375564	2026-05-15 18:52:30.432731	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+175	3	3	PR-00006	4	\N	1	Civil	1	2026-05-01	\N	Approved	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.43576	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+183	3	3	PR-00014	4	\N	2	Civil	1	2026-05-09	\N	Submitted	\N	\N	f	2026-04-29 18:52:30.375564	2026-05-15 18:52:30.458309	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+184	3	3	PR-00015	4	\N	2	Civil	1	2026-05-10	\N	Converted to PO	\N	\N	f	2026-04-30 18:52:30.375564	2026-05-15 18:52:30.460726	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+185	3	3	PR-00020	4	\N	1	CIVIL	1	2026-06-03		Converted to PO	4	2026-05-20 06:57:55.499327	f	2026-05-20 12:27:38.929279	2026-05-20 12:31:17.850162	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+179	3	3	PR-00010	4	\N	2	Civil	1	2026-05-05	\N	Converted to PO	\N	\N	f	2026-04-25 18:52:30.375564	2026-06-01 15:23:31.656676	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+178	3	3	PR-00009	4	\N	3	Civil	1	2026-05-04	\N	Converted to PO	\N	\N	f	2026-04-24 18:52:30.375564	2026-06-01 16:39:26.947196	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+188	3	3	PR-00023	4	\N	1	CIVIL	1	2026-06-15		Converted to PO	4	2026-06-01 11:17:45.135642	f	2026-06-01 16:47:36.211265	2026-06-01 17:03:57.438438	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+187	3	3	PR-00022	4	\N	1	ADMIN	1	2026-06-15		Converted to PO	4	2026-06-01 11:17:10.199457	f	2026-06-01 16:47:00.870149	2026-06-01 17:32:30.435217	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+189	3	3	PR-00024	4	\N	1	BIOCHEMISTRY MEDICAL COLLEGE	1	2026-06-17		Converted to PO	4	2026-06-03 09:00:37.495367	f	2026-06-03 14:30:29.971745	2026-06-03 14:31:01.94332	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+180	3	3	PR-00011	4	\N	3	Civil	1	2026-05-06	\N	Approved	4	2026-06-08 10:05:58.206107	f	2026-04-26 18:52:30.375564	2026-06-08 15:35:58.208066	3	\N	\N	\N	\N	\N	\N	\N	\N	\N
+181	3	3	PR-00012	4	\N	2	Civil	1	2026-05-07	\N	Submitted	\N	\N	f	2026-04-27 18:52:30.375564	2026-06-08 15:54:14.266406	2	\N	\N	\N	\N	\N	\N	\N	\N	\N
+186	3	3	PR-00021	4	\N	1	CIVIL	1	2026-06-03		Converted to PO	4	2026-06-08 07:06:20.77098	f	2026-05-20 14:06:53.134145	2026-06-08 16:14:50.273921	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+190	3	3	PR-00025	4	\N	1	ADMIN BLOCK	1	2026-06-22		Submitted	\N	\N	f	2026-06-08 16:47:30.328866	2026-06-08 17:05:19.224985	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
+192	3	3	PR-00027	4	\N	1	ART CENTRE	1	2026-06-22		Submitted	\N	\N	f	2026-06-08 17:55:00.531189	2026-06-08 17:59:01.111296	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
+191	3	3	PR-00026	4	\N	1	ADMIN BLOCK	1	2026-06-22	\n[Short Closed: Not Required]	Short Closed	\N	\N	f	2026-06-08 17:06:00.229077	2026-06-08 18:04:14.067753	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
+193	3	3	PR-00028	4	\N	2	IP GENERIC PHARMACY MAIN STORE	1	2026-06-23		Draft	\N	\N	f	2026-06-08 18:05:29.772886	2026-06-08 18:06:38.06265	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
+194	2	2	PR-00001	10	\N	\N	Mechanical	3	2026-06-26		Converted to PO	3	2026-06-11 19:29:40.555686	f	2026-06-12 00:19:47.597691	2026-06-12 01:00:29.667038	2	\N	\N	\N	\N	\N	\N	\N	\N	\N
+195	2	2	PR-00002	3	\N	\N	Mechanical	3	2026-06-26		Converted to PO	3	2026-06-11 19:58:30.051646	f	2026-06-12 00:40:52.805513	2026-06-12 01:40:11.473288	2	\N	\N	\N	\N	\N	\N	\N	\N	\N
+196	2	2	PR-00003	10	\N	\N	Mechanical	3	2026-06-26	\n[Rejected: no needed now]	Rejected	\N	\N	f	2026-06-12 00:56:37.980796	2026-07-08 11:21:18.029881	2	\N	\N	\N	\N	\N	\N	\N	\N	\N
+199	2	2	PR-00006	3	\N	\N	\N	3	2026-06-30	\n[Short Closed: already pr raised ]	Short Closed	3	2026-07-07 13:35:58.620752	f	2026-06-16 11:01:07.031945	2026-07-08 11:22:24.991438	2	\N	\N	\N	\N	\N	\N	\N	\N	\N
+198	2	2	PR-00005	3	\N	7	HEALTH 	3	2026-06-30	\n[Rejected: Not Required]	Rejected	\N	\N	f	2026-06-16 10:57:43.196702	2026-09-02 18:00:04.007361	2	\N	\N	\N	\N	\N	\N	\N	\N	11
+216	2	2	PR-00023	3	\N	12	Chemistry	3	2026-09-03		Draft	\N	\N	f	2026-09-02 17:01:52.701097	2026-09-02 17:01:52.701111	1	Purchase	\N	\N	\N	\N	\N	f	\N	3
+197	2	2	PR-00004	10	\N	8	HEALTH 	3	2026-06-26		Converted to PO	3	2026-06-11 19:58:16.903903	f	2026-06-12 00:57:22.512377	2026-09-02 17:02:34.59009	2	\N	\N	\N	\N	\N	\N	\N	\N	11
+202	2	2	PR-00009	3	\N	12	Chemistry	3	2026-08-21		Submitted	\N	\N	f	2026-07-03 11:46:40.099177	2026-09-02 17:02:34.590117	1	\N	\N	\N	\N	\N	\N	\N	\N	3
+200	2	2	PR-00007	3	\N	\N	CSE - Data Science	3	2026-07-02		Converted to PO	3	2026-06-18 05:58:23.857592	f	2026-06-18 11:28:07.704199	2026-09-02 17:02:34.59011	2	\N	\N	\N	\N	\N	\N	\N	\N	3
+201	2	2	PR-00008	3	\N	8	HEALTH 	3	2026-07-14		Converted to PO	3	2026-07-01 09:57:24.949598	f	2026-06-30 18:33:51.277817	2026-09-02 17:02:34.590114	2	\N	\N	\N	\N	\N	\N	\N	\N	11
+203	2	2	PR-00010	3	\N	7	HEALTH 	3	2026-07-21		Converted to PO	3	2026-07-07 13:33:09.809097	f	2026-07-07 19:00:03.750122	2026-09-02 17:02:34.59012	2	\N	\N	\N	\N	\N	\N	\N	\N	11
+204	2	2	PR-00011	3	\N	\N	Biochemistry	3	2026-08-10	\n[Short Closed: none]	Short Closed	3	2026-08-03 10:21:59.342786	f	2026-08-03 15:51:29.219193	2026-09-02 17:02:34.590123	2	Purchase	\N	\N	\N	\N	\N	f	\N	1
+205	2	2	PR-00012	3	\N	8	HEALTH 	3	2026-08-15		Approved	3	2026-08-03 11:33:53.755286	f	2026-08-03 16:57:20.120584	2026-09-02 17:02:34.590126	2	Purchase	\N	\N	\N	\N	\N	f	\N	11
+206	2	2	PR-00013	3	\N	7	HEALTH 	3	2026-08-14		Converted to PO	3	2026-08-14 07:10:05.305418	f	2026-08-14 12:37:45.391061	2026-09-02 17:02:34.590128	2	Rental	Standard Rental	\N	Months	\N	\N	f	\N	11
+209	2	2	PR-00016	3	\N	7	HEALTH 	3	2026-08-18		Submitted	\N	\N	f	2026-08-18 12:23:32.937762	2026-09-02 17:02:34.590137	1	Purchase	\N	\N	\N	\N	\N	f	\N	11
+207	2	2	PR-00014	3	\N	\N	Nursing Foundation	3	2026-08-18		Converted to PO	3	2026-08-17 05:11:52.603847	f	2026-08-17 10:41:37.019811	2026-09-02 17:02:34.590131	2	Purchase	\N	\N	\N	\N	\N	f	\N	8
+208	2	2	PR-00015	3	\N	\N	Child Health Nursing	3	2026-08-19		Converted to PO	3	2026-08-18 06:08:43.17722	f	2026-08-18 11:35:51.789742	2026-09-02 17:02:34.590134	2	Purchase	\N	\N	\N	\N	\N	f	\N	8
+210	2	2	PR-00017	3	\N	\N	Pharmacognosy	3	2026-08-21		Converted to PO	3	2026-08-19 12:22:54.898428	f	2026-08-19 17:52:11.12197	2026-09-02 17:02:34.59014	2	Purchase	\N	\N	\N	\N	\N	f	\N	4
+211	2	2	PR-00018	3	\N	\N	Electrotherapy Lab	3	2026-08-26		Draft	\N	\N	f	2026-08-19 17:52:39.77309	2026-09-02 17:02:34.590143	1	Purchase	\N	\N	\N	\N	\N	f	\N	10
+212	2	2	PR-00019	12	\N	\N	Biochemistry	3	2026-08-31		Submitted	\N	\N	f	2026-08-28 12:04:38.176645	2026-09-02 17:02:34.590146	1	Purchase	\N	\N	\N	\N	\N	f	\N	1
+213	2	2	PR-00020	3	\N	\N	Nursing Foundation	3	2026-09-08		Converted to PO	3	2026-09-01 09:04:46.829735	f	2026-09-01 14:33:45.814682	2026-09-02 17:02:34.590148	2	Purchase	\N	\N	\N	\N	\N	f	\N	8
+214	2	2	PR-00021	10	\N	\N	Medical Surgical Nursing	3	2026-09-01		Converted to PO	3	2026-09-01 11:39:32.639898	f	2026-09-01 17:09:00.521663	2026-09-02 17:02:34.590151	2	Purchase	\N	\N	\N	\N	\N	f	\N	8
+215	2	2	PR-00022	9	\N	\N	Medical Surgical Nursing	3	2026-09-08		Converted to PO	3	2026-09-01 12:29:40.007282	f	2026-09-01 17:44:17.218331	2026-09-02 17:02:34.590154	2	Purchase	\N	\N	\N	\N	\N	f	\N	8
 \.
 
 
@@ -17038,9 +17046,7 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 401	224	4266	4627	69	69	f	\N	\N	\N
 403	224	4268	4629	69	69	f	\N	\N	\N
 405	224	4270	4631	69	69	f	\N	\N	\N
-411	224	4276	4637	69	69	f	\N	\N	\N
 414	224	4279	4640	69	69	f	\N	\N	\N
-423	224	4288	4649	69	69	f	\N	\N	\N
 425	224	4290	4651	69	69	f	\N	\N	\N
 534	224	4410	4771	71	71	f	\N	\N	\N
 387	224	4252	4817	71	71	f	\N	\N	\N
@@ -17139,8 +17145,6 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 449	224	4314	4675	69	69	f	\N	\N	\N
 459	224	4324	4685	69	69	f	\N	\N	\N
 460	224	4325	4686	69	69	f	\N	\N	\N
-461	224	4326	4687	69	69	f	\N	\N	\N
-462	224	4327	4688	69	69	f	\N	\N	\N
 466	224	4331	4692	69	69	f	\N	\N	\N
 437	224	4302	4663	71	71	f	\N	\N	\N
 439	224	4304	4665	71	71	f	\N	\N	\N
@@ -17172,7 +17176,6 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 642	224	4501	4610	72	72	f	\N	\N	\N
 471	224	4336	4697	69	69	f	\N	\N	\N
 480	224	4345	4706	69	69	f	\N	\N	\N
-482	224	4347	4708	69	69	f	\N	\N	\N
 486	224	4351	4712	69	69	f	\N	\N	\N
 489	224	4354	4715	69	69	f	\N	\N	\N
 495	224	4360	4721	69	69	f	\N	\N	\N
@@ -17290,6 +17293,11 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 653	228	5319	2751	63	63	f	\N	3	2026-08-19 17:41:56.512539
 654	229	5320	2564	66	66	f	\N	3	2026-08-19 19:09:57.430102
 655	229	5321	2565	63	63	f	\N	3	2026-08-19 19:09:57.430117
+411	224	4276	4637	71	71	f	\N	\N	\N
+423	224	4288	4649	71	71	f	\N	\N	\N
+461	224	4326	4687	71	71	f	\N	\N	\N
+462	224	4327	4688	71	71	f	\N	\N	\N
+482	224	4347	4708	71	71	f	\N	\N	\N
 \.
 
 
@@ -24585,9 +24593,6 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 238	63	68
 239	63	73
 240	63	74
-241	69	80
-242	69	67
-243	69	68
 251	65	66
 252	65	67
 253	64	65
@@ -24601,6 +24606,9 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 270	78	66
 271	78	81
 272	76	81
+273	69	80
+274	69	67
+275	69	68
 \.
 
 
@@ -27149,7 +27157,7 @@ SELECT pg_catalog.setval('public.complaint_images_id_seq', 37, true);
 -- Name: complaints_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaints_id_seq', 475, true);
+SELECT pg_catalog.setval('public.complaints_id_seq', 478, true);
 
 
 --
@@ -27429,21 +27437,21 @@ SELECT pg_catalog.setval('public.purchase_orders_id_seq', 291, true);
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 69, true);
+SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 70, true);
 
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 634, true);
+SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 635, true);
 
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_requests_id_seq', 215, true);
+SELECT pg_catalog.setval('public.purchase_requests_id_seq', 216, true);
 
 
 --
@@ -27632,7 +27640,7 @@ SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 22, true);
 -- Name: vendor_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_categories_id_seq', 272, true);
+SELECT pg_catalog.setval('public.vendor_categories_id_seq', 275, true);
 
 
 --
@@ -31239,6 +31247,14 @@ ALTER TABLE ONLY public.purchase_requests
 
 
 --
+-- Name: purchase_requests purchase_requests_institution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.purchase_requests
+    ADD CONSTRAINT purchase_requests_institution_id_fkey FOREIGN KEY (institution_id) REFERENCES public.institutions(id);
+
+
+--
 -- Name: purchase_requests purchase_requests_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -32106,5 +32122,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict eczA1tJHPFKsJ3gx0AQZTtIMQUOENnpHJxzObxJrsYQ1lQrXUwUavRJANyAQysf
+\unrestrict xUu6txV2RURMbVecQx4BktA6hY45vkgFaxgdyIa2OEDYSXPTsJVNZTC0ttOlobJ
 

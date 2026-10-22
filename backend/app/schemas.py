@@ -555,6 +555,7 @@ class PRItemOut(PRItemBase):
 
 class PRBase(BaseModel):
     project_id: int
+    institution_id: Optional[int] = None
     required_date: Optional[date] = None
     priority: str = "Normal"
     remarks: Optional[str] = Field(None, max_length=255)
@@ -599,6 +600,7 @@ class PROut(PRBase):
     requester_name: Optional[str] = None
     room_name: Optional[str] = None
     project_name: Optional[str] = None
+    institution_name: Optional[str] = None
     building_name: Optional[str] = None
     department_name: Optional[str] = None
     items: List[PRItemOut] = []

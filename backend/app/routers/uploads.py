@@ -2,8 +2,10 @@
 
 import os
 import uuid
+from pathlib import Path
 from datetime import datetime
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi.responses import FileResponse
 from app.auth import get_current_user, get_tenant_id, get_site_id
 from app.models import User
 
@@ -43,8 +45,11 @@ async def upload_file(
     dir_path = os.path.join(base_dir, str(tenant_id))
     os.makedirs(dir_path, exist_ok=True)
 
-    # Generate unique filename
-    ext = os.path.splitext(file.filename)[1] or ".pdf"
+    # Generate unique filename with safe extension
+    SAFE_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".webp", ".gif"}
+    ext = os.path.splitext(file.filename)[1].lower() if file.filename else ".pdf"
+    if ext not in SAFE_EXTENSIONS:
+        ext = ".pdf"
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     unique_name = f"{timestamp}_{uuid.uuid4().hex[:8]}{ext}"
     file_path = os.path.join(dir_path, unique_name)
@@ -52,6 +57,22 @@ async def upload_file(
     with open(file_path, "wb") as f:
         f.write(contents)
 
-    # Return the URL path (served by StaticFiles mount)
+    # Return the URL path (served by authenticated endpoint below)
     url = f"/api/{file_path}"
     return {"url": url, "filename": file.filename, "size": len(contents)}
+
+
+@router.get("/files/{file_path:path}")
+async def serve_upload(
+    file_path: str,
+    current_user: User = Depends(get_current_user),
+):
+    """Serve uploaded files with authentication. Prevents path traversal."""
+    # Resolve and validate path is within uploads directory
+    base = Path("uploads").resolve()
+    target = (base / file_path).resolve()
+    if not str(target).startswith(str(base)):
+        raise HTTPException(403, "Access denied")
+    if not target.is_file():
+        raise HTTPException(404, "File not found")
+    return FileResponse(target)

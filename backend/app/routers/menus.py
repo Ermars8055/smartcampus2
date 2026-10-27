@@ -4,7 +4,7 @@ from typing import List
 
 from app import models, schemas
 from app.database import get_db
-from app.auth import get_current_user
+from app.auth import get_current_user, require_platform_admin
 
 router = APIRouter(
     prefix="/api/menus",
@@ -13,23 +13,24 @@ router = APIRouter(
 )
 
 @router.get("", response_model=List[schemas.MenuItemResponse])
-def get_menus(db: Session = Depends(get_db)):
-    """
-    Get all active menu items in a hierarchical structure.
-    Only fetches root menus (parent_id is None). The SQLAlchemy model relationships
-    will automatically eagerly load or dynamically fetch the children based on configuration,
-    but here we rely on Pydantic's recursive parsing of the `children` relationship.
-    """
-    # Fetch all root menu items, ordered by their 'order' field
-    menus = db.query(models.MenuItem).filter(
+def get_menus(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    """Get all active menu items — platform admins see all, others see tenant-scoped."""
+    query = db.query(models.MenuItem).filter(
         models.MenuItem.parent_id == None,
         models.MenuItem.is_active == True
-    ).order_by(models.MenuItem.order).all()
-    
+    )
+    # Tenant isolation: non-platform-admins only see global menus (tenant_id is None)
+    # or their own tenant's menus
+    if not getattr(current_user, '_is_platform_admin', False):
+        tid = getattr(current_user, '_tenant_id', None)
+        query = query.filter(
+            (models.MenuItem.tenant_id == None) | (models.MenuItem.tenant_id == tid)
+        )
+    menus = query.order_by(models.MenuItem.order).all()
     return menus
 
 @router.post("", response_model=schemas.MenuItemResponse, status_code=status.HTTP_201_CREATED)
-def create_menu(menu: schemas.MenuItemCreate, db: Session = Depends(get_db)):
+def create_menu(menu: schemas.MenuItemCreate, db: Session = Depends(get_db), current_user=Depends(require_platform_admin())):
     """
     Create a new menu item.
     """
@@ -40,7 +41,7 @@ def create_menu(menu: schemas.MenuItemCreate, db: Session = Depends(get_db)):
     return db_menu
 
 @router.put("/{menu_id}", response_model=schemas.MenuItemResponse)
-def update_menu(menu_id: int, menu: schemas.MenuItemUpdate, db: Session = Depends(get_db)):
+def update_menu(menu_id: int, menu: schemas.MenuItemUpdate, db: Session = Depends(get_db), current_user=Depends(require_platform_admin())):
     """
     Update an existing menu item.
     """
@@ -57,7 +58,7 @@ def update_menu(menu_id: int, menu: schemas.MenuItemUpdate, db: Session = Depend
     return db_menu
 
 @router.delete("/{menu_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_menu(menu_id: int, db: Session = Depends(get_db)):
+def delete_menu(menu_id: int, db: Session = Depends(get_db), current_user=Depends(require_platform_admin())):
     """
     Delete a menu item.
     """
@@ -73,7 +74,7 @@ class MenuMoveRequest(schemas.BaseModel):
     direction: str # 'up' or 'down'
 
 @router.put("/{menu_id}/move", response_model=schemas.MenuItemResponse)
-def move_menu(menu_id: int, request: MenuMoveRequest, db: Session = Depends(get_db)):
+def move_menu(menu_id: int, request: MenuMoveRequest, db: Session = Depends(get_db), current_user=Depends(require_platform_admin())):
     """
     Move a menu item up or down within its sibling group.
     """

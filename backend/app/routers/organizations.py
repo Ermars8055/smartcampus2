@@ -70,7 +70,9 @@ def update_organization(
     ).first()
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
-    for k, v in data.model_dump().items():
+    for k, v in data.model_dump(exclude_unset=True).items():
+        if k in ("id", "tenant_id", "site_id", "created_at", "updated_at"):
+            continue
         setattr(org, k, v)
     db.commit()
     db.refresh(org)
@@ -165,7 +167,9 @@ def update_project(
     ).first()
     if not proj:
         raise HTTPException(status_code=404, detail="Project not found")
-    for k, v in data.model_dump().items():
+    for k, v in data.model_dump(exclude_unset=True).items():
+        if k in ("id", "tenant_id", "site_id", "created_at", "updated_at"):
+            continue
         setattr(proj, k, v)
     db.commit()
     db.refresh(proj)
@@ -265,7 +269,9 @@ def update_institution(
     ).first()
     if not inst:
         raise HTTPException(status_code=404, detail="Institution not found")
-    for k, v in data.model_dump().items():
+    for k, v in data.model_dump(exclude_unset=True).items():
+        if k in ("id", "tenant_id", "site_id", "created_at", "updated_at"):
+            continue
         setattr(inst, k, v)
     db.commit()
     db.refresh(inst)
@@ -372,7 +378,9 @@ def update_building(
     ).first()
     if not building:
         raise HTTPException(status_code=404, detail="Building not found")
-    for k, v in data.model_dump().items():
+    for k, v in data.model_dump(exclude_unset=True).items():
+        if k in ("id", "tenant_id", "site_id", "created_at", "updated_at"):
+            continue
         setattr(building, k, v)
     db.commit()
     db.refresh(building)
@@ -464,7 +472,10 @@ def update_floor(
         Floor.id == id, Floor.tenant_id == tenant_id, Floor.site_id == site_id
     ).first()
     if not floor: raise HTTPException(status_code=404, detail="Floor not found")
-    for k,v in data.model_dump().items(): setattr(floor, k, v)
+    for k, v in data.model_dump(exclude_unset=True).items():
+        if k in ("id", "tenant_id", "site_id", "created_at", "updated_at"):
+            continue
+        setattr(floor, k, v)
     db.commit()
     db.refresh(floor)
     return floor
@@ -567,7 +578,10 @@ def update_room(
         Room.id == id, Room.tenant_id == tenant_id, Room.site_id == site_id
     ).first()
     if not room: raise HTTPException(status_code=404, detail="Room not found")
-    for k,v in data.model_dump().items(): setattr(room, k, v)
+    for k, v in data.model_dump(exclude_unset=True).items():
+        if k in ("id", "tenant_id", "site_id", "created_at", "updated_at"):
+            continue
+        setattr(room, k, v)
     db.commit()
     db.refresh(room)
     return room
@@ -767,7 +781,10 @@ def update_department(
     update_data = data.model_dump(exclude_unset=True)
     if "code" in update_data and not update_data["code"]:
         del update_data["code"]
-    for k,v in update_data.items(): setattr(dept, k, v)
+    for k, v in update_data.items():
+        if k in ("id", "tenant_id", "site_id", "created_at", "updated_at"):
+            continue
+        setattr(dept, k, v)
     db.commit()
     db.refresh(dept)
     return DepartmentOut(
@@ -884,7 +901,9 @@ def update_warehouse(
     ).first()
     if not wh:
         raise HTTPException(status_code=404, detail="Store not found")
-    for k, v in data.model_dump().items():
+    for k, v in data.model_dump(exclude_unset=True).items():
+        if k in ("id", "tenant_id", "site_id", "created_at", "updated_at"):
+            continue
         setattr(wh, k, v)
     db.commit()
     db.refresh(wh)

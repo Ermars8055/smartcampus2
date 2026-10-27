@@ -147,7 +147,7 @@ def create_grn(data: GRNCreate, db: Session=Depends(get_db), current_user: User=
     except Exception as e:
         db.rollback()
         import logging
-        logging.getLogger('uvicorn').error(f'GRN Creation Error: {str(e)}')
+        logging.getLogger(__name__).error(f'GRN Creation Error: {str(e)}')
         if isinstance(e, HTTPException):
             raise e
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred")

@@ -6,7 +6,7 @@ from typing import List, Optional
 from pydantic import BaseModel, EmailStr
 from app.database import get_db
 from app.models import User, TenantMembership, UserRoleAssignment, Tenant, Role, Site
-from app.auth import get_current_user, require_permission, get_password_hash
+from app.auth import get_current_user, require_permission, get_password_hash, validate_password_strength
 
 router = APIRouter(prefix="/api/admin/users", tags=["Admin Users"])
 
@@ -163,6 +163,9 @@ def create_user(
         if len(sites) != len(set(data.site_ids)):
             raise HTTPException(status_code=400, detail="Invalid sites for this tenant")
 
+    pwd_err = validate_password_strength(data.password)
+    if pwd_err:
+        raise HTTPException(400, pwd_err)
     user = User(
         username=data.username,
         email=data.email,

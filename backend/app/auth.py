@@ -1,5 +1,5 @@
 """JWT authentication with multi-tenant workspace support."""
-import logging
+import logging, re, secrets as _secrets
 from datetime import datetime, timedelta, timezone
 from app.utils.tz import get_now_ist
 from typing import Optional, List
@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-from app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES
 from app.database import get_db
 
 from app.core.context import current_user_id, current_tenant_id, current_site_id
@@ -18,15 +18,42 @@ log = logging.getLogger(__name__)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
+# In-memory token blocklist (for production, use Redis)
+_token_blocklist: set[str] = set()
+
 def verify_password(plain, hashed):
     return pwd_context.verify(plain, hashed)
 
 def get_password_hash(password):
     return pwd_context.hash(password)
 
+def validate_password_strength(password: str) -> str | None:
+    """Returns error message if password is weak, None if strong."""
+    if len(password) < 8:
+        return "Password must be at least 8 characters"
+    if not re.search(r"[A-Z]", password):
+        return "Password must contain at least one uppercase letter"
+    if not re.search(r"[a-z]", password):
+        return "Password must contain at least one lowercase letter"
+    if not re.search(r"\d", password):
+        return "Password must contain at least one digit"
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>_\-+=\[\]\\;'/`~]", password):
+        return "Password must contain at least one special character"
+    return None
+
+def blocklist_token(jti: str):
+    """Add a token JTI to the blocklist (call on logout)."""
+    _token_blocklist.add(jti)
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     expire = get_now_ist() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    to_encode.update({"exp": expire, "jti": _secrets.token_hex(16), "type": "access"})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def create_refresh_token(data: dict):
+    to_encode = {"sub": data.get("sub"), "type": "refresh", "jti": _secrets.token_hex(16)}
+    expire = get_now_ist() + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -37,6 +64,13 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
         if not username:
+            raise cred_exc
+        # Check if token has been revoked
+        jti = payload.get("jti")
+        if jti and jti in _token_blocklist:
+            raise cred_exc
+        # Reject refresh tokens used as access tokens
+        if payload.get("type") == "refresh":
             raise cred_exc
     except JWTError:
         raise cred_exc

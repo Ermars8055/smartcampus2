@@ -50,6 +50,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
+    // Validate inputs before calling API
+    final workspace = _workspaceController.text.trim();
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+
+    if (workspace.isEmpty || username.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please fill in all fields.';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;

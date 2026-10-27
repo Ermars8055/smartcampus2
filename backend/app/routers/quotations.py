@@ -504,9 +504,9 @@ def send_quotation_request(
         
         return {"message": "Quotation Request sent to vendors"}
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        import logging
+        logging.getLogger(__name__).error(f"Error sending quotation request: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="An internal error occurred")
 
 
 @router.post("/requests/{id}/receive")
@@ -642,12 +642,30 @@ def enter_vendor_quotation(
 
     attachment_path = existing.attachment_path if existing else None
     if file:
+        ALLOWED_CONTENT_TYPES = [
+            "application/pdf",
+            "image/png",
+            "image/jpeg",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ]
+        if file.content_type not in ALLOWED_CONTENT_TYPES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"File type '{file.content_type}' is not allowed. Allowed types: {', '.join(ALLOWED_CONTENT_TYPES)}"
+            )
+        file_content = file.file.read()
+        MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+        if len(file_content) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=400,
+                detail="File size exceeds the 10 MB limit"
+            )
         upload_dir = "uploads/quotations"
         os.makedirs(upload_dir, exist_ok=True)
         filename = f"qr_{qr_id}_v_{vendor_id}_{file.filename}"
         file_path = os.path.join(upload_dir, filename)
         with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+            buffer.write(file_content)
         attachment_path = f"/api/{file_path}"
         
     q_date = datetime.strptime(quotation_date, "%Y-%m-%d").date() if quotation_date else None

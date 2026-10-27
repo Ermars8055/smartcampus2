@@ -93,6 +93,8 @@ def update_purchase_request(id: int, data: PRUpdate, db: Session=Depends(get_db)
             pr.approved_by_id = current_user.id
             pr.approved_at = datetime.utcnow()
     for k, v in update_data.items():
+        if k in ("id", "tenant_id", "site_id", "requester_id", "created_at"):
+            continue
         setattr(pr, k, v)
     db.commit()
     return {'message': 'PR updated successfully'}

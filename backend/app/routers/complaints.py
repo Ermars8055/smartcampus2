@@ -113,7 +113,7 @@ def _get_complaint(db: Session, complaint_id: int, tenant_id: int, site_id: int)
 # ── Metadata endpoints ───────────────────────────────────────────────────────
 
 @router.get("/metadata/statuses", response_model=List[str])
-def get_complaint_statuses():
+def get_complaint_statuses(current_user=Depends(get_current_user)):
     """Return the ordered list of active complaint statuses for the frontend UI."""
     return [
         ComplaintStatus.REGISTERED.value,

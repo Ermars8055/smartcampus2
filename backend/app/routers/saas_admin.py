@@ -6,7 +6,7 @@ from typing import List
 from app.database import get_db
 from app.models import Tenant, User, Site, Role, RolePermission, UserRoleAssignment, TenantMembership
 from app.schemas import TenantCreate, TenantOut, TenantProvisionCreate, UserCreate, UserOut, TenantDetailsOut
-from app.auth import get_current_user, require_platform_admin, get_password_hash
+from app.auth import get_current_user, require_platform_admin, get_password_hash, validate_password_strength
 
 router = APIRouter(prefix="/api/admin/saas", tags=["SaaS Admin"])
 
@@ -148,6 +148,9 @@ def provision_tenant(
     db.add(site)
     db.flush()
 
+    pwd_err = validate_password_strength(data.admin.password)
+    if pwd_err:
+        raise HTTPException(400, pwd_err)
     admin_role = create_admin_role(db, tenant.id)
     admin = User(
         username=data.admin.username,
@@ -253,13 +256,14 @@ def create_tenant_admin(
     if existing:
         raise HTTPException(status_code=400, detail="Username or email already exists")
 
+    pwd_err = validate_password_strength(data.password)
+    if pwd_err:
+        raise HTTPException(400, pwd_err)
     user = User(
         username=data.username,
         email=data.email,
         full_name=data.full_name,
         hashed_password=get_password_hash(data.password),
-        role="Admin",
-        tenant_id=id
     )
     db.add(user)
     db.commit()

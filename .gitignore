@@ -40,6 +40,17 @@ EQUIPMENT LIST master.xlsx
 *.xlsx
 .~lock.*
 
+# Database dumps
+*.dump
+*.sql.bak
+
+# Private keys and certificates
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+
 # Test files and samples
 backend/test_pdf.py
 sample_quotation_full.pdf

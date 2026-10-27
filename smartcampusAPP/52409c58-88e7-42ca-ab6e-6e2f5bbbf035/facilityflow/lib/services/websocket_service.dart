@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:facilityflow/globals/app_state.dart';
 
 class WebSocketService {
@@ -15,14 +16,19 @@ class WebSocketService {
 
   WebSocketService._internal();
 
-  void connect(AppState appState) {
+  void connect(AppState appState) async {
     if (_isConnected) return;
 
     final baseUrl = dotenv.env['API_URL'] ?? '';
     if (baseUrl.isEmpty) return;
 
+    // Retrieve JWT token for WebSocket authentication
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'jwt_token');
+    if (token == null) return;
+
     // Convert http/https to ws/wss
-    final wsUrl = baseUrl.replaceFirst('http', 'ws') + '/api/ws/indents';
+    final wsUrl = baseUrl.replaceFirst('http', 'ws') + '/api/ws/indents?token=$token';
 
     try {
       _channel = WebSocketChannel.connect(Uri.parse(wsUrl));

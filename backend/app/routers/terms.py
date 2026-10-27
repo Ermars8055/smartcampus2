@@ -73,6 +73,8 @@ def update_term(
         ).update({"is_default": False})
         
     for k, v in update_data.items():
+        if k in ("id", "tenant_id", "site_id", "created_at"):
+            continue
         setattr(term, k, v)
         
     db.commit()

@@ -1167,7 +1167,8 @@ export default function PurchaseOrders() {
           value={tabValue}
           onChange={(_, v) => setTabValue(v)}
           variant="scrollable"
-          scrollButtons={false}
+          scrollButtons="auto"
+          allowScrollButtonsMobile
           sx={{ mb: 2, minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0.5 } }}
         >
           {['Draft', 'Submitted', 'Approved', 'Sent to Vendor', 'Partially Received', 'Closed', 'Short Closed', 'Cancelled', 'Rejected', 'Pending', 'All'].map(s => (

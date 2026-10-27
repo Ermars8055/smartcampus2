@@ -260,6 +260,7 @@ export default function PurchaseRequests() {
 
       const payload = {
         project_id: form.project_id,
+        institution_id: form.institution_id || null,
         building_id: form.building_id || null,
         department_name: form.department_name,
         procurement_type: form.procurement_type || 'Purchase',
@@ -763,7 +764,7 @@ export default function PurchaseRequests() {
                   }
                 }}>
                   <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{pr.pr_number}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{pr.project_name || '-'}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem' }}>{pr.institution_name || pr.project_name || '-'}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{pr.department_name || '-'}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{formatDate(pr.created_at)}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{formatDate(pr.required_date)}</TableCell>
@@ -841,7 +842,7 @@ export default function PurchaseRequests() {
             </Grid>
             <Grid item xs={4}>
               <Typography variant="caption" color="textSecondary">Institution</Typography>
-              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.project_name || '—'}</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.institution_name || detailDialog?.project_name || '—'}</Typography>
             </Grid>
             <Grid item xs={4}>
               <Typography variant="caption" color="textSecondary">Department</Typography>
@@ -926,8 +927,8 @@ export default function PurchaseRequests() {
                               <TableCell align="right">REQ QTY</TableCell>
                               {detailHistoryData.entries.map((entry, idx) => (
                                 <TableCell key={idx} align="center">
-                                  <Box sx={{ whiteSpace: 'normal', maxWidth: 80, lineHeight: 1.2, margin: '0 auto', textTransform: 'uppercase' }}>
-                                    L{entry.level} APPROVED QTY
+                                  <Box sx={{ whiteSpace: 'normal', maxWidth: 80, lineHeight: 1.2, margin: '0 auto', textTransform: 'uppercase', color: entry.status === 'Rejected' ? '#ef4444' : 'inherit' }}>
+                                    L{entry.level} {entry.status === 'Rejected' ? 'REJECTED' : 'APPROVED QTY'}
                                   </Box>
                                 </TableCell>
                               ))}
@@ -955,7 +956,11 @@ export default function PurchaseRequests() {
                                         {histItem ? (
                                           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                              <Typography variant="body2" sx={{ fontWeight: 700, color: '#1d4ed8' }}>{histItem.approved_quantity}</Typography>
+                                              {entry.status === 'Rejected' ? (
+                                                <Cancel sx={{ fontSize: 18, color: '#ef4444' }} />
+                                              ) : (
+                                                <Typography variant="body2" sx={{ fontWeight: 700, color: '#1d4ed8' }}>{histItem.approved_quantity}</Typography>
+                                              )}
                                               {histItem.remarks && (
                                                 <Tooltip title={histItem.remarks} arrow placement="top">
                                                   <Textsms sx={{ fontSize: 14, color: '#94a3b8', cursor: 'help' }} />
@@ -983,8 +988,8 @@ export default function PurchaseRequests() {
                         <Box sx={{ mt: 2 }}>
                           <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>General Approval Remarks</Typography>
                           {detailHistoryData.entries.filter(e => e.remarks).slice().reverse().map((e, idx) => (
-                            <Box key={idx} sx={{ mb: 1, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
-                              <Typography variant="caption" sx={{ fontWeight: 700, color: '#1d4ed8', display: 'block', mb: 0.5 }}>L{e.level} Approval - {e.approver_name}</Typography>
+                            <Box key={idx} sx={{ mb: 1, p: 1.5, bgcolor: e.status === 'Rejected' ? '#fef2f2' : '#f8fafc', borderRadius: 1, border: '1px solid', borderColor: e.status === 'Rejected' ? '#fca5a5' : '#e2e8f0' }}>
+                              <Typography variant="caption" sx={{ fontWeight: 700, color: e.status === 'Rejected' ? '#ef4444' : '#1d4ed8', display: 'block', mb: 0.5 }}>L{e.level} {e.status === 'Rejected' ? 'Rejection' : 'Approval'} - {e.approver_name}</Typography>
                               <Typography variant="body2" sx={{ color: '#334155' }}>{e.remarks}</Typography>
                             </Box>
                           ))}
@@ -1362,7 +1367,7 @@ export default function PurchaseRequests() {
         </DialogTitle>
         <DialogContent sx={{ px: 4, py: 2 }}>
           <Box sx={{ mb: 2, p: 2, bgcolor: '#eff6ff', borderRadius: 2, border: '1px solid #bfdbfe' }}>
-            <Grid container spacing={2} alignItems="center">
+            <Grid container spacing={2} alignItems="flex-start">
               <Grid item xs={12} sm={9}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={8}>
@@ -1447,7 +1452,7 @@ export default function PurchaseRequests() {
               { label: 'Dept', value: convertDialog.pr?.department_name },
               { label: 'Bldg', value: convertDialog.pr?.building_name },
               { label: 'PR Date', value: formatDate(convertDialog.pr?.created_at) },
-              { label: 'Items', value: `${convertDialog.pr?.items?.length || 0} materials` },
+              { label: 'Items', value: `${convertDialog.pr?.items?.length || 0} material${(convertDialog.pr?.items?.length === 1) ? '' : 's'}` },
             ].map((item, idx) => (
               <Grid item xs={2} key={idx}>
                 <Typography variant="caption" color="textSecondary" sx={{ display: 'block', lineHeight: 1, fontSize: '0.65rem' }}>{item.label}</Typography>
@@ -1585,7 +1590,7 @@ export default function PurchaseRequests() {
             </Grid>
             <Grid item xs={3}>
               <Typography variant="caption" color="textSecondary">Institution</Typography>
-              <Typography sx={{ fontWeight: 600 }}>{approvalDialog.pr?.project_name || '—'}</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{approvalDialog.pr?.institution_name || approvalDialog.pr?.project_name || '—'}</Typography>
             </Grid>
             <Grid item xs={3}>
               <Typography variant="caption" color="textSecondary">Department</Typography>

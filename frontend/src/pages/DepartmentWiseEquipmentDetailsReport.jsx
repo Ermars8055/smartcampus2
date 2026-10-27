@@ -2,17 +2,19 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, Grid, FormControl, InputLabel, Select, MenuItem,
-  Checkbox, ListItemText, OutlinedInput, ListSubheader, TextField, CircularProgress
+  Checkbox, ListItemText, OutlinedInput, ListSubheader, TextField, CircularProgress,
+  Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Chip, Paper, Divider, Stack
 } from '@mui/material';
 import {
-  Search, Assessment, FileDownload, PictureAsPdf, Print, Refresh
+  Search, Assessment, FileDownload, PictureAsPdf, Print, Refresh,
+  Close, OpenInNew, PrecisionManufacturing, Build, CheckCircle, Warning, PhotoCamera
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import api from '../services/api';
+import api, { getFileUrl } from '../services/api';
 import { useMessage } from '../context/MessageContext';
 
 export default function DepartmentWiseEquipmentDetailsReport() {
@@ -31,6 +33,7 @@ export default function DepartmentWiseEquipmentDetailsReport() {
 
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState(null);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
 
   useEffect(() => {
     api.get('/api/categories').then(r => setCategories(r.data)).catch(() => {});
@@ -321,16 +324,37 @@ export default function DepartmentWiseEquipmentDetailsReport() {
                         </TableCell>
                       </TableRow>
                       {dept.equipments.map((eq, e_idx) => (
-                        <TableRow key={`eq-${d_idx}-${e_idx}`} hover>
-                          <TableCell>{eq.equipment_name}</TableCell>
+                        <TableRow 
+                          key={`eq-${d_idx}-${e_idx}`} 
+                          hover
+                          onClick={() => setSelectedEquipment(eq)}
+                          sx={{ 
+                            cursor: 'pointer',
+                            transition: 'background-color 0.15s',
+                            '&:hover': { bgcolor: '#F0F9FF !important' }
+                          }}
+                        >
+                          <TableCell sx={{ fontWeight: 600, color: '#0284C7' }}>
+                            <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+                              <span>{eq.equipment_name}</span>
+                              <OpenInNew sx={{ fontSize: '0.85rem', opacity: 0.7 }} />
+                            </Box>
+                          </TableCell>
                           <TableCell>{eq.make}</TableCell>
                           <TableCell>{eq.model}</TableCell>
-                          <TableCell>{eq.serial_number}</TableCell>
+                          <TableCell sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{eq.serial_number}</TableCell>
                           <TableCell>{eq.last_pm_date}</TableCell>
                           <TableCell>{eq.next_pm_due_date}</TableCell>
                           <TableCell>{eq.last_calibration_date}</TableCell>
                           <TableCell>{eq.next_calibration_due_date}</TableCell>
-                          <TableCell>{eq.status}</TableCell>
+                          <TableCell>
+                            <Chip 
+                              label={eq.status} 
+                              size="small" 
+                              color={eq.status === 'Operational' ? 'success' : (eq.status === 'Under Repair' ? 'warning' : 'default')}
+                              sx={{ fontWeight: 600, fontSize: '0.75rem', height: 22 }}
+                            />
+                          </TableCell>
                         </TableRow>
                       ))}
                     </React.Fragment>
@@ -352,6 +376,212 @@ export default function DepartmentWiseEquipmentDetailsReport() {
           <Typography color="textSecondary">No equipment data found for the selected filters.</Typography>
         </Box>
       )}
+
+      {/* Equipment Details Popup Modal */}
+      <Dialog 
+        open={!!selectedEquipment} 
+        onClose={() => setSelectedEquipment(null)} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden' } }}
+      >
+        <DialogTitle sx={{ m: 0, p: 2, bgcolor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ p: 1, bgcolor: '#E0F2FE', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PrecisionManufacturing sx={{ color: '#0284C7', fontSize: 28 }} />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: '#0F172A', lineHeight: 1.2 }}>
+                {selectedEquipment?.equipment_name}
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#64748B' }}>
+                Code: <strong>{selectedEquipment?.equipment_code}</strong> | Serial No: <strong>{selectedEquipment?.serial_number || 'N/A'}</strong>
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={() => setSelectedEquipment(null)} size="small" sx={{ color: '#64748B' }}>
+            <Close />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent sx={{ p: 3 }}>
+          {selectedEquipment && (
+            <Stack spacing={2.5}>
+              
+              {/* Status & Location Banner */}
+              <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, bgcolor: '#F8FAFC', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+                <Box>
+                  <Typography variant="caption" sx={{ color: '#64748B', display: 'block', fontWeight: 600 }}>DEPARTMENT / LOCATION</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 700, color: '#1E293B' }}>{selectedEquipment.department_name}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ color: '#64748B', display: 'block', fontWeight: 600 }}>INSTITUTION</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 700, color: '#1E293B' }}>{selectedEquipment.institution_name}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ color: '#64748B', display: 'block', fontWeight: 600 }}>CURRENT STATUS</Typography>
+                  <Chip 
+                    label={selectedEquipment.status} 
+                    color={selectedEquipment.status === 'Operational' ? 'success' : (selectedEquipment.status === 'Under Repair' ? 'warning' : 'default')}
+                    sx={{ fontWeight: 700 }}
+                  />
+                </Box>
+              </Paper>
+
+              {/* Specifications Card */}
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155', mb: 1, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem' }}>
+                  Equipment Specifications
+                </Typography>
+                <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                  <Table size="small">
+                    <TableBody>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', width: '25%', bgcolor: '#F8FAFC' }}>Make</TableCell>
+                        <TableCell sx={{ width: '25%' }}>{selectedEquipment.make || '-'}</TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', width: '25%', bgcolor: '#F8FAFC' }}>Model</TableCell>
+                        <TableCell sx={{ width: '25%' }}>{selectedEquipment.model || '-'}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', bgcolor: '#F8FAFC' }}>Serial Number</TableCell>
+                        <TableCell sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{selectedEquipment.serial_number || '-'}</TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', bgcolor: '#F8FAFC' }}>Category</TableCell>
+                        <TableCell>{selectedEquipment.equipment_category || '-'}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', bgcolor: '#F8FAFC' }}>Procurement Type</TableCell>
+                        <TableCell>{selectedEquipment.procurement_type || '-'}</TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', bgcolor: '#F8FAFC' }}>Installation Date</TableCell>
+                        <TableCell>{selectedEquipment.installation_date || '-'}</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </Paper>
+              </Box>
+
+              {/* Procurement & Financials */}
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155', mb: 1, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem' }}>
+                  Procurement & Financial Details
+                </Typography>
+                <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                  <Table size="small">
+                    <TableBody>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', width: '25%', bgcolor: '#F8FAFC' }}>PO Number</TableCell>
+                        <TableCell sx={{ width: '25%' }}>{selectedEquipment.po_number || '-'}</TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', width: '25%', bgcolor: '#F8FAFC' }}>GRN Number</TableCell>
+                        <TableCell sx={{ width: '25%' }}>{selectedEquipment.grn_number || '-'}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', bgcolor: '#F8FAFC' }}>Equipment Cost</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>
+                          {selectedEquipment.equipment_cost != null ? `₹${selectedEquipment.equipment_cost.toLocaleString('en-IN')}` : '-'}
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', bgcolor: '#F8FAFC' }}>Year of Purchase</TableCell>
+                        <TableCell>{selectedEquipment.year_of_purchase || '-'}</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </Paper>
+              </Box>
+
+              {/* Maintenance & Warranty */}
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155', mb: 1, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem' }}>
+                  Maintenance & Service Status
+                </Typography>
+                <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                  <Table size="small">
+                    <TableBody>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', width: '25%', bgcolor: '#F8FAFC' }}>Warranty Status</TableCell>
+                        <TableCell sx={{ width: '25%' }}>
+                          {selectedEquipment.warranty_available ? (
+                            <Chip label="Under Warranty" color="success" size="small" sx={{ fontWeight: 600, height: 20, fontSize: '0.7rem' }} />
+                          ) : (
+                            <Chip label="No Warranty" size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
+                          )}
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', width: '25%', bgcolor: '#F8FAFC' }}>Warranty Expiry</TableCell>
+                        <TableCell sx={{ width: '25%' }}>{selectedEquipment.warranty_expiry_date || '-'}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', bgcolor: '#F8FAFC' }}>AMC / CMC</TableCell>
+                        <TableCell>
+                          {selectedEquipment.amc_cmc_required ? (
+                            <Chip label={selectedEquipment.amc_cmc_status || 'Required'} color="primary" size="small" sx={{ fontWeight: 600, height: 20, fontSize: '0.7rem' }} />
+                          ) : 'Not Applicable'}
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', bgcolor: '#F8FAFC' }}>Contract Period</TableCell>
+                        <TableCell>
+                          {selectedEquipment.amc_cmc_start_date !== '-' || selectedEquipment.amc_cmc_end_date !== '-' 
+                            ? `${selectedEquipment.amc_cmc_start_date} to ${selectedEquipment.amc_cmc_end_date}` 
+                            : '-'}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', bgcolor: '#F8FAFC' }}>Last PM Date</TableCell>
+                        <TableCell>{selectedEquipment.last_pm_date || '-'}</TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', bgcolor: '#F8FAFC' }}>Next PM Due</TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: '#0284C7' }}>{selectedEquipment.next_pm_due_date || '-'}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', bgcolor: '#F8FAFC' }}>Last Calibration</TableCell>
+                        <TableCell>{selectedEquipment.last_calibration_date || '-'}</TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: '#64748B', bgcolor: '#F8FAFC' }}>Next Calibration Due</TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: '#D97706' }}>{selectedEquipment.next_calibration_due_date || '-'}</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </Paper>
+              </Box>
+
+              {/* Photos (if available) */}
+              {((selectedEquipment.equipment_photos && selectedEquipment.equipment_photos.length > 0) || selectedEquipment.equipment_photo_url) && (
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155', mb: 1, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem' }}>
+                    Equipment Photos
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+                    {selectedEquipment.equipment_photos && selectedEquipment.equipment_photos.length > 0 ? (
+                      selectedEquipment.equipment_photos.map((photo, pIdx) => (
+                        <Box 
+                          key={pIdx} 
+                          component="img" 
+                          src={getFileUrl(photo.url || photo)} 
+                          alt="Equipment" 
+                          sx={{ width: 120, height: 90, objectFit: 'cover', borderRadius: 2, border: '1px solid #E2E8F0' }} 
+                        />
+                      ))
+                    ) : (
+                      selectedEquipment.equipment_photo_url && (
+                        <Box 
+                          component="img" 
+                          src={getFileUrl(selectedEquipment.equipment_photo_url)} 
+                          alt="Equipment" 
+                          sx={{ width: 120, height: 90, objectFit: 'cover', borderRadius: 2, border: '1px solid #E2E8F0' }} 
+                        />
+                      )
+                    )}
+                  </Box>
+                </Box>
+              )}
+
+            </Stack>
+          )}
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #E2E8F0', bgcolor: '#F8FAFC' }}>
+          <Button 
+            onClick={() => setSelectedEquipment(null)} 
+            variant="contained" 
+            sx={{ borderRadius: 2, textTransform: 'none', px: 3, fontWeight: 600, bgcolor: '#0F172A', '&:hover': { bgcolor: '#1E293B' } }}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

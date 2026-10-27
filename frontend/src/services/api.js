@@ -16,7 +16,7 @@ const api = axios.create({
  */
 export const getFileUrl = (path) => {
   if (!path) return '';
-  if (path.startsWith('http')) return path;
+  if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) return path;
   // Ensure the path starts with /
   let normalizedPath = path.startsWith('/') ? path : `/${path}`;
 

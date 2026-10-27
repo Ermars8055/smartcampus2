@@ -138,14 +138,21 @@ class TenantDetailsOut(BaseModel):
 
 class TenantConfigurationBase(BaseModel):
     base_state: str
-    cgst_share_percent: float
-    sgst_share_percent: float
+    cgst_share_percent: float = 50.0
+    sgst_share_percent: Optional[float] = 50.0
     po_short_close_notify_roles: Optional[List[str]] = []
+    po_short_close_notify_users: Optional[List[int]] = []
+    wo_short_close_notify_roles: Optional[List[str]] = []
     pm_advance_email_enabled: Optional[bool] = False
     pm_advance_email_types: Optional[List[str]] = []
     pm_advance_email_days: Optional[int] = None
     pm_advance_email_roles: Optional[List[str]] = []
     pm_advance_email_users: Optional[List[int]] = []
+    pm_advance_email_frequency_tiers: Optional[List[Dict[str, Any]]] = []
+    calibration_advance_email_enabled: Optional[bool] = False
+    calibration_advance_email_roles: Optional[List[str]] = []
+    calibration_advance_email_users: Optional[List[int]] = []
+    calibration_advance_email_frequency_tiers: Optional[List[Dict[str, Any]]] = []
 
 class TenantConfigurationCreate(TenantConfigurationBase):
     pass
@@ -2220,6 +2227,9 @@ class ComplaintCloseRequest(BaseModel):
     equipment_photo_url: Optional[str] = None
     serial_number_photo_url: Optional[str] = None
     installation_report_url: Optional[str] = None
+    equipment_photos: Optional[List[Dict[str, Any]]] = None
+    serial_number_photos: Optional[List[Dict[str, Any]]] = None
+    installation_documents: Optional[List[Dict[str, Any]]] = None
     serial_number: Optional[str] = None
     status_on_work_completion: Optional[str] = None
     job_completed_satisfactorily: Optional[bool] = None
@@ -2279,6 +2289,8 @@ class ComplaintOut(ComplaintBase):
 
 class EquipmentUpdateSerial(BaseModel):
     serial_number: str = Field(..., min_length=1)
+    serial_number_photos: Optional[List[dict]] = None
+    serial_number_photo_url: Optional[str] = None
 
 class EquipmentUpdate(BaseModel):
     equipment_code: Optional[str] = None
@@ -2314,6 +2326,11 @@ class EquipmentUpdate(BaseModel):
     linked_reagents: Optional[List[dict]] = None
     requires_installation: Optional[bool] = None
     is_biomedical: Optional[bool] = None
+    equipment_photos: Optional[List[dict]] = None
+    serial_number_photos: Optional[List[dict]] = None
+    installation_documents: Optional[List[dict]] = None
+    other_documents: Optional[List[dict]] = None
+
 class EquipmentInstallationUpdate(BaseModel):
     serial_number: Optional[str] = None
     installation_date: Optional[datetime] = None
@@ -2358,6 +2375,11 @@ class EquipmentItemCreate(BaseModel):
     billing_frequency: Optional[str] = None
     cost_per_test: Optional[float] = None
     linked_reagents: Optional[List[dict]] = None
+    equipment_photos: Optional[List[dict]] = None
+    serial_number_photos: Optional[List[dict]] = None
+    installation_documents: Optional[List[dict]] = None
+    other_documents: Optional[List[dict]] = None
+
 class EquipmentBulkQRRequest(BaseModel):
     is_all: bool = False
     equipment_ids: List[int] = []
@@ -2391,6 +2413,10 @@ class EquipmentItemOut(BaseModel):
     equipment_category: Optional[str] = None
     serial_number_photo_url: Optional[str] = None
     equipment_photo_url: Optional[str] = None
+    equipment_photos: Optional[List[dict]] = None
+    serial_number_photos: Optional[List[dict]] = None
+    installation_documents: Optional[List[dict]] = None
+    other_documents: Optional[List[dict]] = None
     warranty_available: Optional[bool] = False
     warranty_expiry_date: Optional[date] = None
     amc_cmc_required: Optional[bool] = False

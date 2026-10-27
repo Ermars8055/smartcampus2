@@ -1153,8 +1153,16 @@ def get_department_equipment_report(
         EquipmentItem.status != "Written Off",
         EquipmentItem.status != "Transferred"
     )
+    loc_ids = []
+    if department_id:
+        loc_ids = [int(id.strip()) for id in department_id.split(',') if id.strip()]
+
     if category_id:
         mat_query = mat_query.filter(Material.category_id == category_id)
+    if institution_id:
+        mat_query = mat_query.filter(EquipmentItem.institution_id == institution_id)
+    if loc_ids:
+        mat_query = mat_query.filter(EquipmentItem.location_id.in_(loc_ids))
     if search:
         search_term = f"%{search}%"
         mat_query = mat_query.filter((Material.code.ilike(search_term)) | (Material.name.ilike(search_term)))
@@ -1171,8 +1179,7 @@ def get_department_equipment_report(
         LocationMaster.site_id == site_id,
         LocationMaster.is_active == True
     )
-    if department_id:
-        loc_ids = [int(id.strip()) for id in department_id.split(',')]
+    if loc_ids:
         loc_query = loc_query.filter(LocationMaster.id.in_(loc_ids))
         
     all_locs = loc_query.order_by(LocationMaster.location_name).all()
@@ -1191,6 +1198,8 @@ def get_department_equipment_report(
     )
     if institution_id:
         count_query = count_query.filter(EquipmentItem.institution_id == institution_id)
+    if loc_ids:
+        count_query = count_query.filter(EquipmentItem.location_id.in_(loc_ids))
         
     count_query = count_query.group_by(EquipmentItem.material_id, LocationMaster.location_name).all()
 
@@ -1212,7 +1221,8 @@ def get_department_equipment_report(
             dept_inventory[loc_name] = qty
             total_mat_inv += qty
             
-        if only_with_stock and total_mat_inv <= 0:
+        # Display only equipment belonging to the department(s) with quantity > 0
+        if total_mat_inv <= 0:
             continue
             
         final_data.append({
@@ -1254,7 +1264,9 @@ def get_department_equipment_details_report(
         Material.is_deleted == False
     ).options(
         joinedload(EquipmentItem.material),
-        joinedload(EquipmentItem.location)
+        joinedload(EquipmentItem.location),
+        joinedload(EquipmentItem.institution),
+        joinedload(EquipmentItem.grn)
     )
     
     if category_id:
@@ -1282,6 +1294,8 @@ def get_department_equipment_details_report(
     
     for eq in equipments:
         dept_name = eq.location.location_name if eq.location and eq.location.location_name else "UNKNOWN"
+        inst_name = eq.institution.name if eq.institution and eq.institution.name else "-"
+        grn_num = eq.grn.grn_number if eq.grn else "-"
         
         if dept_name not in departments_map:
             departments_map[dept_name] = {
@@ -1292,7 +1306,11 @@ def get_department_equipment_details_report(
             
         departments_map[dept_name]["equipment_count"] += 1
         departments_map[dept_name]["equipments"].append({
+            "id": eq.id,
+            "equipment_code": eq.equipment_code or "-",
             "equipment_name": f"{eq.material.code} - {eq.material.name}" if eq.material else "-",
+            "material_name": eq.material.name if eq.material else "-",
+            "material_code": eq.material.code if eq.material else "-",
             "make": eq.make or "-",
             "model": eq.model or "-",
             "serial_number": eq.serial_number or "-",
@@ -1300,7 +1318,26 @@ def get_department_equipment_details_report(
             "next_pm_due_date": eq.next_pm_due_date.strftime("%Y-%m-%d") if eq.next_pm_due_date else "-",
             "last_calibration_date": eq.last_calibration_date.strftime("%Y-%m-%d") if eq.last_calibration_date else "-",
             "next_calibration_due_date": eq.next_calibration_due_date.strftime("%Y-%m-%d") if eq.next_calibration_due_date else "-",
-            "status": eq.status or "-"
+            "status": eq.status or "-",
+            "department_name": dept_name,
+            "institution_name": inst_name,
+            "equipment_category": eq.equipment_category or "-",
+            "equipment_cost": float(eq.equipment_cost) if eq.equipment_cost is not None else None,
+            "year_of_purchase": eq.year_of_purchase or "-",
+            "po_number": eq.po_number or "-",
+            "grn_number": grn_num,
+            "installation_date": eq.installation_date.strftime("%Y-%m-%d") if eq.installation_date else "-",
+            "procurement_type": eq.procurement_type or "-",
+            "warranty_available": eq.warranty_available,
+            "warranty_expiry_date": eq.warranty_expiry_date.strftime("%Y-%m-%d") if eq.warranty_expiry_date else "-",
+            "amc_cmc_required": eq.amc_cmc_required,
+            "amc_cmc_status": eq.amc_cmc_status or "None",
+            "amc_cmc_start_date": eq.amc_cmc_start_date.strftime("%Y-%m-%d") if eq.amc_cmc_start_date else "-",
+            "amc_cmc_end_date": eq.amc_cmc_end_date.strftime("%Y-%m-%d") if eq.amc_cmc_end_date else "-",
+            "pm_required": eq.pm_required,
+            "calibration_required": eq.calibration_required,
+            "equipment_photos": eq.equipment_photos or [],
+            "equipment_photo_url": eq.equipment_photo_url
         })
         
     sorted_departments = sorted(departments_map.values(), key=lambda x: x["department_name"])
@@ -1313,11 +1350,12 @@ def get_department_equipment_details_report(
 
 
 # ==========================================
-# CALL STATUS REPORT
+# COMPLAINT STATUS REPORT (formerly Call Status)
 # ==========================================
 
+@router.get("/complaint-status")
 @router.get("/call-status")
-def get_call_status_report(
+def get_complaint_status_report(
     start_date: Optional[str] = Query(None, description="Start Date (YYYY-MM-DD)"),
     end_date: Optional[str] = Query(None, description="End Date (YYYY-MM-DD)"),
     db: Session = Depends(get_db),
@@ -1325,7 +1363,7 @@ def get_call_status_report(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    """Report for Maintenance Call Statuses (AMC, CMC, Warranty, No Contract)"""
+    """Report for Maintenance Complaint Statuses (AMC, CMC, Warranty, No Contract)"""
     from app.models import Complaint, EquipmentItem
     from datetime import timedelta
     from app.routers.complaints import _enrich
@@ -1405,6 +1443,164 @@ def get_call_status_report(
         })
         
     return {
+        "summary": summary,
+        "history": history
+    }
+
+# ==========================================
+# ENGINEER EVALUATION REPORT
+# ==========================================
+
+@router.get("/engineers")
+def get_engineers_list(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("reports", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Fetch list of engineers/technicians available for evaluation filtering."""
+    from app.models import User, Complaint, TenantMembership, UserRoleAssignment, Role
+
+    # 1. Users who have complaints assigned to them
+    assigned_user_ids = [
+        r[0] for r in db.query(Complaint.assigned_to_id)
+        .filter(Complaint.tenant_id == tenant_id, Complaint.assigned_to_id.isnot(None))
+        .distinct().all()
+    ]
+    
+    # 2. Users with role containing 'technician' or 'engineer'
+    tech_role_ids = [
+        r.id for r in db.query(Role).filter(
+            Role.tenant_id == tenant_id,
+            (Role.name.ilike("%technician%")) | (Role.name.ilike("%engineer%"))
+        ).all()
+    ]
+    tech_user_ids = [
+        r[0] for r in db.query(UserRoleAssignment.user_id)
+        .filter(UserRoleAssignment.role_id.in_(tech_role_ids))
+        .distinct().all()
+    ] if tech_role_ids else []
+    
+    target_ids = list(set(assigned_user_ids + tech_user_ids))
+    
+    if target_ids:
+        users = db.query(User).filter(
+            User.id.in_(target_ids),
+            User.is_active == True,
+            User.is_deleted == False
+        ).order_by(User.full_name).all()
+    else:
+        users = db.query(User).join(TenantMembership).filter(
+            TenantMembership.tenant_id == tenant_id,
+            User.is_active == True,
+            User.is_deleted == False
+        ).order_by(User.full_name).all()
+        
+    return [{"id": u.id, "full_name": u.full_name, "email": u.email} for u in users]
+
+
+@router.get("/engineer-evaluation")
+def get_engineer_evaluation_report(
+    start_date: Optional[str] = Query(None, description="Start Date (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="End Date (YYYY-MM-DD)"),
+    engineer_id: Optional[int] = Query(None, description="Selected Engineer / User ID"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("reports", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Report for Engineer Evaluation with complaint breakdown and metrics"""
+    from app.models import Complaint, EquipmentItem, User
+    from datetime import timedelta
+    from app.routers.complaints import _enrich
+    
+    now = get_now_ist()
+    
+    if start_date:
+        dt_start = datetime.strptime(start_date, "%Y-%m-%d").replace(hour=0, minute=0, second=0)
+    else:
+        dt_start = (now - timedelta(days=30)).replace(hour=0, minute=0, second=0)
+        
+    if end_date:
+        dt_end = datetime.strptime(end_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+    else:
+        dt_end = now.replace(hour=23, minute=59, second=59)
+
+    query = db.query(Complaint).outerjoin(EquipmentItem).filter(
+        Complaint.tenant_id == tenant_id,
+        Complaint.site_id == site_id,
+        Complaint.is_deleted == False,
+        Complaint.created_at >= dt_start,
+        Complaint.created_at <= dt_end
+    )
+    
+    selected_engineer = None
+    if engineer_id:
+        query = query.filter(Complaint.assigned_to_id == engineer_id)
+        eng_user = db.query(User).filter(User.id == engineer_id).first()
+        if eng_user:
+            selected_engineer = {
+                "id": eng_user.id,
+                "full_name": eng_user.full_name,
+                "email": eng_user.email
+            }
+    
+    complaints = query.order_by(Complaint.created_at.desc()).all()
+    
+    summary = {
+        "AMC": 0,
+        "CMC": 0,
+        "Warranty": 0,
+        "Out of Warranty": 0,
+        "Preventive Maintenance": 0,
+        "Calibration": 0,
+        "Installation": 0
+    }
+    
+    history = []
+    
+    for c in complaints:
+        enriched_c = _enrich(c, db)
+        status = enriched_c.equipment_warranty_status
+        ctype = c.complaint_type or "Breakdown"
+        
+        if status == "AMC":
+            display_status = "AMC"
+            summary["AMC"] += 1
+        elif status == "CMC":
+            display_status = "CMC"
+            summary["CMC"] += 1
+        elif status == "Warranty":
+            display_status = "Warranty"
+            summary["Warranty"] += 1
+        else:
+            if ctype in ("PM", "Preventive Maintenance Call"):
+                display_status = "Preventive Maintenance"
+                summary["Preventive Maintenance"] += 1
+            elif ctype in ("Calibration", "Calibration Call"):
+                display_status = "Calibration"
+                summary["Calibration"] += 1
+            elif ctype == "Installation":
+                display_status = "Installation"
+                summary["Installation"] += 1
+            else:
+                display_status = "Out of Warranty"
+                summary["Out of Warranty"] += 1
+            
+        history.append({
+            "docket_no": enriched_c.docket_no,
+            "created_at": enriched_c.created_at.strftime("%Y-%m-%d %H:%M") if enriched_c.created_at else "",
+            "department": enriched_c.department_name or "-",
+            "nature_of_complaint": enriched_c.nature_of_complaint or "-",
+            "assigned_to": enriched_c.assigned_to_name or "-",
+            "status": enriched_c.status,
+            "service_category": display_status,
+            "equipment_code": enriched_c.equipment_code or "-",
+            "resolved_at": enriched_c.resolved_at.strftime("%Y-%m-%d %H:%M") if enriched_c.resolved_at else "-"
+        })
+        
+    return {
+        "engineer": selected_engineer,
         "summary": summary,
         "history": history
     }

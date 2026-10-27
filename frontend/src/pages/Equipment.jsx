@@ -10,7 +10,8 @@ import {
 } from '@mui/material';
 import {
   Search, Build, QrCode, UploadFile, CheckCircle, Warning, OpenInNew,
-  LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh, Assignment, DeleteOutline, Print, Science, CompareArrows, Add, History, PhotoCamera
+  LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh, Assignment, DeleteOutline, Print, Science, CompareArrows, Add, History, PhotoCamera,
+  Close, Delete, PictureAsPdf, InsertDriveFile, Visibility
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -19,6 +20,250 @@ import { formatDate } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
 import { useMessage } from '../context/MessageContext';
 import { QRCodeSVG } from 'qrcode.react';
+
+function EquipmentAttachmentManager({ form, onChange, isEdit, readOnly = false, onPreviewImage }) {
+  const [activeCategory, setActiveCategory] = useState('equipment_photos');
+  const [uploading, setUploading] = useState(false);
+  const { showMessage } = useMessage();
+
+  const categories = [
+    {
+      key: 'equipment_photos',
+      label: 'Equipment Photos',
+      icon: <PhotoCamera fontSize="small" />,
+      accept: 'image/*',
+      isPhoto: true,
+      hint: 'Photos of the equipment unit / asset'
+    },
+    {
+      key: 'serial_number_photos',
+      label: 'Serial No. Photos',
+      icon: <PhotoCamera fontSize="small" />,
+      accept: 'image/*',
+      isPhoto: true,
+      hint: 'Photos of serial number plate / barcode'
+    },
+    {
+      key: 'installation_documents',
+      label: 'Installation Reports',
+      icon: <PictureAsPdf fontSize="small" />,
+      accept: '.pdf,image/*',
+      isPhoto: false,
+      hint: 'Commissioning reports, installation certificates'
+    },
+    {
+      key: 'other_documents',
+      label: 'Other Documents',
+      icon: <InsertDriveFile fontSize="small" />,
+      accept: '.pdf,image/*,.doc,.docx',
+      isPhoto: false,
+      hint: 'User manuals, warranty cards, calibration certificates, invoices'
+    }
+  ];
+
+  const currentCategoryObj = categories.find(c => c.key === activeCategory) || categories[0];
+  const currentFiles = form[activeCategory] || [];
+
+  const handleUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      const uploaded = [];
+      for (const f of files) {
+        const fd = new FormData();
+        fd.append('file', f);
+        const res = await api.post(`/api/upload?folder=${activeCategory}`, fd, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        uploaded.push({
+          url: res.data.url,
+          name: f.name,
+          size: f.size,
+          uploaded_at: new Date().toISOString()
+        });
+      }
+      onChange({
+        ...form,
+        [activeCategory]: [...currentFiles, ...uploaded]
+      });
+      showMessage(`${uploaded.length} file(s) uploaded to ${currentCategoryObj.label}`, 'Success', 'success');
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to upload file(s)', 'Upload Error', 'error');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleRemove = (index) => {
+    onChange({
+      ...form,
+      [activeCategory]: currentFiles.filter((_, i) => i !== index)
+    });
+  };
+
+  return (
+    <Box sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0', width: '100%', boxSizing: 'border-box' }}>
+      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2, borderBottom: '1px solid #e2e8f0', pb: 1.5 }}>
+        {categories.map(cat => {
+          const count = (form[cat.key] || []).length;
+          const isSelected = activeCategory === cat.key;
+          return (
+            <Chip
+              key={cat.key}
+              icon={cat.icon}
+              label={`${cat.label} (${count})`}
+              onClick={() => setActiveCategory(cat.key)}
+              color={isSelected ? 'primary' : 'default'}
+              variant={isSelected ? 'filled' : 'outlined'}
+              sx={{ fontWeight: 600, cursor: 'pointer' }}
+            />
+          );
+        })}
+      </Box>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
+        <Box>
+          <Typography variant="body2" sx={{ fontWeight: 700, color: '#1e293b' }}>
+            {currentCategoryObj.label}
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#64748b' }}>
+            {currentCategoryObj.hint}
+          </Typography>
+        </Box>
+        {!readOnly && (
+          <Button
+            variant="contained"
+            size="small"
+            component="label"
+            disabled={uploading}
+            startIcon={uploading ? <CircularProgress size={16} color="inherit" /> : <UploadFile />}
+            sx={{ textTransform: 'none', fontWeight: 600 }}
+          >
+            {uploading ? 'Uploading...' : '+ Upload Files'}
+            <input
+              type="file"
+              hidden
+              multiple
+              accept={currentCategoryObj.accept}
+              onChange={handleUpload}
+            />
+          </Button>
+        )}
+      </Box>
+
+      {/* File Items Display */}
+      {currentFiles.length === 0 ? (
+        <Box sx={{ p: 3, textAlign: 'center', bgcolor: '#fff', borderRadius: 1.5, border: '1px dashed #cbd5e1' }}>
+          <Typography variant="caption" color="textSecondary">
+            {readOnly ? 'No files attached in this category yet.' : 'No files attached in this category yet. Click "+ Upload Files" above to add.'}
+          </Typography>
+        </Box>
+      ) : currentCategoryObj.isPhoto ? (
+        /* Photo Grid */
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+          {currentFiles.map((photo, idx) => (
+            <Box
+              key={idx}
+              sx={{
+                width: 110,
+                height: 100,
+                borderRadius: 1.5,
+                border: '1px solid #cbd5e1',
+                overflow: 'hidden',
+                position: 'relative',
+                bgcolor: '#fff',
+                '&:hover .photo-actions': { opacity: 1 }
+              }}
+            >
+              <Box
+                component="img"
+                src={getFileUrl(photo.url)}
+                alt={photo.name || 'Photo'}
+                onClick={() => onPreviewImage && onPreviewImage(photo)}
+                sx={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+              />
+              <Box
+                className="photo-actions"
+                sx={{
+                  position: 'absolute',
+                  top: 0, left: 0, right: 0, bottom: 0,
+                  bgcolor: 'rgba(15,23,42,0.5)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 0.5,
+                  opacity: 0,
+                  transition: 'opacity 0.2s'
+                }}
+              >
+                <IconButton size="small" onClick={() => onPreviewImage && onPreviewImage(photo)} sx={{ color: '#fff', bgcolor: 'rgba(255,255,255,0.2)', '&:hover': { bgcolor: 'rgba(255,255,255,0.4)' } }} title="Click to enlarge">
+                  <Visibility fontSize="small" />
+                </IconButton>
+                {!readOnly && (
+                  <IconButton size="small" onClick={() => handleRemove(idx)} sx={{ color: '#f87171', bgcolor: 'rgba(255,255,255,0.2)', '&:hover': { bgcolor: 'rgba(255,255,255,0.4)' } }} title="Delete photo">
+                    <Delete fontSize="small" />
+                  </IconButton>
+                )}
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      ) : (
+        /* Document List */
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {currentFiles.map((doc, idx) => (
+            <Box
+              key={idx}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                p: 1,
+                bgcolor: '#fff',
+                borderRadius: 1.5,
+                border: '1px solid #e2e8f0'
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                {doc.name?.toLowerCase().endsWith('.pdf') ? (
+                  <PictureAsPdf color="error" fontSize="small" />
+                ) : (
+                  <InsertDriveFile color="primary" fontSize="small" />
+                )}
+                <Typography
+                  variant="body2"
+                  noWrap
+                  onClick={() => window.open(getFileUrl(doc.url), '_blank')}
+                  sx={{ cursor: 'pointer', color: '#2563EB', fontWeight: 600, '&:hover': { textDecoration: 'underline' } }}
+                  title="Click to open file"
+                >
+                  {doc.name || `Document ${idx + 1}`}
+                </Typography>
+                {doc.size ? (
+                  <Typography variant="caption" color="textSecondary">
+                    ({(doc.size / 1024).toFixed(0)} KB)
+                  </Typography>
+                ) : null}
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <IconButton size="small" onClick={() => window.open(getFileUrl(doc.url), '_blank')} title="Open in new tab">
+                  <OpenInNew fontSize="small" />
+                </IconButton>
+                {!readOnly && (
+                  <IconButton size="small" color="error" onClick={() => handleRemove(idx)} title="Delete document">
+                    <Delete fontSize="small" />
+                  </IconButton>
+                )}
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      )}
+    </Box>
+  );
+}
 
 export default function Equipment() {
 
@@ -51,6 +296,10 @@ export default function Equipment() {
   const [serialInput, setSerialInput] = useState('');
   const [serialNotAvailable, setSerialNotAvailable] = useState(false);
   const [serialSubmitting, setSerialSubmitting] = useState(false);
+  const [serialPhotos, setSerialPhotos] = useState([]);
+  const [serialUploading, setSerialUploading] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [rberFiles, setRberFiles] = useState([]);
 
   // QR Dialog
   const [qrDialog, setQrDialog] = useState(null);
@@ -90,7 +339,7 @@ export default function Equipment() {
   // Installation Dialog
   const [installDialog, setInstallDialog] = useState(null);
   const [installForm, setInstallForm] = useState({ serial_number: '', installation_date: '', installed_by: '', contact_number: '', location_id: '', installation_remarks: '' });
-  const [installFiles, setInstallFiles] = useState({ file: null, equipment_photo: null, serial_number_photo: null });
+  const [installFiles, setInstallFiles] = useState({ files: [], equipment_photos: [], serial_number_photos: [] });
   const [installSubmitting, setInstallSubmitting] = useState(false);
 
   // Upload Docs Dialog
@@ -260,6 +509,75 @@ export default function Equipment() {
     return filteredEquipment.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   }, [filteredEquipment, page, rowsPerPage]);
 
+  // Open Serial Number Dialog
+  const handleOpenSerial = (item) => {
+    setSerialDialog(item);
+    setSerialInput(item.serial_number && item.serial_number !== 'NA' ? item.serial_number : '');
+    setSerialNotAvailable(item.serial_number === 'NA');
+    setSerialPhotos(item.serial_number_photos && item.serial_number_photos.length > 0 
+      ? item.serial_number_photos 
+      : (item.serial_number_photo_url ? [{ url: item.serial_number_photo_url, name: 'Serial Number Photo' }] : []));
+  };
+
+  const handleSerialPhotoUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setSerialUploading(true);
+    try {
+      const uploaded = [];
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await api.post('/api/upload?folder=serial_number_photos', fd, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        uploaded.push({ url: res.data.url, name: file.name, size: file.size, uploaded_at: new Date().toISOString() });
+      }
+      setSerialPhotos(prev => [...prev, ...uploaded]);
+      showMessage(`${uploaded.length} serial photo(s) uploaded`, 'Success', 'success');
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to upload photo', 'Error', 'error');
+    } finally {
+      setSerialUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  // Open Edit Dialog with normalized attachments
+  const handleOpenEdit = (item) => {
+    const itemToEdit = { ...item };
+    if (!itemToEdit.linked_reagents || itemToEdit.linked_reagents.length === 0) {
+      itemToEdit.linked_reagents = [{ material_id: '' }];
+    }
+    itemToEdit.equipment_photos = itemToEdit.equipment_photos && itemToEdit.equipment_photos.length > 0 
+      ? itemToEdit.equipment_photos 
+      : (itemToEdit.equipment_photo_url ? [{ url: itemToEdit.equipment_photo_url, name: 'Equipment Photo' }] : []);
+    itemToEdit.serial_number_photos = itemToEdit.serial_number_photos && itemToEdit.serial_number_photos.length > 0 
+      ? itemToEdit.serial_number_photos 
+      : (itemToEdit.serial_number_photo_url ? [{ url: itemToEdit.serial_number_photo_url, name: 'Serial Number Photo' }] : []);
+    itemToEdit.installation_documents = itemToEdit.installation_documents && itemToEdit.installation_documents.length > 0 
+      ? itemToEdit.installation_documents 
+      : (itemToEdit.installation_report_url ? [{ url: itemToEdit.installation_report_url, name: 'Installation Report' }] : []);
+    itemToEdit.other_documents = itemToEdit.other_documents || [];
+    setEditForm(itemToEdit);
+    setEditDialog(item);
+  };
+
+  const openUploadDocs = (item) => {
+    const itemData = { ...item };
+    itemData.equipment_photos = itemData.equipment_photos && itemData.equipment_photos.length > 0
+      ? itemData.equipment_photos
+      : (itemData.equipment_photo_url ? [{ url: itemData.equipment_photo_url, name: 'Equipment Photo' }] : []);
+    itemData.serial_number_photos = itemData.serial_number_photos && itemData.serial_number_photos.length > 0
+      ? itemData.serial_number_photos
+      : (itemData.serial_number_photo_url ? [{ url: itemData.serial_number_photo_url, name: 'Serial Number Photo' }] : []);
+    itemData.installation_documents = itemData.installation_documents && itemData.installation_documents.length > 0
+      ? itemData.installation_documents
+      : (itemData.installation_report_url ? [{ url: itemData.installation_report_url, name: 'Installation Report' }] : []);
+    itemData.other_documents = itemData.other_documents || [];
+    setUploadDocsDialog(itemData);
+  };
+
   // Handle Serial Number Update Submit
   const handleSerialSubmit = async () => {
     const finalSerial = serialNotAvailable ? 'NA' : serialInput.trim();
@@ -270,13 +588,15 @@ export default function Equipment() {
     setSerialSubmitting(true);
     try {
       await api.put(`/api/equipment/${serialDialog.id}/serial-number`, {
-        serial_number: finalSerial
+        serial_number: finalSerial,
+        serial_number_photos: serialPhotos
       });
-      const successMessage = finalSerial === 'NA' ? 'Serial number - updated as NA' : `Serial number updated successfully to '${finalSerial}'`;
+      const successMessage = finalSerial === 'NA' ? 'Serial number updated as NA' : `Serial number updated successfully to '${finalSerial}'`;
       showMessage(successMessage, 'Success', 'success');
       setSerialDialog(null);
       setSerialInput('');
       setSerialNotAvailable(false);
+      setSerialPhotos([]);
       loadData();
     } catch (err) {
       showMessage(err.response?.data?.detail || 'Failed to update serial number', 'Duplicate Found', 'warning');
@@ -546,12 +866,32 @@ export default function Equipment() {
     }
     setRberSubmitting(true);
     try {
+      if (rberFiles && rberFiles.length > 0) {
+        const uploadedDocs = [];
+        for (const file of rberFiles) {
+          const fd = new FormData();
+          fd.append('file', file);
+          const uploadRes = await api.post('/api/upload?folder=other_documents', fd, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+          uploadedDocs.push({
+            url: uploadRes.data.url,
+            name: `RBER Document: ${file.name}`,
+            uploaded_at: new Date().toISOString()
+          });
+        }
+        const existingDocs = rberDialog.other_documents || [];
+        await api.put(`/api/equipment/${rberDialog.id}`, {
+          other_documents: [...existingDocs, ...uploadedDocs]
+        });
+      }
       await api.post(`/api/equipment/${rberDialog.id}/rber`, {
         rber_date: rberDate,
         reason: rberReason
       });
       showMessage('Equipment marked as RBER successfully', 'Success', 'success');
       setRberDialog(null);
+      setRberFiles([]);
       loadData();
     } catch (err) {
       showMessage(err.response?.data?.detail || 'Failed to mark as RBER', 'Error', 'error');
@@ -574,9 +914,21 @@ export default function Equipment() {
       formData.append('location_id', installForm.location_id);
       if (installForm.installation_remarks) formData.append('installation_remarks', installForm.installation_remarks);
 
-      if (installFiles.file) formData.append('file', installFiles.file);
-      if (installFiles.equipment_photo) formData.append('equipment_photo', installFiles.equipment_photo);
-      if (installFiles.serial_number_photo) formData.append('serial_number_photo', installFiles.serial_number_photo);
+      if (installFiles.files && installFiles.files.length > 0) {
+        installFiles.files.forEach(f => formData.append('files', f));
+      } else if (installFiles.file) {
+        formData.append('file', installFiles.file);
+      }
+      if (installFiles.equipment_photos && installFiles.equipment_photos.length > 0) {
+        installFiles.equipment_photos.forEach(f => formData.append('equipment_photos', f));
+      } else if (installFiles.equipment_photo) {
+        formData.append('equipment_photo', installFiles.equipment_photo);
+      }
+      if (installFiles.serial_number_photos && installFiles.serial_number_photos.length > 0) {
+        installFiles.serial_number_photos.forEach(f => formData.append('serial_number_photos', f));
+      } else if (installFiles.serial_number_photo) {
+        formData.append('serial_number_photo', installFiles.serial_number_photo);
+      }
 
       await api.post(`/api/equipment/${installDialog.id}/installation`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -591,27 +943,23 @@ export default function Equipment() {
   };
 
   const handleUploadDocsSubmit = async () => {
-    if (!uploadDocsFiles.file && !uploadDocsFiles.equipment_photo && !uploadDocsFiles.serial_number_photo) {
-      showMessage('Please select at least one file to upload.', 'Validation Error', 'warning');
-      return;
-    }
+    if (!uploadDocsDialog) return;
     setUploadDocsSubmitting(true);
     try {
-      const formData = new FormData();
-      if (uploadDocsFiles.file) formData.append('file', uploadDocsFiles.file);
-      if (uploadDocsFiles.equipment_photo) formData.append('equipment_photo', uploadDocsFiles.equipment_photo);
-      if (uploadDocsFiles.serial_number_photo) formData.append('serial_number_photo', uploadDocsFiles.serial_number_photo);
-
-      const response = await api.post(`/api/equipment/${uploadDocsDialog.id}/upload-docs`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const response = await api.put(`/api/equipment/${uploadDocsDialog.id}`, {
+        equipment_photos: uploadDocsDialog.equipment_photos || [],
+        serial_number_photos: uploadDocsDialog.serial_number_photos || [],
+        installation_documents: uploadDocsDialog.installation_documents || [],
+        other_documents: uploadDocsDialog.other_documents || []
       });
-      showMessage('Documents uploaded successfully', 'Success', 'success');
+      showMessage('Documents updated successfully', 'Success', 'success');
       setUploadDocsDialog(null);
       loadData();
       
       // Update open dialogs instantly
       if (editDialog && editDialog.id === uploadDocsDialog.id) {
         setEditDialog({ ...editDialog, ...response.data });
+        setEditForm(prev => ({ ...prev, ...response.data }));
       }
       if (viewDialog && viewDialog.id === uploadDocsDialog.id) {
         setViewDialog({ ...viewDialog, ...response.data });
@@ -731,7 +1079,11 @@ export default function Equipment() {
       is_biomedical: false,
       requires_installation: false,
       battery_details: '',
-      linked_reagents: []
+      linked_reagents: [],
+      equipment_photos: [],
+      serial_number_photos: [],
+      installation_documents: [],
+      other_documents: []
     });
     setAddDialog(true);
   };
@@ -866,6 +1218,7 @@ export default function Equipment() {
               <MenuItem value="Under maintenance">Under maintenance</MenuItem>
               <MenuItem value="Spare Requested">Spare Requested</MenuItem>
               <MenuItem value="Written Off">Written Off</MenuItem>
+              <MenuItem value="RBER">RBER</MenuItem>
             </Select>
           </FormControl>
 
@@ -994,23 +1347,18 @@ export default function Equipment() {
 
                 <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                   {item.serial_number_status === 'Pending Update' && (
-                    <Button size="small" variant="outlined" color="warning" startIcon={<Edit color="warning" />} onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); setSerialNotAvailable(false); }}>
+                    <Button size="small" variant="outlined" color="warning" startIcon={<Edit color="warning" />} onClick={(e) => { e.stopPropagation(); handleOpenSerial(item); }}>
                       Update Serial
                     </Button>
                   )}
                   <Button size="small" variant="outlined" color="primary" disabled={item.status === 'RBER'} startIcon={<Edit color="primary" />} onClick={(e) => { 
                     e.stopPropagation(); 
-                    const itemToEdit = { ...item };
-                    if (!itemToEdit.linked_reagents || itemToEdit.linked_reagents.length === 0) {
-                      itemToEdit.linked_reagents = [{ material_id: '' }];
-                    }
-                    setEditForm(itemToEdit); 
-                    setEditDialog(item); 
+                    handleOpenEdit(item);
                   }}>
                     Edit
                   </Button>
                   {(item.installation_status === 'Pending Installation' || item.installation_status === 'Installation Requested') && (
-                    <Button size="small" variant="contained" color="secondary" startIcon={<Build />} onClick={(e) => { e.stopPropagation(); setInstallForm({ ...installForm, serial_number: item.serial_number || '' }); setInstallFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setInstallDialog(item); }}>
+                    <Button size="small" variant="contained" color="secondary" startIcon={<Build />} onClick={(e) => { e.stopPropagation(); setInstallForm({ ...installForm, serial_number: item.serial_number || '' }); setInstallFiles({ files: [], equipment_photos: [], serial_number_photos: [] }); setInstallDialog(item); }}>
                       Complete Install
                     </Button>
                   )}
@@ -1144,7 +1492,7 @@ export default function Equipment() {
                             size="small"
                             color="warning"
                             clickable
-                            onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); setSerialNotAvailable(false); }}
+                            onClick={(e) => { e.stopPropagation(); handleOpenSerial(item); }}
                             sx={{ fontWeight: 600, fontSize: '0.7rem' }}
                           />
                         </Tooltip>
@@ -1171,7 +1519,7 @@ export default function Equipment() {
                           color="secondary" 
                           icon={<Assignment sx={{ fontSize: '14px !important' }} />} 
                           sx={{ fontSize: '0.75rem', cursor: 'pointer', '&:hover': { opacity: 0.8 } }} 
-                          onClick={(e) => { e.stopPropagation(); setInstallForm({ ...installForm, serial_number: item.serial_number || '' }); setInstallFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setInstallDialog(item); }}
+                          onClick={(e) => { e.stopPropagation(); setInstallForm({ ...installForm, serial_number: item.serial_number || '' }); setInstallFiles({ files: [], equipment_photos: [], serial_number_photos: [] }); setInstallDialog(item); }}
                         />
                       ) : (
                         <Chip label="Not Required" size="small" sx={{ bgcolor: '#F1F5F9', color: '#64748B', fontSize: '0.75rem' }} />
@@ -1207,12 +1555,7 @@ export default function Equipment() {
                           <span>
                             <IconButton size="small" color="primary" disabled={item.status === 'RBER'} onClick={(e) => { 
                               e.stopPropagation(); 
-                              const itemToEdit = { ...item };
-                              if (!itemToEdit.linked_reagents || itemToEdit.linked_reagents.length === 0) {
-                                itemToEdit.linked_reagents = [{ material_id: '' }];
-                              }
-                              setEditForm(itemToEdit); 
-                              setEditDialog(item); 
+                              handleOpenEdit(item);
                             }}>
                               <Edit color={item.status === 'RBER' ? 'disabled' : 'primary'} fontSize="small" />
                             </IconButton>
@@ -1296,7 +1639,7 @@ export default function Equipment() {
       </Card>
 
       {/* Dialog 1: Update Serial Number */}
-      <Dialog open={!!serialDialog} onClose={() => { setSerialDialog(null); setSerialNotAvailable(false); }} maxWidth="xs" fullWidth>
+      <Dialog open={!!serialDialog} onClose={() => { setSerialDialog(null); setSerialNotAvailable(false); setSerialPhotos([]); }} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ fontWeight: 700 }}>Update Serial Number</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 1 }}>
@@ -1330,10 +1673,89 @@ export default function Equipment() {
               label="Serial Number Not Available"
               sx={{ mt: 2 }}
             />
+
+            <Divider sx={{ my: 2 }} />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                Serial Number Photos ({serialPhotos.length})
+              </Typography>
+              <Button
+                size="small"
+                variant="outlined"
+                component="label"
+                disabled={serialUploading || serialNotAvailable}
+                startIcon={serialUploading ? <CircularProgress size={14} /> : <PhotoCamera />}
+                sx={{ textTransform: 'none', fontWeight: 600 }}
+              >
+                {serialUploading ? 'Uploading...' : '+ Upload Photo'}
+                <input
+                  type="file"
+                  hidden
+                  multiple
+                  accept="image/*"
+                  disabled={serialNotAvailable}
+                  onChange={handleSerialPhotoUpload}
+                />
+              </Button>
+            </Box>
+            {serialNotAvailable && (
+              <Typography variant="caption" sx={{ color: '#64748b', fontStyle: 'italic', display: 'block', mb: 1 }}>
+                Photo upload is disabled when serial number is not available.
+              </Typography>
+            )}
+            {serialPhotos.length === 0 ? (
+              <Typography variant="caption" color="textSecondary" sx={{ display: 'block', fontStyle: 'italic' }}>
+                No serial number photos attached yet.
+              </Typography>
+            ) : (
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                {serialPhotos.map((photo, idx) => (
+                  <Box
+                    key={idx}
+                    sx={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: 1,
+                      border: '1px solid #cbd5e1',
+                      overflow: 'hidden',
+                      position: 'relative',
+                      bgcolor: '#f8fafc',
+                      '&:hover .photo-del': { opacity: 1 }
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={getFileUrl(photo.url)}
+                      alt="Serial"
+                      onClick={() => setPreviewImage(photo)}
+                      sx={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+                    />
+                    <IconButton
+                      size="small"
+                      className="photo-del"
+                      onClick={() => setSerialPhotos(prev => prev.filter((_, i) => i !== idx))}
+                      sx={{
+                        position: 'absolute',
+                        top: 2,
+                        right: 2,
+                        bgcolor: 'rgba(0,0,0,0.6)',
+                        color: '#fff',
+                        p: 0.3,
+                        opacity: 0,
+                        transition: 'opacity 0.2s',
+                        '&:hover': { bgcolor: '#ef4444' }
+                      }}
+                    >
+                      <Close sx={{ fontSize: 14 }} />
+                    </IconButton>
+                  </Box>
+                ))}
+              </Box>
+            )}
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={() => { setSerialDialog(null); setSerialNotAvailable(false); }} color="inherit">Cancel</Button>
+          <Button onClick={() => { setSerialDialog(null); setSerialNotAvailable(false); setSerialPhotos([]); }} color="inherit">Cancel</Button>
           <Button variant="contained" color="primary" disabled={serialSubmitting} onClick={handleSerialSubmit}>
             {serialSubmitting ? 'Saving...' : 'Save Serial Number'}
           </Button>
@@ -1540,7 +1962,7 @@ export default function Equipment() {
       </Dialog>
 
       {/* RBER Dialog */}
-      <Dialog open={!!rberDialog} onClose={() => setRberDialog(null)} maxWidth="xs" fullWidth>
+      <Dialog open={!!rberDialog} onClose={() => { setRberDialog(null); setRberFiles([]); }} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, color: '#ED6C02' }}>Mark as RBER</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -1564,10 +1986,133 @@ export default function Equipment() {
               required
               placeholder="Provide detailed reason (e.g. beyond economical repair)"
             />
+            <Box sx={{ border: '1px dashed #cbd5e1', borderRadius: 1.5, p: 2, bgcolor: '#f8fafc' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569' }}>
+                  Attach Condemnation / RBER Documents
+                </Typography>
+                {rberFiles.length > 0 && (
+                  <Chip size="small" label={`${rberFiles.length} file${rberFiles.length > 1 ? 's' : ''}`} color="warning" variant="outlined" />
+                )}
+              </Box>
+              
+              <Button
+                size="small"
+                variant="outlined"
+                component="label"
+                startIcon={<UploadFile />}
+                sx={{ textTransform: 'none', width: '100%', fontWeight: 600, mb: rberFiles.length > 0 ? 1.5 : 0 }}
+              >
+                {rberFiles.length > 0 ? 'Add More Documents' : 'Choose Documents / Reports'}
+                <input
+                  type="file"
+                  multiple
+                  hidden
+                  accept=".pdf,image/*,.doc,.docx"
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      const filesArray = Array.from(e.target.files);
+                      setRberFiles(prev => [...prev, ...filesArray]);
+                    }
+                  }}
+                />
+              </Button>
+
+              {rberFiles.length > 0 && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  {rberFiles.map((file, idx) => {
+                    const isImg = file.type?.startsWith('image/') || /\.(jpe?g|png|gif|webp|svg)$/i.test(file.name);
+                    const fileObjUrl = URL.createObjectURL(file);
+                    return (
+                      <Box key={idx} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', bgcolor: '#fff', p: 1, borderRadius: 1.5, border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0, flex: 1 }}>
+                          {isImg ? (
+                            <Box
+                              component="img"
+                              src={fileObjUrl}
+                              alt={file.name}
+                              onClick={() => setPreviewImage({ url: fileObjUrl, name: file.name })}
+                              sx={{
+                                width: 44,
+                                height: 44,
+                                objectFit: 'cover',
+                                borderRadius: 1,
+                                border: '1px solid #cbd5e1',
+                                cursor: 'pointer',
+                                flexShrink: 0,
+                                transition: 'transform 0.15s, border-color 0.15s',
+                                '&:hover': { transform: 'scale(1.05)', borderColor: '#ED6C02' }
+                              }}
+                              title="Click to enlarge"
+                            />
+                          ) : (
+                            <Box
+                              onClick={() => window.open(fileObjUrl, '_blank')}
+                              sx={{
+                                width: 44,
+                                height: 44,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                bgcolor: '#f1f5f9',
+                                borderRadius: 1,
+                                border: '1px solid #cbd5e1',
+                                cursor: 'pointer',
+                                flexShrink: 0,
+                                '&:hover': { bgcolor: '#e2e8f0' }
+                              }}
+                              title="Click to view file"
+                            >
+                              {file.name?.toLowerCase().endsWith('.pdf') ? (
+                                <PictureAsPdf color="error" fontSize="small" />
+                              ) : (
+                                <InsertDriveFile color="primary" fontSize="small" />
+                              )}
+                            </Box>
+                          )}
+                          <Box sx={{ minWidth: 0, flex: 1 }}>
+                            <Typography
+                              variant="caption"
+                              noWrap
+                              onClick={() => isImg ? setPreviewImage({ url: fileObjUrl, name: file.name }) : window.open(fileObjUrl, '_blank')}
+                              sx={{
+                                fontWeight: 600,
+                                display: 'block',
+                                color: '#1e293b',
+                                cursor: 'pointer',
+                                '&:hover': { color: '#ED6C02', textDecoration: 'underline' }
+                              }}
+                            >
+                              {file.name}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: '#64748b' }}>
+                              {(file.size / 1024).toFixed(0)} KB {isImg ? '• Click to enlarge' : '• Click to view'}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <IconButton
+                            size="small"
+                            onClick={() => isImg ? setPreviewImage({ url: fileObjUrl, name: file.name }) : window.open(fileObjUrl, '_blank')}
+                            title={isImg ? "Enlarge Image" : "Open File"}
+                            sx={{ color: '#64748b', '&:hover': { color: '#ED6C02' } }}
+                          >
+                            <Visibility fontSize="small" />
+                          </IconButton>
+                          <IconButton size="small" color="error" onClick={() => setRberFiles(prev => prev.filter((_, i) => i !== idx))} title="Remove">
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                    );
+                  })}
+                </Box>
+              )}
+            </Box>
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setRberDialog(null)} color="inherit">Cancel</Button>
+          <Button onClick={() => { setRberDialog(null); setRberFiles([]); }} color="inherit">Cancel</Button>
           <Button onClick={handleRBERSubmit} variant="contained" color="warning" disabled={rberSubmitting}>
             {rberSubmitting ? 'Processing...' : 'Confirm RBER'}
           </Button>
@@ -1693,34 +2238,43 @@ export default function Equipment() {
                 </Table>
               </Grid>
 
-              <Grid item xs={12}>
-                <Divider sx={{ my: 1 }} />
-                <Typography variant="subtitle2" color="primary" sx={{ mb: 1, fontWeight: 700 }}>
-                  Attached Documents
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  {viewDialog?.installation_status === 'Installed' && (
-                    <Button size="small" variant="outlined" color="primary" startIcon={<UploadFile />} onClick={(e) => { e.stopPropagation(); setUploadDocsFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setUploadDocsDialog(viewDialog); }}>
-                      Manage Documents
-                    </Button>
-                  )}
-                  {viewDialog?.equipment_photo_url && (
-                    <Button size="small" variant="outlined" color="primary" startIcon={<PhotoCamera />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(viewDialog.equipment_photo_url), '_blank'); }}>
-                      Eq. Photo
-                    </Button>
-                  )}
-                  {viewDialog?.serial_number_photo_url && (
-                    <Button size="small" variant="outlined" color="secondary" startIcon={<PhotoCamera />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(viewDialog.serial_number_photo_url), '_blank'); }}>
-                      SN Photo
-                    </Button>
-                  )}
-                  {viewDialog?.installation_report_url && (
-                    <Button size="small" variant="outlined" color="success" startIcon={<OpenInNew />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(viewDialog.installation_report_url), '_blank'); }}>
-                      Installation Report
-                    </Button>
-                  )}
-                </Box>
-              </Grid>
+              {(() => {
+                const eqPhotos = (viewDialog.equipment_photos && viewDialog.equipment_photos.length > 0)
+                  ? viewDialog.equipment_photos
+                  : (viewDialog.equipment_photo_url ? [{ url: viewDialog.equipment_photo_url, name: 'Equipment Photo' }] : []);
+                const snPhotos = (viewDialog.serial_number_photos && viewDialog.serial_number_photos.length > 0)
+                  ? viewDialog.serial_number_photos
+                  : (viewDialog.serial_number_photo_url ? [{ url: viewDialog.serial_number_photo_url, name: 'Serial Number Photo' }] : []);
+                const installDocs = (viewDialog.installation_documents && viewDialog.installation_documents.length > 0)
+                  ? viewDialog.installation_documents
+                  : (viewDialog.installation_report_url ? [{ url: viewDialog.installation_report_url, name: 'Installation Report' }] : []);
+                const otherDocs = viewDialog.other_documents || [];
+                const totalCount = eqPhotos.length + snPhotos.length + installDocs.length + otherDocs.length;
+
+                const viewForm = {
+                  ...viewDialog,
+                  equipment_photos: eqPhotos,
+                  serial_number_photos: snPhotos,
+                  installation_documents: installDocs,
+                  other_documents: otherDocs
+                };
+
+                return (
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 1.5 }} />
+                    <Box sx={{ mb: 1.5 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                        Attached Photos & Documents ({totalCount})
+                      </Typography>
+                    </Box>
+                    <EquipmentAttachmentManager
+                      form={viewForm}
+                      readOnly={true}
+                      onPreviewImage={setPreviewImage}
+                    />
+                  </Grid>
+                );
+              })()}
 
               {viewDialog.linked_reagents && viewDialog.linked_reagents.length > 0 && (
                 <Grid item xs={12}>
@@ -2101,6 +2655,19 @@ export default function Equipment() {
                   </Button>
                 </Box>
               </Grid>
+
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
+                  Attached Photos & Documents
+                </Typography>
+                <EquipmentAttachmentManager
+                  form={addForm}
+                  onChange={setAddForm}
+                  isEdit={false}
+                  onPreviewImage={setPreviewImage}
+                />
+              </Grid>
             </Grid>
           </Box>
         </DialogContent>
@@ -2300,31 +2867,15 @@ export default function Equipment() {
 
               <Grid item xs={12}>
                 <Divider sx={{ my: 1 }} />
-                <Typography variant="subtitle2" color="primary" sx={{ mb: 1, fontWeight: 700 }}>
-                  Attached Documents
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
+                  Attached Photos & Documents
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  {editDialog?.installation_status === 'Installed' && (
-                    <Button size="small" variant="outlined" color="primary" startIcon={<UploadFile />} onClick={(e) => { e.stopPropagation(); setUploadDocsFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setUploadDocsDialog(editDialog); }}>
-                      Manage Documents
-                    </Button>
-                  )}
-                  {editDialog?.equipment_photo_url && (
-                    <Button size="small" variant="outlined" color="primary" startIcon={<PhotoCamera />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(editDialog.equipment_photo_url), '_blank'); }}>
-                      Eq. Photo
-                    </Button>
-                  )}
-                  {editDialog?.serial_number_photo_url && (
-                    <Button size="small" variant="outlined" color="secondary" startIcon={<PhotoCamera />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(editDialog.serial_number_photo_url), '_blank'); }}>
-                      SN Photo
-                    </Button>
-                  )}
-                  {editDialog?.installation_report_url && (
-                    <Button size="small" variant="outlined" color="success" startIcon={<OpenInNew />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(editDialog.installation_report_url), '_blank'); }}>
-                      Installation Report
-                    </Button>
-                  )}
-                </Box>
+                <EquipmentAttachmentManager
+                  form={editForm}
+                  onChange={setEditForm}
+                  isEdit={true}
+                  onPreviewImage={setPreviewImage}
+                />
               </Grid>
 
               <Grid item xs={12}>
@@ -2424,16 +2975,40 @@ export default function Equipment() {
             <Typography variant="subtitle2" color="primary">Upload Documents (Optional)</Typography>
 
             <Box>
-              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Installation Report (PDF/Image)</Typography>
-              <TextField type="file" size="small" fullWidth inputProps={{ accept: '.pdf,image/*' }} onChange={e => setInstallFiles({ ...installFiles, file: e.target.files[0] })} />
+              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>
+                Installation Report(s) (PDF/Image) {installFiles.files?.length > 0 && `(${installFiles.files.length} selected)`}
+              </Typography>
+              <TextField
+                type="file"
+                size="small"
+                fullWidth
+                inputProps={{ accept: '.pdf,image/*,.doc,.docx', multiple: true }}
+                onChange={e => setInstallFiles(prev => ({ ...prev, files: Array.from(e.target.files || []) }))}
+              />
             </Box>
             <Box>
-              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Equipment Photo</Typography>
-              <TextField type="file" size="small" fullWidth inputProps={{ accept: 'image/*' }} onChange={e => setInstallFiles({ ...installFiles, equipment_photo: e.target.files[0] })} />
+              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>
+                Equipment Photo(s) {installFiles.equipment_photos?.length > 0 && `(${installFiles.equipment_photos.length} selected)`}
+              </Typography>
+              <TextField
+                type="file"
+                size="small"
+                fullWidth
+                inputProps={{ accept: 'image/*', multiple: true }}
+                onChange={e => setInstallFiles(prev => ({ ...prev, equipment_photos: Array.from(e.target.files || []) }))}
+              />
             </Box>
             <Box>
-              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Serial Number Photo</Typography>
-              <TextField type="file" size="small" fullWidth inputProps={{ accept: 'image/*' }} onChange={e => setInstallFiles({ ...installFiles, serial_number_photo: e.target.files[0] })} />
+              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>
+                Serial Number Photo(s) {installFiles.serial_number_photos?.length > 0 && `(${installFiles.serial_number_photos.length} selected)`}
+              </Typography>
+              <TextField
+                type="file"
+                size="small"
+                fullWidth
+                inputProps={{ accept: 'image/*', multiple: true }}
+                onChange={e => setInstallFiles(prev => ({ ...prev, serial_number_photos: Array.from(e.target.files || []) }))}
+              />
             </Box>
           </Box>
         </DialogContent>
@@ -2446,75 +3021,27 @@ export default function Equipment() {
       </Dialog>
 
       {/* Upload Documents Dialog */}
-      <Dialog open={!!uploadDocsDialog} onClose={() => setUploadDocsDialog(null)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700, color: '#1E293B' }}>Upload Documents: {uploadDocsDialog?.equipment_code}</DialogTitle>
+      <Dialog open={!!uploadDocsDialog} onClose={() => setUploadDocsDialog(null)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, color: '#1E293B' }}>Manage Documents: {uploadDocsDialog?.equipment_code}</DialogTitle>
         <DialogContent dividers>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-            <Alert severity="info" sx={{ mb: 1 }}>Upload missing installation reports or photos for this equipment.</Alert>
-
-            <Box>
-              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Installation Report (PDF/Image)</Typography>
-              <TextField 
-                type="file" 
-                size="small" 
-                fullWidth 
-                inputProps={{ accept: '.pdf,image/*' }} 
-                onChange={e => setUploadDocsFiles({ ...uploadDocsFiles, file: e.target.files[0] })}
-                InputProps={{
-                  endAdornment: uploadDocsDialog?.installation_report_url ? (
-                    <InputAdornment position="end">
-                      <Button size="small" color="success" startIcon={<OpenInNew />} onClick={() => window.open(getFileUrl(uploadDocsDialog.installation_report_url), '_blank')} sx={{ textTransform: 'none', fontWeight: 600, mr: -1 }}>
-                        View Current
-                      </Button>
-                    </InputAdornment>
-                  ) : null
-                }}
+            <Alert severity="info" sx={{ mb: 1 }}>
+              Manage and upload equipment photos, serial number photos, commissioning/installation reports, and user manuals.
+            </Alert>
+            {uploadDocsDialog && (
+              <EquipmentAttachmentManager
+                form={uploadDocsDialog}
+                onChange={setUploadDocsDialog}
+                isEdit={true}
+                onPreviewImage={setPreviewImage}
               />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Equipment Photo</Typography>
-              <TextField 
-                type="file" 
-                size="small" 
-                fullWidth 
-                inputProps={{ accept: 'image/*' }} 
-                onChange={e => setUploadDocsFiles({ ...uploadDocsFiles, equipment_photo: e.target.files[0] })}
-                InputProps={{
-                  endAdornment: uploadDocsDialog?.equipment_photo_url ? (
-                    <InputAdornment position="end">
-                      <Button size="small" color="success" startIcon={<PhotoCamera />} onClick={() => window.open(getFileUrl(uploadDocsDialog.equipment_photo_url), '_blank')} sx={{ textTransform: 'none', fontWeight: 600, mr: -1 }}>
-                        View Current
-                      </Button>
-                    </InputAdornment>
-                  ) : null
-                }}
-              />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Serial Number Photo</Typography>
-              <TextField 
-                type="file" 
-                size="small" 
-                fullWidth 
-                inputProps={{ accept: 'image/*' }} 
-                onChange={e => setUploadDocsFiles({ ...uploadDocsFiles, serial_number_photo: e.target.files[0] })}
-                InputProps={{
-                  endAdornment: uploadDocsDialog?.serial_number_photo_url ? (
-                    <InputAdornment position="end">
-                      <Button size="small" color="success" startIcon={<PhotoCamera />} onClick={() => window.open(getFileUrl(uploadDocsDialog.serial_number_photo_url), '_blank')} sx={{ textTransform: 'none', fontWeight: 600, mr: -1 }}>
-                        View Current
-                      </Button>
-                    </InputAdornment>
-                  ) : null
-                }}
-              />
-            </Box>
+            )}
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setUploadDocsDialog(null)} color="inherit">Cancel</Button>
           <Button onClick={handleUploadDocsSubmit} variant="contained" color="primary" disabled={uploadDocsSubmitting}>
-            {uploadDocsSubmitting ? 'Uploading...' : 'Upload Documents'}
+            {uploadDocsSubmitting ? 'Saving...' : 'Save Documents'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -2533,6 +3060,47 @@ export default function Equipment() {
             {confirmInstallSubmitting ? 'Generating...' : 'Confirm'}
           </Button>
         </DialogActions>
+      </Dialog>
+
+      {/* Photo Preview Lightbox Dialog */}
+      <Dialog
+        open={!!previewImage}
+        onClose={() => setPreviewImage(null)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: { bgcolor: '#0f172a', color: '#fff', borderRadius: 2, overflow: 'hidden' }
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#f8fafc' }} noWrap>
+            {previewImage?.name || 'Photo Preview'}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            {previewImage?.url && (
+              <IconButton size="small" onClick={() => window.open(getFileUrl(previewImage.url), '_blank')} sx={{ color: '#fff' }} title="Open Original in New Tab">
+                <OpenInNew fontSize="small" />
+              </IconButton>
+            )}
+            <IconButton size="small" onClick={() => setPreviewImage(null)} sx={{ color: '#fff' }}>
+              <Close fontSize="small" />
+            </IconButton>
+          </Box>
+        </Box>
+        <DialogContent sx={{ p: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', bgcolor: '#020617', minHeight: 400 }}>
+          {previewImage?.url && (
+            <Box
+              component="img"
+              src={getFileUrl(previewImage.url)}
+              alt={previewImage?.name || 'Preview'}
+              sx={{
+                maxWidth: '100%',
+                maxHeight: '75vh',
+                objectFit: 'contain'
+              }}
+            />
+          )}
+        </DialogContent>
       </Dialog>
 
     </Box>

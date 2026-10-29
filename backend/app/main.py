@@ -63,14 +63,19 @@ from app.routers.auth import limiter
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# CORS middleware — uses origins from config/env, never wildcard
+# CORS middleware — support Vercel, localhost, and custom domains with full header access
+origins = [o for o in CORS_ORIGINS if o != "*"]
+if not origins:
+    origins = ["https://smartcampus2.vercel.app"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
+    allow_origins=origins,
+    allow_origin_regex=r"^https://.*\.vercel\.app$|^https://.*\.onrender\.com$|^http://localhost(:\d+)?$",
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
-    expose_headers=["Content-Disposition"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 

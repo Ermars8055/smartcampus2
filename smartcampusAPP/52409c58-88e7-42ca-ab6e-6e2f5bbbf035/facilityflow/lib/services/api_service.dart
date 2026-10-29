@@ -15,9 +15,9 @@ class ApiService {
 
   ApiService._internal() {
     // Load API URL from .env file
-    String baseUrl = dotenv.env['API_URL'] ?? 'https://sweet-rings-flash.loca.lt';
+    String baseUrl = dotenv.env['API_URL'] ?? 'https://smartcampus2.onrender.com';
     if (baseUrl.isEmpty) {
-      baseUrl = 'https://sweet-rings-flash.loca.lt';
+      baseUrl = 'https://smartcampus2.onrender.com';
     }
 
     dio = Dio(

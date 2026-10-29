@@ -25,7 +25,9 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
   late TabController _tabController;
   final List<String> _tabs = [
     'All',
-    'Open / Assigned',
+    'Registered',
+    'Open',
+    'Assigned',
     'Under Inspection',
     'Material Pending',
     'Pending Approval',
@@ -62,13 +64,15 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
   String? _getApiStatusForTab(int index) {
     switch (index) {
       case 0: return null; // All
-      case 1: return 'Registered,Open,Assigned';
-      case 2: return 'Under Inspection';
-      case 3: return 'Material Pending';
-      case 4: return 'Pending Approval';
-      case 5: return 'In Progress';
-      case 6: return 'Reopened';
-      case 7: return 'Closed,Resolved,Rejected';
+      case 1: return 'Registered';
+      case 2: return 'Open';
+      case 3: return 'Assigned';
+      case 4: return 'Under Inspection';
+      case 5: return 'Material Pending';
+      case 6: return 'Pending Approval';
+      case 7: return 'In Progress';
+      case 8: return 'Reopened';
+      case 9: return 'Closed';
       default: return null;
     }
   }
@@ -300,7 +304,7 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
                                                 fontWeight: FontWeight.bold,
                                                 color: theme.colorScheme.primary,
                                               ),
-                                              overflow: TextOverflow.ellipsis,
+                                              softWrap: true,
                                             ),
                                           ),
                                           const SizedBox(width: 8),
@@ -364,7 +368,7 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
                                             child: Text(
                                               complaint.individualDetailed,
                                               maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
+                                              softWrap: true,
                                               style: theme.textTheme.bodySmall,
                                             ),
                                           ),
@@ -479,10 +483,10 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
                       ),
                     ],
                   ),
-                  // Right side: Log Issue button
+                  // Right side: Raise Complaint button
                   ElevatedButton.icon(
                     icon: const Icon(Icons.add_comment, size: 16),
-                    label: const Text('Log Issue', style: TextStyle(fontSize: 12)),
+                    label: const Text('Raise Complaint', style: TextStyle(fontSize: 12)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
                       foregroundColor: Colors.white,

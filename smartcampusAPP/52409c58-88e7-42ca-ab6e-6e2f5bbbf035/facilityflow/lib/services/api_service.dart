@@ -15,9 +15,9 @@ class ApiService {
 
   ApiService._internal() {
     // Load API URL from .env file
-    String baseUrl = dotenv.env['API_URL'] ?? '';
+    String baseUrl = dotenv.env['API_URL'] ?? 'https://sweet-rings-flash.loca.lt';
     if (baseUrl.isEmpty) {
-      throw Exception('API_URL not found in .env file');
+      baseUrl = 'https://sweet-rings-flash.loca.lt';
     }
 
     dio = Dio(

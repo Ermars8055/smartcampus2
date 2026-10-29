@@ -785,8 +785,9 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final statusColor = _getStatusColor(widget.complaint.status);
-    final formattedDate = DateFormat('dd MMM yyyy, hh:mm a')
-        .format(widget.complaint.complaintDate);
+    final dateStr = DateFormat('dd MMM yyyy').format(widget.complaint.complaintDate);
+    final timeStr = widget.complaint.complaintTime ?? DateFormat('hh:mm a').format(widget.complaint.complaintDate);
+    final formattedDate = '$dateStr, $timeStr';
 
     final appState = AppState.of(context);
     final materialIssues = appState.materialIssues
@@ -797,18 +798,26 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
     final isAssigned = widget.complaint.status == 'Assigned' ||
         (widget.complaint.status == 'Open' &&
             widget.complaint.assignedToName != null);
-    final isRegistered = widget.complaint.status == 'Registered' || (widget.complaint.status == 'Open' && widget.complaint.assignedToName == null);
+    final isRegistered = widget.complaint.status == 'Registered' ||
+        widget.complaint.status == 'Reopened' ||
+        (widget.complaint.status == 'Open' &&
+            widget.complaint.assignedToName == null);
     final isUnderInspection = widget.complaint.status == 'Under Inspection';
     final isMaterialPending = widget.complaint.status == 'Material Pending';
     final isInProgress = widget.complaint.status == 'In Progress';
+    final isPendingApproval = widget.complaint.status == 'Pending Approval';
+    final isClosed = widget.complaint.status == 'Closed';
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.complaint.docketNo,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(widget.complaint.docketNo,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+        ),
       ),
       bottomNavigationBar: _buildBottomActionBar(
-          isRegistered, isAssigned, isUnderInspection, isMaterialPending, isInProgress),
+          isRegistered, isAssigned, isUnderInspection, isMaterialPending, isInProgress, isPendingApproval, isClosed),
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -854,7 +863,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                                 style: theme.textTheme.titleMedium
                                     ?.copyWith(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 12),
-                            Text('LOCATION / ROOM',
+                            Text('LOCATION / DEPT',
                                 style: theme.textTheme.bodySmall
                                     ?.copyWith(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
@@ -1204,9 +1213,8 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                         ),
                       ),
                     ],
-                    if (widget.complaint.status == 'Closed' &&
-                        (widget.complaint.resolutionEntered != null ||
-                            widget.complaint.resolutionRemarks.isNotEmpty)) ...[
+                    if ((widget.complaint.resolutionEntered != null && widget.complaint.resolutionEntered!.isNotEmpty) ||
+                        widget.complaint.resolutionRemarks.isNotEmpty || widget.complaint.closureReason != null) ...[
                       Text('Closure Details',
                           style: theme.textTheme.titleSmall
                               ?.copyWith(color: const Color(0xFF059669))),
@@ -1529,19 +1537,21 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   }
 
   Widget? _buildBottomActionBar(bool isRegistered, bool isAssigned, bool isUnderInspection,
-      bool isMaterialPending, bool isInProgress) {
-    if (!isRegistered && !isAssigned && !isUnderInspection && !isMaterialPending && !isInProgress) {
+      bool isMaterialPending, bool isInProgress, bool isPendingApproval, bool isClosed) {
+    if (!isRegistered && !isAssigned && !isUnderInspection && !isMaterialPending && !isInProgress && !isPendingApproval && !isClosed) {
       return null;
     }
 
     bool canStartRepair = _rwo != null ||
-        _materialIssues.isNotEmpty ||
-        _materialIndents.every((i) => i['status'] == 'Rejected');
+        (_materialIssues.isNotEmpty && _materialIssues.every((i) => i['is_acknowledged'] == true)) ||
+        (_materialIndents.isNotEmpty && _materialIndents.every((i) => i['status'] == 'Rejected'));
     bool canClose = true;
     if (_materialIndents.isNotEmpty) {
       canClose = _materialIndents.every((ind) =>
               ind['status'] == 'Issued' ||
               ind['status'] == 'Rejected' ||
+              ind['status'] == 'Partially Issued' ||
+              ind['status'] == 'Completed' ||
               ind['status'] == 'Closed') &&
           _materialIssues.every((i) => i['is_acknowledged'] == true);
     }
@@ -1630,6 +1640,36 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                       ),
                     ),
                   ),
+                if (isPendingApproval) ...[
+                  if (widget.complaint.adminApprovedById == null)
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showApproveDialog('admin'),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                        icon: const Icon(Icons.thumb_up),
+                        label: const Text('Level 1 Approve'),
+                      ),
+                    ),
+                  if (widget.complaint.adminApprovedById != null && widget.complaint.managerApprovedById == null)
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showApproveDialog('manager'),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                        icon: const Icon(Icons.verified),
+                        label: const Text('Level 2 Approve'),
+                      ),
+                    ),
+                ],
+                if (isClosed) ...[
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _showReopenDialog,
+                      style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                      icon: const Icon(Icons.replay),
+                      label: const Text('Reopen Complaint'),
+                    ),
+                  ),
+                ],
               ],
             ),
             if (isMaterialPending || isInProgress) ...[

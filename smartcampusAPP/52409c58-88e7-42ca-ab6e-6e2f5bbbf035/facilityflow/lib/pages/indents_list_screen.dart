@@ -30,7 +30,8 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
     'Approved',
     'Issued',
     'Partially Issued',
-    'Rejected'
+    'Rejected',
+    'Closed',
   ];
 
   DateTime? _startDate;
@@ -63,6 +64,7 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
       case 'Converted to PO':
         return const Color(0xFF0D9488);
       case 'Cancelled':
+      case 'Closed':
         return const Color(0xFF94A3B8);
       default:
         return const Color(0xFF64748B);

@@ -3,7 +3,7 @@ import secrets
 import logging
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from pydantic import BaseModel
 from typing import Optional, List
 from app.database import get_db
@@ -103,7 +103,16 @@ def login(request: Request, body: LoginRequest, db: Session = Depends(get_db)):
     if not body.workspace:
         raise HTTPException(400, "Workspace ID is required")
 
-    tenant = db.query(Tenant).filter(Tenant.slug == body.workspace.lower()).first()
+    cleaned_ws = body.workspace.lower().strip()
+    normalized_ws = cleaned_ws.replace("-", "").replace("_", "").replace(" ", "")
+    tenant = db.query(Tenant).filter(
+        or_(
+            Tenant.slug == cleaned_ws,
+            Tenant.slug == normalized_ws,
+            func.lower(Tenant.name) == cleaned_ws,
+            func.lower(Tenant.name) == normalized_ws
+        )
+    ).first()
     if not tenant:
         raise HTTPException(404, "Workspace not found")
     if tenant.status != "Active":

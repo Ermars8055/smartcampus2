@@ -19,9 +19,8 @@ def get_menus(db: Session = Depends(get_db), current_user=Depends(get_current_us
         models.MenuItem.parent_id == None,
         models.MenuItem.is_active == True
     )
-    # Tenant isolation: non-platform-admins only see global menus (tenant_id is None)
-    # or their own tenant's menus
-    if not getattr(current_user, '_is_platform_admin', False):
+    # Tenant isolation: if tenant_id exists on MenuItem, filter by it
+    if hasattr(models.MenuItem, 'tenant_id') and not getattr(current_user, '_is_platform_admin', False):
         tid = getattr(current_user, '_tenant_id', None)
         query = query.filter(
             (models.MenuItem.tenant_id == None) | (models.MenuItem.tenant_id == tid)

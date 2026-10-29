@@ -14,10 +14,18 @@ late final SharedPreferences sharedPrefs;
 @NowaGenerated()
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint("Failed to load .env: $e");
+  }
   
-  await Hive.initFlutter();
-  await Hive.openBox('offline_cache');
+  try {
+    await Hive.initFlutter();
+    await Hive.openBox('offline_cache');
+  } catch (e) {
+    debugPrint("Failed to initialize Hive: $e");
+  }
 
   // Firebase is completely removed
   // await Firebase.initializeApp(...);

@@ -29,14 +29,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _initVideo() async {
-    _videoController =
-        VideoPlayerController.asset('assets/videos/login_bg.mp4');
-    await _videoController!.initialize();
-    _videoController!.setLooping(true);
-    _videoController!.setVolume(0.0);
-    _videoController!.play();
-    if (mounted) {
-      setState(() {});
+    try {
+      _videoController =
+          VideoPlayerController.asset('assets/videos/login_bg.mp4');
+      await _videoController!.initialize();
+      _videoController!.setLooping(true);
+      _videoController!.setVolume(0.0);
+      _videoController!.play();
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      debugPrint("Video init failed: $e");
     }
   }
 

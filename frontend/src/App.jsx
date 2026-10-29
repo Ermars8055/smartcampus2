@@ -54,7 +54,8 @@ import DepartmentWiseEquipmentDetailsReport from './pages/DepartmentWiseEquipmen
 import CalibrationDetailReport from './pages/CalibrationDetailReport';
 import EquipmentCountReport from './pages/EquipmentCountReport';
 import PendingGatepassReturnsReport from './pages/PendingGatepassReturnsReport';
-import CallStatusReport from './pages/CallStatusReport';
+import ComplaintStatusReport from './pages/ComplaintStatusReport';
+import EngineerEvaluationReport from './pages/EngineerEvaluationReport';
 import Users from './pages/Users';
 import AuditLogs from './pages/AuditLogs';
 import ApprovalFlows from './pages/ApprovalFlows';
@@ -172,6 +173,7 @@ function AppRoutes() {
         <Route path="gate-passes" element={<GatePasses />} />
         <Route path="inventory" element={<Inventory />} />
         <Route path="intelligence" element={<Intelligence />} />
+        <Route path="reports" element={<Navigate to="/reports/stock" replace />} />
         <Route path="reports/stock" element={<DynamicReport title="Stock Report" description="Download and analyze operational data" endpoint="/api/reports/stock" hasWarehouseFilter={true} downloadFilename="stock_report" />} />
         <Route path="reports/consumption" element={<DynamicReport title="Consumption Report" description="Download and analyze operational data" endpoint="/api/reports/consumption" downloadFilename="consumption_report" />} />
         <Route path="reports/pr-status" element={<DynamicReport title="PR Status Report" description="Download and analyze operational data" endpoint="/api/reports/pr-status" downloadFilename="pr_status_report" />} />
@@ -189,7 +191,9 @@ function AppRoutes() {
         <Route path="reports/department-equipment-details" element={<DepartmentWiseEquipmentDetailsReport />} />
         <Route path="reports/calibration-details" element={<CalibrationDetailReport />} />
         <Route path="reports/pending-gatepass-returns" element={<PendingGatepassReturnsReport />} />
-        <Route path="reports/call-status" element={<CallStatusReport />} />
+        <Route path="reports/complaint-status" element={<ComplaintStatusReport />} />
+        <Route path="reports/call-status" element={<ComplaintStatusReport />} />
+        <Route path="reports/engineer-evaluation" element={<EngineerEvaluationReport />} />
         <Route path="admin" element={<Navigate to="/admin/configurations" replace />} />
         <Route path="admin/users" element={<Users />} />
         <Route path="admin/audit-logs" element={<AuditLogs />} />
@@ -218,6 +222,7 @@ function AppRoutes() {
         <Route path="finance/reports/pending-invoices" element={<VendorPendingInvoicesReport />} />
         <Route path="finance/reports/pending-payments" element={<VendorPendingPaymentsReport />} />
       </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

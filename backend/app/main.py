@@ -31,8 +31,13 @@ log = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Create tables and seed minimal data on startup."""
+    """Create tables, run auto-migrations, and seed minimal data on startup."""
     Base.metadata.create_all(bind=engine)
+    
+    # Run idempotent schema compatibility checks & migrations
+    from app.auto_migration import run_auto_migrations
+    run_auto_migrations()
+
     from app.seed_data import seed_database
     db = SessionLocal()
     try:

@@ -689,8 +689,21 @@ def short_close_po(id: int, body: RejectBody=RejectBody(), db: Session=Depends(g
         import threading
         config = db.query(TenantConfiguration).filter(TenantConfiguration.tenant_id == tenant_id).first()
         notify_roles = config.po_short_close_notify_roles if config and config.po_short_close_notify_roles else []
+        notify_user_ids = config.po_short_close_notify_users if config and config.po_short_close_notify_users else []
+
+        recipient_user_ids = set()
         if notify_roles:
-            users_to_notify = db.query(User).join(UserRoleAssignment).join(Role).filter(User.is_active == True, User.email.isnot(None), Role.name.in_(notify_roles)).distinct().all()
+            role_users = db.query(User.id).join(UserRoleAssignment).join(Role).filter(
+                User.is_active == True, User.email.isnot(None), Role.name.in_(notify_roles)
+            ).all()
+            for ru in role_users:
+                recipient_user_ids.add(ru[0])
+        if notify_user_ids:
+            for uid in notify_user_ids:
+                recipient_user_ids.add(uid)
+
+        if recipient_user_ids:
+            users_to_notify = db.query(User).filter(User.id.in_(list(recipient_user_ids)), User.is_active == True, User.email.isnot(None)).all()
             if users_to_notify:
                 subject, html_body = _build_po_short_close_email_template(po, body.remarks, current_user)
                 for u in users_to_notify:

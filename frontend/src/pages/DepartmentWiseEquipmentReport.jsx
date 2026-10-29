@@ -26,8 +26,7 @@ export default function DepartmentWiseEquipmentReport() {
     categoryId: '',
     institutionId: '',
     departmentIds: [],
-    search: '',
-    onlyWithStock: false
+    search: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -53,9 +52,7 @@ export default function DepartmentWiseEquipmentReport() {
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const params = {
-        only_with_stock: filters.onlyWithStock
-      };
+      const params = {};
       if (filters.categoryId) params.category_id = filters.categoryId;
       if (filters.institutionId) params.institution_id = filters.institutionId;
       if (filters.departmentIds.length > 0) params.department_id = filters.departmentIds.join(',');
@@ -77,8 +74,7 @@ export default function DepartmentWiseEquipmentReport() {
       categoryId: '',
       institutionId: '',
       departmentIds: [],
-      search: '',
-      onlyWithStock: false
+      search: ''
     });
     setReportData(null);
     setPage(0);
@@ -120,7 +116,6 @@ export default function DepartmentWiseEquipmentReport() {
     const catName = categories.find(c => c.id === filters.categoryId)?.name || 'All Categories';
     const depts = filters.departmentIds.length > 0 ? departments.filter(d => filters.departmentIds.includes(d.id)).map(d => d.name).join(', ') : 'All';
     const searchVal = filters.search || 'None';
-    const stockOnlyVal = filters.onlyWithStock ? 'Yes' : 'No';
 
     ws.addRow([]);
     ws.addRow([]);
@@ -144,17 +139,11 @@ export default function DepartmentWiseEquipmentReport() {
     cellDept.value = { richText: [{ font: { bold: true }, text: 'Department: ' }, { text: depts }] };
     cellDept.alignment = { horizontal: 'left', vertical: 'middle' };
 
-    // Search (Center)
-    ws.mergeCells(3, 3, 3, 5);
+    // Search (Center / Right)
+    ws.mergeCells(3, 3, 3, totalCols);
     const cellSearch = ws.getCell(3, 3);
     cellSearch.value = { richText: [{ font: { bold: true }, text: 'Search: ' }, { text: searchVal }] };
-    cellSearch.alignment = { horizontal: 'center', vertical: 'middle' };
-
-    // Stock Only (Right)
-    ws.mergeCells(3, 6, 3, totalCols);
-    const cellStock = ws.getCell(3, 6);
-    cellStock.value = { richText: [{ font: { bold: true }, text: 'Stock Only: ' }, { text: stockOnlyVal }] };
-    cellStock.alignment = { horizontal: 'right', vertical: 'middle' };
+    cellSearch.alignment = { horizontal: 'left', vertical: 'middle' };
 
     ws.getRow(2).height = 20;
     ws.getRow(3).height = 20;
@@ -361,7 +350,7 @@ export default function DepartmentWiseEquipmentReport() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} md={3}>
             <FormControl size="small" fullWidth>
               <InputLabel shrink>Institution</InputLabel>
               <Select displayEmpty value={filters.institutionId} label="Institution" onChange={e => setFilters({ ...filters, institutionId: e.target.value, departmentIds: [] })}>
@@ -416,11 +405,8 @@ export default function DepartmentWiseEquipmentReport() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} md={3}>
             <TextField size="small" fullWidth label="Material Search" placeholder="Code / Name" value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <FormControlLabel control={<Switch size="small" checked={filters.onlyWithStock} onChange={e => setFilters({ ...filters, onlyWithStock: e.target.checked })} />} label={<Typography variant="body2">Show only materials with stock</Typography>} />
           </Grid>
           <Grid item xs={12} sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
             <Button variant="outlined" startIcon={<Refresh />} onClick={handleReset}>Reset Filters</Button>

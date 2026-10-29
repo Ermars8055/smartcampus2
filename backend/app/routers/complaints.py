@@ -652,17 +652,48 @@ def close_complaint(
         )
 
     if complaint.complaint_type == "Installation":
-        if not payload.equipment_photo_url or not payload.installation_report_url:
+        has_eq_photo = bool(payload.equipment_photo_url or (payload.equipment_photos and len(payload.equipment_photos) > 0))
+        has_inst_report = bool(payload.installation_report_url or (payload.installation_documents and len(payload.installation_documents) > 0))
+        if not has_eq_photo or not has_inst_report:
             raise HTTPException(status_code=400, detail="Equipment photo and Installation Report are mandatory for Installation complaints.")
             
-        if not payload.serial_number_photo_url and payload.serial_number != 'NA':
+        has_sn_photo = bool(payload.serial_number_photo_url or (payload.serial_number_photos and len(payload.serial_number_photos) > 0))
+        if not has_sn_photo and payload.serial_number != 'NA':
             raise HTTPException(status_code=400, detail="Serial Number photo is mandatory unless Serial Number is NA.")
         
         if complaint.equipment:
-            complaint.equipment.equipment_photo_url = payload.equipment_photo_url
-            if payload.serial_number_photo_url:
-                complaint.equipment.serial_number_photo_url = payload.serial_number_photo_url
-            complaint.equipment.installation_report_url = payload.installation_report_url
+            eq_photos = list(complaint.equipment.equipment_photos or [])
+            if payload.equipment_photos:
+                for p in payload.equipment_photos:
+                    if p.get('url') and not any(x.get('url') == p.get('url') for x in eq_photos):
+                        eq_photos.append(p)
+            elif payload.equipment_photo_url and not any(p.get('url') == payload.equipment_photo_url for p in eq_photos):
+                eq_photos.append({'url': payload.equipment_photo_url, 'name': 'Installation Equipment Photo'})
+            complaint.equipment.equipment_photos = eq_photos
+            if eq_photos:
+                complaint.equipment.equipment_photo_url = eq_photos[0].get('url')
+
+            sn_photos = list(complaint.equipment.serial_number_photos or [])
+            if payload.serial_number_photos:
+                for p in payload.serial_number_photos:
+                    if p.get('url') and not any(x.get('url') == p.get('url') for x in sn_photos):
+                        sn_photos.append(p)
+            elif payload.serial_number_photo_url and not any(p.get('url') == payload.serial_number_photo_url for p in sn_photos):
+                sn_photos.append({'url': payload.serial_number_photo_url, 'name': 'Installation Serial Photo'})
+            complaint.equipment.serial_number_photos = sn_photos
+            if sn_photos:
+                complaint.equipment.serial_number_photo_url = sn_photos[0].get('url')
+
+            inst_docs = list(complaint.equipment.installation_documents or [])
+            if payload.installation_documents:
+                for d in payload.installation_documents:
+                    if d.get('url') and not any(x.get('url') == d.get('url') for x in inst_docs):
+                        inst_docs.append(d)
+            elif payload.installation_report_url and not any(d.get('url') == payload.installation_report_url for d in inst_docs):
+                inst_docs.append({'url': payload.installation_report_url, 'name': 'Installation Report'})
+            complaint.equipment.installation_documents = inst_docs
+            if inst_docs:
+                complaint.equipment.installation_report_url = inst_docs[0].get('url')
             
             if payload.serial_number and payload.serial_number != 'NA':
                 complaint.equipment.serial_number = payload.serial_number
@@ -683,7 +714,15 @@ def close_complaint(
         complaint.equipment.status = "Under maintenance"
     
     # Add documents
-    for url in payload.document_urls:
+    all_doc_urls = list(payload.document_urls or [])
+    if payload.installation_report_url and payload.installation_report_url not in all_doc_urls:
+        all_doc_urls.append(payload.installation_report_url)
+    if payload.installation_documents:
+        for d in payload.installation_documents:
+            if d.get('url') and d.get('url') not in all_doc_urls:
+                all_doc_urls.append(d.get('url'))
+
+    for url in all_doc_urls:
         doc = ComplaintDocument(
             complaint_id=complaint.id,
             file_url=url,
@@ -691,7 +730,21 @@ def close_complaint(
         )
         db.add(doc)
         
-    for img_url in payload.resolution_image_urls:
+    all_img_urls = list(payload.resolution_image_urls or [])
+    if payload.equipment_photo_url and payload.equipment_photo_url not in all_img_urls:
+        all_img_urls.append(payload.equipment_photo_url)
+    if payload.equipment_photos:
+        for p in payload.equipment_photos:
+            if p.get('url') and p.get('url') not in all_img_urls:
+                all_img_urls.append(p.get('url'))
+    if payload.serial_number_photo_url and payload.serial_number_photo_url not in all_img_urls:
+        all_img_urls.append(payload.serial_number_photo_url)
+    if payload.serial_number_photos:
+        for p in payload.serial_number_photos:
+            if p.get('url') and p.get('url') not in all_img_urls:
+                all_img_urls.append(p.get('url'))
+
+    for img_url in all_img_urls:
         new_img = ComplaintImage(
             complaint_id=complaint.id,
             image_url=img_url,

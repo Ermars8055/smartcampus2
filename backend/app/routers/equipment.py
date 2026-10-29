@@ -9,6 +9,41 @@ from app.schemas import EquipmentItemOut, EquipmentItemCreate, EquipmentUpdateSe
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 import os
 import uuid
+def serialize_equipment(item: EquipmentItem) -> EquipmentItemOut:
+    out = EquipmentItemOut.model_validate(item)
+    mat = item.material
+    grn = item.grn
+    wh = item.warehouse
+    proj = item.project
+    out.material_name = mat.name if mat else None
+    out.material_code = mat.code if mat else None
+    out.grn_number = grn.grn_number if grn else None
+    out.warehouse_name = wh.name if wh else None
+    out.project_name = proj.name if proj else None
+    out.location_name = item.location.location_name if item.location else None
+    out.institution_name = item.institution.name if item.institution else None
+
+    # Fallback normalization from legacy single URLs if array is empty
+    if not out.equipment_photos and item.equipment_photo_url:
+        out.equipment_photos = [{'url': item.equipment_photo_url, 'name': 'Equipment Photo'}]
+    elif not out.equipment_photos:
+        out.equipment_photos = []
+
+    if not out.serial_number_photos and item.serial_number_photo_url:
+        out.serial_number_photos = [{'url': item.serial_number_photo_url, 'name': 'Serial Number Photo'}]
+    elif not out.serial_number_photos:
+        out.serial_number_photos = []
+
+    if not out.installation_documents and item.installation_report_url:
+        out.installation_documents = [{'url': item.installation_report_url, 'name': 'Installation Report'}]
+    elif not out.installation_documents:
+        out.installation_documents = []
+
+    if not out.other_documents:
+        out.other_documents = item.other_documents or []
+
+    return out
+
 router = APIRouter(prefix='/api/equipment', tags=['Equipment'])
 
 @router.get('', response_model=List[EquipmentItemOut])
@@ -37,22 +72,7 @@ def list_equipment(search: Optional[str]=None, tab: Optional[str]='all', warehou
         search_pattern = f'%{search}%'
         q = q.join(EquipmentItem.material).filter(EquipmentItem.equipment_code.ilike(search_pattern) | EquipmentItem.serial_number.ilike(search_pattern) | Material.name.ilike(search_pattern) | Material.code.ilike(search_pattern))
     items = q.order_by(EquipmentItem.created_at.desc()).all()
-    result = []
-    for item in items:
-        mat = item.material
-        grn = item.grn
-        wh = item.warehouse
-        proj = item.project
-        out = EquipmentItemOut.model_validate(item)
-        out.material_name = mat.name if mat else None
-        out.material_code = mat.code if mat else None
-        out.grn_number = grn.grn_number if grn else None
-        out.warehouse_name = wh.name if wh else None
-        out.project_name = proj.name if proj else None
-        out.location_name = item.location.location_name if item.location else None
-        out.institution_name = item.institution.name if item.institution else None
-        result.append(out)
-    return result
+    return [serialize_equipment(item) for item in items]
 
 @router.post('', response_model=EquipmentItemOut)
 def create_equipment(item_in: EquipmentItemCreate, db: Session=Depends(get_db), current_user: User=Depends(require_permission('equipment', 'create')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
@@ -116,23 +136,19 @@ def create_equipment(item_in: EquipmentItemCreate, db: Session=Depends(get_db), 
     if new_item.requires_installation:
         new_item.installation_status = 'Pending Installation'
         new_item.status = 'Pending Installation'
+    if new_item.equipment_photos and not new_item.equipment_photo_url:
+        new_item.equipment_photo_url = new_item.equipment_photos[0].get('url')
+    if new_item.serial_number_photos and not new_item.serial_number_photo_url:
+        new_item.serial_number_photo_url = new_item.serial_number_photos[0].get('url')
+    if new_item.installation_documents and not new_item.installation_report_url:
+        new_item.installation_report_url = new_item.installation_documents[0].get('url')
     db.add(new_item)
     db.commit()
     db.refresh(new_item)
     history = EquipmentHistory(equipment_id=new_item.id, event_type='Manual Registration', description='Equipment added manually', created_by_id=current_user.id)
     db.add(history)
     db.commit()
-    mat = new_item.material
-    wh = new_item.warehouse
-    proj = new_item.project
-    out = EquipmentItemOut.model_validate(new_item)
-    out.material_name = mat.name if mat else None
-    out.material_code = mat.code if mat else None
-    out.warehouse_name = wh.name if wh else None
-    out.project_name = proj.name if proj else None
-    out.location_name = new_item.location.location_name if new_item.location else None
-    out.institution_name = new_item.institution.name if new_item.institution else None
-    return out
+    return serialize_equipment(new_item)
 
 @router.get('/pm-schedule', response_model=List[PMScheduleOut])
 def get_pm_schedule(db: Session=Depends(get_db), current_user: User=Depends(require_permission('equipment', 'read')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
@@ -282,11 +298,7 @@ def get_equipment_item(id: int, db: Session=Depends(get_db), current_user: User=
     item = db.query(EquipmentItem).filter(EquipmentItem.id == id, EquipmentItem.tenant_id == tenant_id, EquipmentItem.site_id == site_id).first()
     if not item:
         raise HTTPException(status_code=404, detail='Equipment item not found')
-    mat = item.material
-    grn = item.grn
-    wh = item.warehouse
-    proj = item.project
-    return EquipmentItemOut(id=item.id, equipment_code=item.equipment_code, material_id=item.material_id, grn_id=item.grn_id, grn_item_id=item.grn_item_id, serial_number=item.serial_number, serial_number_status=item.serial_number_status or 'Pending Update', is_biomedical=item.is_biomedical or False, requires_installation=item.requires_installation or False, installation_status=item.installation_status or 'Not Required', installation_date=item.installation_date, installation_report_url=item.installation_report_url, installation_remarks=item.installation_remarks, warehouse_id=item.warehouse_id, project_id=item.project_id, status=item.status or 'In Store', created_at=item.created_at, updated_at=item.updated_at, material_name=mat.name if mat else None, material_code=mat.code if mat else None, grn_number=grn.grn_number if grn else None, warehouse_name=wh.name if wh else None, project_name=proj.name if proj else None)
+    return serialize_equipment(item)
 
 @router.put('/{id}', response_model=EquipmentItemOut)
 def update_equipment_item(id: int, payload: EquipmentUpdate, db: Session=Depends(get_db), current_user: User=Depends(require_permission('equipment', 'update')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
@@ -296,6 +308,13 @@ def update_equipment_item(id: int, payload: EquipmentUpdate, db: Session=Depends
     update_data = payload.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(item, key, value)
+
+    if 'equipment_photos' in update_data:
+        item.equipment_photo_url = item.equipment_photos[0].get('url') if item.equipment_photos else None
+    if 'serial_number_photos' in update_data:
+        item.serial_number_photo_url = item.serial_number_photos[0].get('url') if item.serial_number_photos else None
+    if 'installation_documents' in update_data:
+        item.installation_report_url = item.installation_documents[0].get('url') if item.installation_documents else None
         
     if 'requires_installation' in update_data:
         if item.requires_installation:
@@ -312,11 +331,7 @@ def update_equipment_item(id: int, payload: EquipmentUpdate, db: Session=Depends
     item.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(item)
-    mat = item.material
-    grn = item.grn
-    wh = item.warehouse
-    proj = item.project
-    return EquipmentItemOut(id=item.id, equipment_code=item.equipment_code, material_id=item.material_id, grn_id=item.grn_id, grn_item_id=item.grn_item_id, serial_number=item.serial_number, serial_number_status=item.serial_number_status or 'Pending Update', is_biomedical=item.is_biomedical or False, requires_installation=item.requires_installation or False, installation_status=item.installation_status or 'Not Required', installation_date=item.installation_date, installation_report_url=item.installation_report_url, installation_remarks=item.installation_remarks, warehouse_id=item.warehouse_id, project_id=item.project_id, status=item.status or 'In Store', created_at=item.created_at, updated_at=item.updated_at, material_name=mat.name if mat else None, material_code=mat.code if mat else None, grn_number=grn.grn_number if grn else None, warehouse_name=wh.name if wh else None, project_name=proj.name if proj else None, make=item.make, model=item.model, equipment_cost=item.equipment_cost, equipment_category=item.equipment_category, warranty_available=item.warranty_available, warranty_expiry_date=item.warranty_expiry_date, amc_cmc_end_date=item.amc_cmc_end_date, amc_po_number=item.amc_po_number, amc_cost=item.amc_cost, pm_required=item.pm_required, calibration_required=item.calibration_required, battery_details=item.battery_details)
+    return serialize_equipment(item)
 
 @router.put('/{id}/serial-number')
 def update_serial_number(id: int, payload: EquipmentUpdateSerial, db: Session=Depends(get_db), current_user: User=Depends(require_permission('equipment', 'update')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
@@ -340,12 +355,34 @@ def update_serial_number(id: int, payload: EquipmentUpdateSerial, db: Session=De
     old_sn = item.serial_number
     item.serial_number = sn
     item.serial_number_status = 'Captured'
+    if payload.serial_number_photos is not None:
+        item.serial_number_photos = payload.serial_number_photos
+        item.serial_number_photo_url = item.serial_number_photos[0].get('url') if item.serial_number_photos else None
+    elif payload.serial_number_photo_url:
+        item.serial_number_photo_url = payload.serial_number_photo_url
+        item.serial_number_photos = [{'url': payload.serial_number_photo_url, 'name': 'Serial Number Photo'}]
     item.updated_at = datetime.utcnow()
     db.commit()
-    return {'message': 'Serial number updated successfully', 'serial_number': item.serial_number}
+    return {'message': 'Serial number updated successfully', 'serial_number': item.serial_number, 'serial_number_photos': item.serial_number_photos or []}
 
 @router.post('/{id}/installation')
-def complete_installation(id: int, serial_number: str=Form(...), installation_date: str=Form(...), installation_remarks: Optional[str]=Form(None), installed_by: str=Form(...), contact_number: str=Form(...), location_id: int=Form(...), file: UploadFile=File(...), equipment_photo: UploadFile=File(...), serial_number_photo: UploadFile=File(...), db: Session=Depends(get_db), current_user: User=Depends(require_permission('equipment', 'update')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+def complete_installation(id: int, 
+                          serial_number: str=Form(...), 
+                          installation_date: str=Form(...), 
+                          installation_remarks: Optional[str]=Form(None), 
+                          installed_by: str=Form(...), 
+                          contact_number: str=Form(...), 
+                          location_id: int=Form(...), 
+                          file: Optional[UploadFile]=File(None), 
+                          equipment_photo: Optional[UploadFile]=File(None), 
+                          serial_number_photo: Optional[UploadFile]=File(None), 
+                          files: Optional[List[UploadFile]]=File(None),
+                          equipment_photos: Optional[List[UploadFile]]=File(None),
+                          serial_number_photos: Optional[List[UploadFile]]=File(None),
+                          db: Session=Depends(get_db), 
+                          current_user: User=Depends(require_permission('equipment', 'update')), 
+                          tenant_id: int=Depends(get_tenant_id), 
+                          site_id: int=Depends(get_site_id)):
     item = db.query(EquipmentItem).filter(EquipmentItem.id == id, EquipmentItem.tenant_id == tenant_id, EquipmentItem.site_id == site_id).first()
     if not item:
         raise HTTPException(status_code=404, detail='Equipment item not found')
@@ -380,12 +417,48 @@ def complete_installation(id: int, serial_number: str=Form(...), installation_da
         with open(file_path, 'wb') as f:
             f.write(contents)
         return f'/api/{file_path}'
-    if file:
-        item.installation_report_url = handle_upload(file, 'installation_reports')
-    if equipment_photo:
-        item.equipment_photo_url = handle_upload(equipment_photo, 'equipment_photos')
-    if serial_number_photo:
-        item.serial_number_photo_url = handle_upload(serial_number_photo, 'serial_number_photos')
+
+    docs = list(item.installation_documents or [])
+    if file and getattr(file, 'filename', None):
+        url = handle_upload(file, 'installation_reports')
+        item.installation_report_url = url
+        docs.append({'url': url, 'name': file.filename or 'Installation Report'})
+    if files:
+        for f in files:
+            if getattr(f, 'filename', None):
+                url = handle_upload(f, 'installation_reports')
+                if not item.installation_report_url:
+                    item.installation_report_url = url
+                docs.append({'url': url, 'name': f.filename or 'Installation Report'})
+    item.installation_documents = docs
+
+    photos = list(item.equipment_photos or [])
+    if equipment_photo and getattr(equipment_photo, 'filename', None):
+        url = handle_upload(equipment_photo, 'equipment_photos')
+        item.equipment_photo_url = url
+        photos.append({'url': url, 'name': equipment_photo.filename or 'Equipment Photo'})
+    if equipment_photos:
+        for ep in equipment_photos:
+            if getattr(ep, 'filename', None):
+                url = handle_upload(ep, 'equipment_photos')
+                if not item.equipment_photo_url:
+                    item.equipment_photo_url = url
+                photos.append({'url': url, 'name': ep.filename or 'Equipment Photo'})
+    item.equipment_photos = photos
+
+    sn_photos = list(item.serial_number_photos or [])
+    if serial_number_photo and getattr(serial_number_photo, 'filename', None):
+        url = handle_upload(serial_number_photo, 'serial_number_photos')
+        item.serial_number_photo_url = url
+        sn_photos.append({'url': url, 'name': serial_number_photo.filename or 'Serial Number Photo'})
+    if serial_number_photos:
+        for snp in serial_number_photos:
+            if getattr(snp, 'filename', None):
+                url = handle_upload(snp, 'serial_number_photos')
+                if not item.serial_number_photo_url:
+                    item.serial_number_photo_url = url
+                sn_photos.append({'url': url, 'name': snp.filename or 'Serial Number Photo'})
+    item.serial_number_photos = sn_photos
     item.installation_status = 'Installed'
     item.status = 'Operational'
     item.updated_at = datetime.utcnow()
@@ -399,6 +472,7 @@ def upload_installation_docs(id: int,
                              file: Optional[UploadFile] = File(None), 
                              equipment_photo: Optional[UploadFile] = File(None), 
                              serial_number_photo: Optional[UploadFile] = File(None), 
+                             other_document: Optional[UploadFile] = File(None),
                              db: Session = Depends(get_db), 
                              current_user: User = Depends(require_permission('equipment', 'update')), 
                              tenant_id: int = Depends(get_tenant_id), 
@@ -406,12 +480,9 @@ def upload_installation_docs(id: int,
     item = db.query(EquipmentItem).filter(EquipmentItem.id == id, EquipmentItem.tenant_id == tenant_id, EquipmentItem.site_id == site_id).first()
     if not item:
         raise HTTPException(status_code=404, detail='Equipment item not found')
-    
-    if item.installation_status != 'Installed':
-        raise HTTPException(status_code=400, detail='Can only upload documents for installed equipment using this endpoint')
 
     def handle_upload(upload_file: UploadFile, folder: str):
-        allowed_types = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'image/webp']
+        allowed_types = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
         if upload_file.content_type not in allowed_types:
             raise HTTPException(status_code=400, detail=f'Invalid file type for {folder}')
         contents = upload_file.file.read()
@@ -428,13 +499,31 @@ def upload_installation_docs(id: int,
 
     uploaded = False
     if file:
-        item.installation_report_url = handle_upload(file, 'installation_reports')
+        url = handle_upload(file, 'installation_reports')
+        item.installation_report_url = url
+        docs = list(item.installation_documents or [])
+        docs.append({'url': url, 'name': file.filename or 'Installation Report'})
+        item.installation_documents = docs
         uploaded = True
     if equipment_photo:
-        item.equipment_photo_url = handle_upload(equipment_photo, 'equipment_photos')
+        url = handle_upload(equipment_photo, 'equipment_photos')
+        item.equipment_photo_url = url
+        photos = list(item.equipment_photos or [])
+        photos.append({'url': url, 'name': equipment_photo.filename or 'Equipment Photo'})
+        item.equipment_photos = photos
         uploaded = True
     if serial_number_photo:
-        item.serial_number_photo_url = handle_upload(serial_number_photo, 'serial_number_photos')
+        url = handle_upload(serial_number_photo, 'serial_number_photos')
+        item.serial_number_photo_url = url
+        sn_photos = list(item.serial_number_photos or [])
+        sn_photos.append({'url': url, 'name': serial_number_photo.filename or 'Serial Number Photo'})
+        item.serial_number_photos = sn_photos
+        uploaded = True
+    if other_document:
+        url = handle_upload(other_document, 'other_documents')
+        other_docs = list(item.other_documents or [])
+        other_docs.append({'url': url, 'name': other_document.filename or 'Document'})
+        item.other_documents = other_docs
         uploaded = True
         
     if not uploaded:
@@ -446,7 +535,7 @@ def upload_installation_docs(id: int,
     db.add(EquipmentHistory(
         equipment_id=item.id, 
         event_type='Document Upload', 
-        description='Installation documents uploaded', 
+        description='Equipment documents/photos uploaded', 
         created_by_id=current_user.id
     ))
     db.commit()
@@ -454,7 +543,11 @@ def upload_installation_docs(id: int,
         'message': 'Documents uploaded successfully', 
         'installation_report_url': item.installation_report_url,
         'equipment_photo_url': item.equipment_photo_url,
-        'serial_number_photo_url': item.serial_number_photo_url
+        'serial_number_photo_url': item.serial_number_photo_url,
+        'equipment_photos': item.equipment_photos,
+        'serial_number_photos': item.serial_number_photos,
+        'installation_documents': item.installation_documents,
+        'other_documents': item.other_documents
     }
 
 @router.post('/{id}/request-installation')

@@ -733,34 +733,40 @@ function ModuleGroup({ mod, expanded, onToggleExpand, isChecked, togglePerm, isE
                           );
                         })}
                       </TableRow>
-                      {child.extendedActions && (
+                      {child.extendedActions && child.extendedActions.length > 0 && (
                         <TableRow>
-                          <TableCell colSpan={5} sx={{ pt: 0, pb: 1, pl: 6, pr: 2, borderBottom: '1px solid #F1F5F9' }}>
-                            <Box sx={{ p: 1.5, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0', display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-                              <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mr: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>Workflow Actions:</Typography>
-                              {child.extendedActions.map(ext => {
-                                const extChecked = isExtChecked(child.resource, ext.key);
-                                return (
-                                  <Chip
-                                    key={ext.key}
-                                    label={ext.label}
-                                    size="small"
-                                    onClick={() => toggleExtPerm(child.resource, ext.key)}
-                                    icon={extChecked ? <CheckBoxIcon fontSize="small" /> : <CheckBoxOutlineBlank fontSize="small" />}
-                                    sx={{
-                                      bgcolor: extChecked ? `${ext.color}15` : '#fff',
-                                      color: extChecked ? ext.color : '#64748B',
-                                      borderColor: extChecked ? ext.color : '#CBD5E1',
-                                      borderWidth: 1,
-                                      borderStyle: 'solid',
-                                      fontWeight: extChecked ? 700 : 500,
-                                      transition: 'all 0.2s',
-                                      '&:hover': { bgcolor: extChecked ? `${ext.color}25` : '#F1F5F9' },
-                                      '& .MuiChip-icon': { color: 'inherit', ml: 0.5 }
-                                    }}
-                                  />
-                                );
-                              })}
+                          <TableCell colSpan={5} sx={{ pt: 0, pb: 1.5, pl: 6, pr: 2, borderBottom: '1px solid #F1F5F9' }}>
+                            <Box sx={{ p: 1.8, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0' }}>
+                              <Typography variant="caption" sx={{ fontWeight: 700, color: '#475569', display: 'block', mb: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                {child.resource === 'configurations' ? 'Configurations Module Permissions / Workflow Actions:' : 'Workflow Actions:'}
+                              </Typography>
+                              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'center' }}>
+                                {child.extendedActions.map(ext => {
+                                  const extChecked = isExtChecked(child.resource, ext.key);
+                                  return (
+                                    <FormControlLabel
+                                      key={ext.key}
+                                      control={
+                                        <Checkbox
+                                          size="small"
+                                          checked={extChecked}
+                                          onChange={() => toggleExtPerm(child.resource, ext.key)}
+                                          sx={{
+                                            color: '#94A3B8',
+                                            '&.Mui-checked': { color: ext.color || '#2563EB' }
+                                          }}
+                                        />
+                                      }
+                                      label={
+                                        <Typography sx={{ fontSize: '0.82rem', fontWeight: extChecked ? 600 : 400, color: extChecked ? '#1E293B' : '#475569' }}>
+                                          {ext.label}
+                                        </Typography>
+                                      }
+                                      sx={{ m: 0 }}
+                                    />
+                                  );
+                                })}
+                              </Box>
                             </Box>
                           </TableCell>
                         </TableRow>

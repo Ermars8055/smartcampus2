@@ -3,7 +3,7 @@ import {
   Box, Typography, Paper, Grid, Divider, Chip, Button, IconButton, Dialog, DialogTitle,
   DialogContent, DialogActions, TextField, CircularProgress, Snackbar, Alert, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Switch, FormControlLabel, Stepper, Step, StepLabel, Select, MenuItem, FormControl, InputLabel, Checkbox
 } from '@mui/material';
-import { ArrowBack, CheckCircle, Assignment, PhotoCamera, Close, AddShoppingCart, Build, Search, VerifiedUser, Cancel, Replay, Add, Print, Save, CameraAlt, PhotoLibrary } from '@mui/icons-material';
+import { ArrowBack, CheckCircle, Assignment, PhotoCamera, Close, AddShoppingCart, Build, Search, VerifiedUser, Cancel, Replay, Add, Print, Save, CameraAlt, PhotoLibrary, PictureAsPdf, InsertDriveFile } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import api, { getFileUrl } from '../services/api';
 import dayjs from 'dayjs';
@@ -56,13 +56,13 @@ export default function ComplaintDetail() {
   const [pmChecklistData, setPmChecklistData] = useState({});
   const isPM = complaint?.complaint_type?.includes('PM') || complaint?.complaint_type?.includes('Preventive Maintenance') || complaint?.is_pm_calibration_call;
   
-  // Installation Specific States
-  const [equipmentPhoto, setEquipmentPhoto] = useState(null);
+  // Installation & Closure Specific States
+  const [equipmentPhotos, setEquipmentPhotos] = useState([]);
   const [serialNumber, setSerialNumber] = useState('');
   const [noSerialNumber, setNoSerialNumber] = useState(false);
-  const [serialNumberPhoto, setSerialNumberPhoto] = useState(null);
-  const [installationReport, setInstallationReport] = useState(null);
-  const [signedReport, setSignedReport] = useState(null);
+  const [serialNumberPhotos, setSerialNumberPhotos] = useState([]);
+  const [installationReports, setInstallationReports] = useState([]);
+  const [signedReports, setSignedReports] = useState([]);
   const [isPrinting, setIsPrinting] = useState(false);
   const printableReportRef = useRef(null);
 
@@ -274,37 +274,39 @@ export default function ComplaintDetail() {
         documentUrls.push(uploadRes.data.url);
       }
       
-      if (signedReport) {
+      for (const file of signedReports) {
         const formDataUpload = new FormData();
-        formDataUpload.append('file', signedReport);
+        formDataUpload.append('file', file);
         const uploadRes = await api.post('/api/upload?folder=complaints', formDataUpload, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
         documentUrls.push(uploadRes.data.url);
       }
 
-      let equipmentPhotoUrl = null;
-      let serialNumberPhotoUrl = null;
-      let installationReportUrl = null;
+      const uploadedEqPhotos = [];
+      const uploadedSnPhotos = [];
+      const uploadedInstDocs = [];
 
       if (complaint?.complaint_type === 'Installation') {
-        if (equipmentPhoto) {
+        for (const file of equipmentPhotos) {
           const fd = new FormData();
-          fd.append('file', equipmentPhoto);
-          const uploadRes = await api.post('/api/upload?folder=complaints', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-          equipmentPhotoUrl = uploadRes.data.url;
+          fd.append('file', file);
+          const uploadRes = await api.post('/api/upload?folder=equipment_photos', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+          uploadedEqPhotos.push({ url: uploadRes.data.url, name: file.name, size: file.size });
         }
-        if (serialNumberPhoto) {
-          const fd = new FormData();
-          fd.append('file', serialNumberPhoto);
-          const uploadRes = await api.post('/api/upload?folder=complaints', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-          serialNumberPhotoUrl = uploadRes.data.url;
+        if (!noSerialNumber) {
+          for (const file of serialNumberPhotos) {
+            const fd = new FormData();
+            fd.append('file', file);
+            const uploadRes = await api.post('/api/upload?folder=serial_number_photos', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+            uploadedSnPhotos.push({ url: uploadRes.data.url, name: file.name, size: file.size });
+          }
         }
-        if (installationReport) {
+        for (const file of installationReports) {
           const fd = new FormData();
-          fd.append('file', installationReport);
-          const uploadRes = await api.post('/api/upload?folder=complaints', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-          installationReportUrl = uploadRes.data.url;
+          fd.append('file', file);
+          const uploadRes = await api.post('/api/upload?folder=installation_reports', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+          uploadedInstDocs.push({ url: uploadRes.data.url, name: file.name, size: file.size });
         }
       }
 
@@ -321,10 +323,13 @@ export default function ComplaintDetail() {
       };
 
       if (complaint?.complaint_type === 'Installation') {
-        payload.equipment_photo_url = equipmentPhotoUrl;
-        payload.serial_number_photo_url = serialNumberPhotoUrl;
-        payload.installation_report_url = installationReportUrl;
-        payload.serial_number = noSerialNumber ? 'NA' : serialNumber;
+        payload.equipment_photos = uploadedEqPhotos;
+        payload.serial_number_photos = uploadedSnPhotos;
+        payload.installation_documents = uploadedInstDocs;
+        payload.equipment_photo_url = uploadedEqPhotos[0]?.url || null;
+        payload.serial_number_photo_url = uploadedSnPhotos[0]?.url || null;
+        payload.installation_report_url = uploadedInstDocs[0]?.url || null;
+        payload.serial_number = noSerialNumber ? 'NA' : (serialNumber || '').trim();
       }
 
       await api.post(`/api/complaints/${id}/close`, payload);
@@ -472,6 +477,14 @@ export default function ComplaintDetail() {
                     setCompletionDate(complaint.completion_date || dayjs().format('YYYY-MM-DD'));
                     setCompletionTime(complaint.completion_time || dayjs().format('HH:mm'));
                     setPmChecklistData(complaint.pm_checklist_data || {});
+                    setEquipmentPhotos([]);
+                    setSerialNumberPhotos([]);
+                    setInstallationReports([]);
+                    setSignedReports([]);
+                    setClosureDocs([]);
+                    setResolutionImages([]);
+                    setNoSerialNumber(false);
+                    setSerialNumber(complaint.equipment?.serial_number || '');
                     setResolveDialogOpen(true);
                   }} disabled={!canClose}>
                     Initiate Closure Workflow
@@ -606,7 +619,7 @@ export default function ComplaintDetail() {
 
           {postRepairImages.length > 0 && (
             <Paper sx={{ p: 3, mb: 3 }}>
-              <Typography variant="h6" sx={{ color: '#1E3A8A', mb: 2 }}>Post-Repair Photos</Typography>
+              <Typography variant="h6" sx={{ color: '#1E3A8A', mb: 2 }}>Equipment / Post-Repair Photos</Typography>
               <Grid container spacing={2}>
                 {postRepairImages.map((img) => (
                   <Grid item xs={6} sm={4} key={img.id}>
@@ -920,7 +933,7 @@ export default function ComplaintDetail() {
       </Dialog>
 
       {/* Resolve Dialog */}
-      <Dialog open={resolveDialogOpen} onClose={() => !actionLoading && setResolveDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={resolveDialogOpen} onClose={() => !actionLoading && setResolveDialogOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>Initiate Closure Workflow</DialogTitle>
         <DialogContent>
           <TextField
@@ -982,8 +995,439 @@ export default function ComplaintDetail() {
               </Grid>
             </Grid>
           )}
+          
+          {isPM && (
+             <PMChecklistForm data={pmChecklistData} onChange={setPmChecklistData} />
+          )}
 
-          <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+          {complaint?.complaint_type === 'Installation' ? (
+            <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, bgcolor: '#F8FAFC', mb: 2 }}>
+              <Typography variant="subtitle2" sx={{ mb: 2, textAlign: 'center', fontWeight: 700, color: '#1e293b' }}>
+                Mandatory Installation Documentation
+              </Typography>
+              
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                {/* 1. Equipment Photos */}
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 600 }}>
+                      1. Equipment Photo(s) * {equipmentPhotos.length > 0 && `(${equipmentPhotos.length})`}
+                    </Typography>
+                    <Button component="label" variant="outlined" size="small" startIcon={<PhotoCamera />} sx={{ textTransform: 'none', fontWeight: 600 }}>
+                      {equipmentPhotos.length > 0 ? '+ Add More Photos' : 'Upload from Camera / Gallery'}
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        hidden
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            setEquipmentPhotos(prev => [...prev, ...Array.from(e.target.files)]);
+                          }
+                        }}
+                      />
+                    </Button>
+                  </Box>
+                  {equipmentPhotos.length > 0 ? (
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                      {equipmentPhotos.map((file, idx) => {
+                        const objUrl = URL.createObjectURL(file);
+                        return (
+                          <Box
+                            key={idx}
+                            sx={{
+                              width: 70,
+                              height: 70,
+                              borderRadius: 1.5,
+                              border: '1px solid #cbd5e1',
+                              overflow: 'hidden',
+                              position: 'relative',
+                              bgcolor: '#fff',
+                              boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
+                              '&:hover .photo-del': { opacity: 1 }
+                            }}
+                          >
+                            <Box
+                              component="img"
+                              src={objUrl}
+                              alt={file.name}
+                              onClick={() => setPreviewDialog({ open: true, url: objUrl })}
+                              sx={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+                              title="Click to enlarge"
+                            />
+                            <IconButton
+                              size="small"
+                              className="photo-del"
+                              onClick={() => setEquipmentPhotos(prev => prev.filter((_, i) => i !== idx))}
+                              sx={{
+                                position: 'absolute',
+                                top: 2,
+                                right: 2,
+                                bgcolor: 'rgba(0,0,0,0.6)',
+                                color: '#fff',
+                                p: 0.3,
+                                opacity: 0,
+                                transition: 'opacity 0.2s',
+                                '&:hover': { bgcolor: '#ef4444' }
+                              }}
+                              title="Remove"
+                            >
+                              <Close sx={{ fontSize: 13 }} />
+                            </IconButton>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  ) : (
+                    <Typography variant="caption" sx={{ color: '#94a3b8', fontStyle: 'italic' }}>
+                      At least one equipment photo is mandatory.
+                    </Typography>
+                  )}
+                </Box>
+
+                {/* 2. Serial Number */}
+                <Box>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1, fontWeight: 600 }}>2. Serial Number *</Typography>
+                  <TextField 
+                    size="small" 
+                    fullWidth 
+                    placeholder="Enter Serial Number" 
+                    value={noSerialNumber ? 'NA' : serialNumber} 
+                    onChange={(e) => setSerialNumber(e.target.value)} 
+                    disabled={noSerialNumber} 
+                    sx={{ mb: 1, bgcolor: '#fff' }}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={noSerialNumber}
+                        onChange={(e) => {
+                          setNoSerialNumber(e.target.checked);
+                          if (e.target.checked) {
+                            setSerialNumber('NA');
+                          }
+                        }}
+                        size="small"
+                      />
+                    }
+                    label={<Typography variant="body2">No Serial Number Available (NA)</Typography>}
+                  />
+                </Box>
+
+                {/* 3. Serial Number Photos */}
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 600 }}>
+                      3. Serial Number Photo(s) * {serialNumberPhotos.length > 0 && `(${serialNumberPhotos.length})`}
+                    </Typography>
+                    <Button
+                      component="label"
+                      variant="outlined"
+                      size="small"
+                      disabled={noSerialNumber}
+                      startIcon={<PhotoCamera />}
+                      sx={{ textTransform: 'none', fontWeight: 600 }}
+                    >
+                      {serialNumberPhotos.length > 0 ? '+ Add More Photos' : 'Upload from Camera / Gallery'}
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        hidden
+                        disabled={noSerialNumber}
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            setSerialNumberPhotos(prev => [...prev, ...Array.from(e.target.files)]);
+                          }
+                        }}
+                      />
+                    </Button>
+                  </Box>
+                  {noSerialNumber ? (
+                    <Typography variant="caption" sx={{ color: '#64748b', fontStyle: 'italic', display: 'block' }}>
+                      Serial number photo upload is disabled when serial number is not available.
+                    </Typography>
+                  ) : serialNumberPhotos.length > 0 ? (
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                      {serialNumberPhotos.map((file, idx) => {
+                        const objUrl = URL.createObjectURL(file);
+                        return (
+                          <Box
+                            key={idx}
+                            sx={{
+                              width: 70,
+                              height: 70,
+                              borderRadius: 1.5,
+                              border: '1px solid #cbd5e1',
+                              overflow: 'hidden',
+                              position: 'relative',
+                              bgcolor: '#fff',
+                              boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
+                              '&:hover .photo-del': { opacity: 1 }
+                            }}
+                          >
+                            <Box
+                              component="img"
+                              src={objUrl}
+                              alt={file.name}
+                              onClick={() => setPreviewDialog({ open: true, url: objUrl })}
+                              sx={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+                              title="Click to enlarge"
+                            />
+                            <IconButton
+                              size="small"
+                              className="photo-del"
+                              onClick={() => setSerialNumberPhotos(prev => prev.filter((_, i) => i !== idx))}
+                              sx={{
+                                position: 'absolute',
+                                top: 2,
+                                right: 2,
+                                bgcolor: 'rgba(0,0,0,0.6)',
+                                color: '#fff',
+                                p: 0.3,
+                                opacity: 0,
+                                transition: 'opacity 0.2s',
+                                '&:hover': { bgcolor: '#ef4444' }
+                              }}
+                              title="Remove"
+                            >
+                              <Close sx={{ fontSize: 13 }} />
+                            </IconButton>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  ) : (
+                    <Typography variant="caption" sx={{ color: '#94a3b8', fontStyle: 'italic' }}>
+                      Serial number photo is required when serial number is provided.
+                    </Typography>
+                  )}
+                </Box>
+
+                {/* 4. Installation Reports */}
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 600 }}>
+                      {noSerialNumber ? '3' : '4'}. Installation Report(s) * {installationReports.length > 0 && `(${installationReports.length})`}
+                    </Typography>
+                    <Button component="label" variant="outlined" size="small" startIcon={<PictureAsPdf />} sx={{ textTransform: 'none', fontWeight: 600 }}>
+                      {installationReports.length > 0 ? '+ Add More Reports' : 'Upload from Camera / File'}
+                      <input
+                        type="file"
+                        multiple
+                        accept=".pdf,image/*,.doc,.docx"
+                        hidden
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            setInstallationReports(prev => [...prev, ...Array.from(e.target.files)]);
+                          }
+                        }}
+                      />
+                    </Button>
+                  </Box>
+                  {installationReports.length > 0 ? (
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                      {installationReports.map((file, idx) => {
+                        const isImg = file.type?.startsWith('image/') || /\.(jpe?g|png|gif|webp)$/i.test(file.name);
+                        const objUrl = URL.createObjectURL(file);
+                        return (
+                          <Chip
+                            key={idx}
+                            icon={isImg ? <PhotoCamera fontSize="small" /> : <PictureAsPdf fontSize="small" />}
+                            label={`${file.name} (${(file.size / 1024).toFixed(0)} KB)`}
+                            onDelete={() => setInstallationReports(prev => prev.filter((_, i) => i !== idx))}
+                            onClick={() => {
+                              if (isImg) setPreviewDialog({ open: true, url: objUrl });
+                              else window.open(objUrl, '_blank');
+                            }}
+                            variant="outlined"
+                            color="success"
+                            clickable
+                            title={isImg ? "Click to enlarge" : "Click to open file"}
+                            sx={{ fontWeight: 600 }}
+                          />
+                        );
+                      })}
+                    </Box>
+                  ) : (
+                    <Typography variant="caption" sx={{ color: '#94a3b8', fontStyle: 'italic' }}>
+                      Installation report is mandatory.
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+            </Box>
+          ) : (
+            <>
+              {/* Post-Repair / Equipment Photos */}
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                Upload Equipment Photos / Post-Repair Photos {resolutionImages.length > 0 && `(${resolutionImages.length})`}
+              </Typography>
+              <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, bgcolor: '#F8FAFC', mb: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                  <Button component="label" variant="outlined" size="small" startIcon={<PhotoCamera />} sx={{ textTransform: 'none', fontWeight: 600 }}>
+                    {resolutionImages.length > 0 ? '+ Add More Photos' : 'Upload from Camera / Gallery'}
+                    <input type="file" multiple accept="image/*" hidden onChange={handleResolutionImageChange} />
+                  </Button>
+                </Box>
+                {resolutionImages.length > 0 && (
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 2, justifyContent: 'center' }}>
+                    {resolutionImages.map((file, idx) => {
+                      const objUrl = URL.createObjectURL(file);
+                      return (
+                        <Box
+                          key={idx}
+                          sx={{
+                            width: 70,
+                            height: 70,
+                            borderRadius: 1.5,
+                            border: '1px solid #cbd5e1',
+                            overflow: 'hidden',
+                            position: 'relative',
+                            bgcolor: '#fff',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
+                            '&:hover .photo-del': { opacity: 1 }
+                          }}
+                        >
+                          <Box
+                            component="img"
+                            src={objUrl}
+                            alt={file.name}
+                            onClick={() => setPreviewDialog({ open: true, url: objUrl })}
+                            sx={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+                            title="Click to enlarge"
+                          />
+                          <IconButton
+                            size="small"
+                            className="photo-del"
+                            onClick={() => removeResolutionImage(idx)}
+                            sx={{
+                              position: 'absolute',
+                              top: 2,
+                              right: 2,
+                              bgcolor: 'rgba(0,0,0,0.6)',
+                              color: '#fff',
+                              p: 0.3,
+                              opacity: 0,
+                              transition: 'opacity 0.2s',
+                              '&:hover': { bgcolor: '#ef4444' }
+                            }}
+                            title="Remove"
+                          >
+                            <Close sx={{ fontSize: 13 }} />
+                          </IconButton>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                )}
+              </Box>
+
+              {/* Signed Service Report / PM Report */}
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                {isPM ? 'Upload Signed Preventive Maintenance Report / Service Report *' : 'Upload Signed Service Report / Maintenance Report *'} {signedReports.length > 0 && `(${signedReports.length})`}
+              </Typography>
+              <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, bgcolor: '#F8FAFC', mb: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                  <Button component="label" variant="outlined" size="small" startIcon={<PictureAsPdf />} sx={{ textTransform: 'none', fontWeight: 600 }}>
+                    {signedReports.length > 0 ? '+ Add More Reports' : 'Upload from Camera / File'}
+                    <input
+                      type="file"
+                      multiple
+                      accept=".pdf,image/*,.doc,.docx"
+                      hidden
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          setSignedReports(prev => [...prev, ...Array.from(e.target.files)]);
+                        }
+                      }}
+                    />
+                  </Button>
+                </Box>
+                {signedReports.length > 0 ? (
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 2, justifyContent: 'center' }}>
+                    {signedReports.map((file, idx) => {
+                      const isImg = file.type?.startsWith('image/') || /\.(jpe?g|png|gif|webp)$/i.test(file.name);
+                      const objUrl = URL.createObjectURL(file);
+                      return (
+                        <Chip
+                          key={idx}
+                          icon={isImg ? <PhotoCamera fontSize="small" /> : <PictureAsPdf fontSize="small" />}
+                          label={`${file.name} (${(file.size / 1024).toFixed(0)} KB)`}
+                          onDelete={() => setSignedReports(prev => prev.filter((_, i) => i !== idx))}
+                          onClick={() => {
+                            if (isImg) setPreviewDialog({ open: true, url: objUrl });
+                            else window.open(objUrl, '_blank');
+                          }}
+                          color="success"
+                          variant="outlined"
+                          clickable
+                          title={isImg ? "Click to enlarge" : "Click to open file"}
+                          sx={{ fontWeight: 600 }}
+                        />
+                      );
+                    })}
+                  </Box>
+                ) : (
+                  <Typography variant="caption" sx={{ color: '#94a3b8', fontStyle: 'italic', display: 'block', mt: 1 }}>
+                    Signed report is mandatory.
+                  </Typography>
+                )}
+              </Box>
+
+              {/* Other Service Documents / Reports */}
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                Upload Other Service Documents / Reports {closureDocs.length > 0 && `(${closureDocs.length})`}
+              </Typography>
+              <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, bgcolor: '#F8FAFC', mb: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                  <input
+                    type="file"
+                    multiple
+                    accept="*/*"
+                    style={{ display: 'none' }}
+                    ref={fileInputRef}
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        setClosureDocs(prev => [...prev, ...Array.from(e.target.files)]);
+                      }
+                    }}
+                  />
+                  <Button variant="outlined" startIcon={<Assignment />} onClick={() => fileInputRef.current.click()} size="small" sx={{ textTransform: 'none', fontWeight: 600 }}>
+                    {closureDocs.length > 0 ? '+ Add More Documents' : 'Select Service Reports / Documents'}
+                  </Button>
+                </Box>
+                {closureDocs.length > 0 && (
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 2, justifyContent: 'center' }}>
+                    {closureDocs.map((file, idx) => {
+                      const isImg = file.type?.startsWith('image/') || /\.(jpe?g|png|gif|webp)$/i.test(file.name);
+                      const objUrl = URL.createObjectURL(file);
+                      return (
+                        <Chip
+                          key={idx}
+                          icon={isImg ? <PhotoCamera fontSize="small" /> : <InsertDriveFile fontSize="small" />}
+                          label={`${file.name} (${(file.size / 1024).toFixed(0)} KB)`}
+                          onDelete={() => setClosureDocs(prev => prev.filter((_, i) => i !== idx))}
+                          onClick={() => {
+                            if (isImg) setPreviewDialog({ open: true, url: objUrl });
+                            else window.open(objUrl, '_blank');
+                          }}
+                          variant="outlined"
+                          color="primary"
+                          clickable
+                          title={isImg ? "Click to enlarge" : "Click to open file"}
+                          sx={{ fontWeight: 600 }}
+                        />
+                      );
+                    })}
+                  </Box>
+                )}
+              </Box>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2, borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
             <Button variant="outlined" color="primary" startIcon={<Save />} onClick={handleSaveDetails} disabled={actionLoading}>
               Save Details
             </Button>
@@ -1003,137 +1447,38 @@ export default function ComplaintDetail() {
                 startIcon={<Print />} 
                 onClick={() => setIsPrinting(true)}
               >
-                Generate Engineer Evaluation Report
+                Generate Maintenance Report
               </Button>
             )}
           </Box>
-          
-          {isPM && (
-             <PMChecklistForm data={pmChecklistData} onChange={setPmChecklistData} />
-          )}
-          
-          {complaint?.complaint_type === 'Installation' ? (
-            <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, bgcolor: '#F8FAFC', mb: 2 }}>
-              <Typography variant="subtitle2" sx={{ mb: 2, textAlign: 'center' }}>Mandatory Installation Documentation</Typography>
-              
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box>
-                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>1. Equipment Photo *</Typography>
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                    <Button component="label" variant="outlined" size="small" startIcon={<PhotoCamera />}>
-                      Upload from Camera / Gallery
-                      <input type="file" accept="image/*" hidden onChange={(e) => setEquipmentPhoto(e.target.files[0])} />
-                    </Button>
-                    {equipmentPhoto && <Typography variant="caption" sx={{ ml: 1, color: 'success.main', fontWeight: 'bold' }}>{equipmentPhoto.name}</Typography>}
-                  </Box>
-                </Box>
-                <Box>
-                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>2. Serial Number *</Typography>
-                  <TextField 
-                    size="small" 
-                    fullWidth 
-                    placeholder="Enter Serial Number" 
-                    value={noSerialNumber ? 'NA' : serialNumber} 
-                    onChange={(e) => setSerialNumber(e.target.value)} 
-                    disabled={noSerialNumber} 
-                    sx={{ mb: 1, bgcolor: '#fff' }}
-                  />
-                  <FormControlLabel
-                    control={<Checkbox checked={noSerialNumber} onChange={(e) => setNoSerialNumber(e.target.checked)} size="small" />}
-                    label={<Typography variant="body2">No Serial Number Available (NA)</Typography>}
-                  />
-                </Box>
-                {!noSerialNumber && (
-                  <Box>
-                    <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>3. Serial Number Photo *</Typography>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                      <Button component="label" variant="outlined" size="small" startIcon={<PhotoCamera />}>
-                        Upload from Camera / Gallery
-                        <input type="file" accept="image/*" hidden onChange={(e) => setSerialNumberPhoto(e.target.files[0])} />
-                      </Button>
-                      {serialNumberPhoto && <Typography variant="caption" sx={{ ml: 1, color: 'success.main', fontWeight: 'bold' }}>{serialNumberPhoto.name}</Typography>}
-                    </Box>
-                  </Box>
-                )}
-                <Box>
-                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>{noSerialNumber ? '3' : '4'}. Installation Report *</Typography>
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                    <Button component="label" variant="outlined" size="small" startIcon={<PhotoCamera />}>
-                      Upload from Camera / File
-                      <input type="file" accept="*/*" hidden onChange={(e) => setInstallationReport(e.target.files[0])} />
-                    </Button>
-                    {installationReport && <Typography variant="caption" sx={{ ml: 1, color: 'success.main', fontWeight: 'bold' }}>{installationReport.name}</Typography>}
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
-          ) : (
-            <>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Post Repair Photos</Typography>
-              <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
-                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-                  <Button component="label" variant="outlined" size="small" startIcon={<PhotoCamera />}>
-                    Upload from Camera / Gallery
-                    <input type="file" multiple accept="image/*" hidden onChange={handleResolutionImageChange} />
-                  </Button>
-                </Box>
-                {resolutionImages.length > 0 && (
-                  <Box sx={{ mt: 2, textAlign: 'left' }}>
-                    {resolutionImages.map((doc, idx) => (
-                      <Chip key={idx} label={doc.name} onDelete={() => removeResolutionImage(idx)} sx={{ m: 0.5 }} />
-                    ))}
-                  </Box>
-                )}
-              </Box>
-
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>{isPM ? 'Upload Signed PM Report *' : 'Upload Signed Engineer Evaluation Report *'}</Typography>
-              <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
-                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-                  <Button component="label" variant="outlined" size="small" startIcon={<PhotoCamera />}>
-                    Upload from Camera / File
-                    <input type="file" accept="*/*" hidden onChange={(e) => setSignedReport(e.target.files[0])} />
-                  </Button>
-                </Box>
-                {signedReport && (
-                  <Box sx={{ mt: 2, textAlign: 'center' }}>
-                    <Chip label={signedReport.name} onDelete={() => setSignedReport(null)} color="success" variant="outlined" sx={{ m: 0.5 }} />
-                  </Box>
-                )}
-              </Box>
-
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Other Service Documents</Typography>
-              <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
-                 <input type="file" multiple accept="*/*" style={{ display: 'none' }} ref={fileInputRef} onChange={(e) => {
-                   if (e.target.files) {
-                     const filesArray = Array.from(e.target.files);
-                     setClosureDocs(prev => [...prev, ...filesArray]);
-                   }
-                 }} />
-                <Button variant="outlined" startIcon={<Assignment />} onClick={() => fileInputRef.current.click()} size="small">
-                  Select Service Reports / Documents
-                </Button>
-                {closureDocs.length > 0 && (
-                  <Box sx={{ mt: 2, textAlign: 'left' }}>
-                    {closureDocs.map((doc, idx) => (
-                      <Chip key={idx} label={doc.name} onDelete={() => setClosureDocs(prev => prev.filter((_, i) => i !== idx))} sx={{ m: 0.5 }} />
-                    ))}
-                  </Box>
-                )}
-              </Box>
-            </>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ p: 2, pt: 0 }}>
-          <Button onClick={() => setResolveDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
-          <Button 
-            onClick={handleResolve} 
-            variant="contained" 
-            color="success" 
-            disabled={actionLoading || !resolutionRemarks || !closureReason || (complaint?.complaint_type === 'Installation' ? (!equipmentPhoto || (!noSerialNumber && !serialNumberPhoto) || (!noSerialNumber && !serialNumber) || !installationReport) : !signedReport) || (isPM && (!pmChecklistData?.pm_start_date_time || !pmChecklistData?.pm_completed_date || !pmChecklistData?.next_pm_due_on || !pmChecklistData?.status || !pmChecklistData?.accepted_for_use))}
-            startIcon={actionLoading ? <CircularProgress size={20} /> : <CheckCircle />}
-          >
-            Submit for Approval
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button onClick={() => setResolveDialogOpen(false)} disabled={actionLoading} color="inherit">Cancel</Button>
+            <Button 
+              onClick={handleResolve} 
+              variant="contained" 
+              color="success" 
+              disabled={
+                actionLoading ||
+                !resolutionRemarks ||
+                !closureReason ||
+                (complaint?.complaint_type === 'Installation'
+                  ? equipmentPhotos.length === 0 ||
+                    (!noSerialNumber && serialNumberPhotos.length === 0) ||
+                    (!noSerialNumber && !serialNumber.trim()) ||
+                    installationReports.length === 0
+                  : signedReports.length === 0) ||
+                (isPM &&
+                  (!pmChecklistData?.pm_start_date_time ||
+                    !pmChecklistData?.pm_completed_date ||
+                    !pmChecklistData?.next_pm_due_on ||
+                    !pmChecklistData?.status ||
+                    !pmChecklistData?.accepted_for_use))
+              }
+              startIcon={actionLoading ? <CircularProgress size={20} /> : <CheckCircle />}
+            >
+              Submit for Approval
+            </Button>
+          </Box>
         </DialogActions>
 
       </Dialog>

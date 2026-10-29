@@ -219,8 +219,10 @@ class TenantConfiguration(Base):
     tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), unique=True, nullable=False)
     base_state = Column(String(100), nullable=False)
     cgst_share_percent = Column(Float, nullable=False)
-    sgst_share_percent = Column(Float, nullable=False)
+    sgst_share_percent = Column(Float, nullable=False, default=50.0)
     po_short_close_notify_roles = Column(JSON, default=list)
+    po_short_close_notify_users = Column(JSON, default=list)
+    wo_short_close_notify_roles = Column(JSON, default=list)
     
     # PM Notification Settings
     pm_advance_email_enabled = Column(Boolean, default=False)
@@ -228,6 +230,13 @@ class TenantConfiguration(Base):
     pm_advance_email_days = Column(Integer, nullable=True)
     pm_advance_email_roles = Column(JSON, default=list)
     pm_advance_email_users = Column(JSON, default=list)
+    pm_advance_email_frequency_tiers = Column(JSON, default=list)
+
+    # Calibration Notification Settings
+    calibration_advance_email_enabled = Column(Boolean, default=False)
+    calibration_advance_email_roles = Column(JSON, default=list)
+    calibration_advance_email_users = Column(JSON, default=list)
+    calibration_advance_email_frequency_tiers = Column(JSON, default=list)
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
     tenant = relationship("Tenant")
@@ -633,6 +642,10 @@ class EquipmentItem(Base):
     serial_number_status = Column(String(50), default="Pending Update") # "Captured", "Pending Update"
     serial_number_photo_url = Column(String(500), nullable=True)
     equipment_photo_url = Column(String(500), nullable=True)
+    equipment_photos = Column(JSON, default=list)
+    serial_number_photos = Column(JSON, default=list)
+    installation_documents = Column(JSON, default=list)
+    other_documents = Column(JSON, default=list)
     is_biomedical = Column(Boolean, default=False)
     requires_installation = Column(Boolean, default=False)
     installation_status = Column(String(50), default="Not Required") # "Not Required", "Pending Installation", "Installed"

@@ -48,6 +48,16 @@ def migrate():
         for bq in backfill_queries:
             res = conn.execute(bq)
             print(f"Backfill executed, rows updated: {res.rowcount}")
+
+        # Update any nulls to empty JSON arrays
+        null_fix_queries = [
+            text("UPDATE equipment_items SET equipment_photos = '[]'::json WHERE equipment_photos IS NULL;"),
+            text("UPDATE equipment_items SET serial_number_photos = '[]'::json WHERE serial_number_photos IS NULL;"),
+            text("UPDATE equipment_items SET installation_documents = '[]'::json WHERE installation_documents IS NULL;"),
+            text("UPDATE equipment_items SET other_documents = '[]'::json WHERE other_documents IS NULL;"),
+        ]
+        for nfq in null_fix_queries:
+            conn.execute(nfq)
             
         conn.commit()
     print("Equipment documents migration completed successfully!")

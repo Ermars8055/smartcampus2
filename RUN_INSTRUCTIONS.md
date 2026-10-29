@@ -33,6 +33,21 @@ uvicorn app.main:app --host 0.0.0.0 --port 8007 --reload
 ✅ **Backend API will run on:** `http://localhost:8007` (and your network IP)
 📄 **Interactive API Docs (Swagger):** `http://localhost:8007/docs`
 
+### 🔄 Applying Migrations / Updating Code
+When pulling the latest code onto a server or existing environment, migrations run automatically on backend startup. To manually run all schema migrations and sync dynamic menus:
+
+**Local Environment:**
+```bash
+cd backend
+source venv/bin/activate
+python scripts/run_migrations.py
+```
+
+**Docker Environment:**
+```bash
+docker compose exec backend python scripts/run_migrations.py
+```
+
 ### 🔄 Optional: Resetting the Database
 If you ever need to wipe the database clean and re-seed it with the default test data, you can run the reset script while the virtual environment is active:
 ```bash

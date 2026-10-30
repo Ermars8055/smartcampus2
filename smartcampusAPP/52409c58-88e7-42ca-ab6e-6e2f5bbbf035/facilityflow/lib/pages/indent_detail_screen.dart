@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:facilityflow/models/indent.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:intl/intl.dart';
@@ -190,11 +191,25 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                                     Expanded(
                                       child: TextField(
                                         controller: controllers[idx],
-                                        keyboardType: TextInputType.number,
-                                        decoration: const InputDecoration(
-                                            labelText: 'Approve Qty',
+                                        keyboardType: item.uomAllowDecimal
+                                            ? const TextInputType.numberWithOptions(
+                                                decimal: true)
+                                            : TextInputType.number,
+                                        inputFormatters: item.uomAllowDecimal
+                                            ? [
+                                                FilteringTextInputFormatter
+                                                    .allow(RegExp(
+                                                        r'^\d+\.?\d{0,4}'))
+                                              ]
+                                            : [
+                                                FilteringTextInputFormatter
+                                                    .digitsOnly
+                                              ],
+                                        decoration: InputDecoration(
+                                            labelText:
+                                                'Approve Qty (${item.uomName})',
                                             isDense: true,
-                                            border: OutlineInputBorder()),
+                                            border: const OutlineInputBorder()),
                                       ),
                                     ),
                                   ],
@@ -242,10 +257,35 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                           List<Map<String, dynamic>> approvalPayload = [];
 
                           for (int i = 0; i < widget.indent.items.length; i++) {
-                            double requestedQty =
-                                widget.indent.items[i].requestedQuantity;
-                            double approvedQty =
-                                double.tryParse(controllers[i].text) ?? 0;
+                            final item = widget.indent.items[i];
+                            double requestedQty = item.requestedQuantity;
+                            double? parsed =
+                                double.tryParse(controllers[i].text.trim());
+                            if (parsed == null || parsed < 0) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      'Please enter a valid quantity for "${item.materialName}"'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+                            double approvedQty = parsed;
+
+                            // Restriction: Block decimals if UOM doesn't allow decimals (e.g., NOS)
+                            if (!item.uomAllowDecimal &&
+                                (approvedQty % 1 != 0)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Decimal quantities are not allowed for "${item.materialName}" (${item.uomName}). Please enter a whole number.',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
 
                             if (approvedQty > requestedQty) {
                               hasLargerQuantity = true;
@@ -254,7 +294,7 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                               allZero = false;
                             }
                             approvalPayload.add({
-                              'indent_item_id': widget.indent.items[i].id,
+                              'indent_item_id': item.id,
                               'approved_quantity': approvedQty,
                               'remarks': remarksControllers[i].text.isEmpty
                                   ? null
@@ -727,6 +767,37 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (widget.indent.status == 'Draft') ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  icon: const Icon(Icons.edit_note),
+                  label: const Text('Edit Draft Indent',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreateIndentScreen(
+                          cloneFrom: widget.indent,
+                          indentId: widget.indent.id,
+                        ),
+                      ),
+                    ).then((val) {
+                      if (val == true && mounted) {
+                        Navigator.pop(context, true);
+                      }
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
             if (widget.indent.status == 'Approved' ||
                 widget.indent.status == 'Partially Issued')
               SizedBox(

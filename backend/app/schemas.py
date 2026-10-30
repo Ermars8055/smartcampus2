@@ -2201,6 +2201,7 @@ class ComplaintUpdate(BaseModel):
     job_completed_satisfactorily: Optional[bool] = None
     completion_date: Optional[date] = None
     completion_time: Optional[str] = None
+    pm_checklist_data: Optional[Dict[str, Any]] = None
 
 # New workflow-specific schemas
 class ComplaintAssign(BaseModel):
@@ -2227,6 +2228,11 @@ class ComplaintCloseRequest(BaseModel):
     equipment_photo_url: Optional[str] = None
     serial_number_photo_url: Optional[str] = None
     installation_report_url: Optional[str] = None
+    serial_number: Optional[str] = None
+    status_on_work_completion: Optional[str] = None
+    job_completed_satisfactorily: Optional[bool] = None
+    completion_date: Optional[date] = None
+    completion_time: Optional[str] = None
     equipment_photos: Optional[List[Dict[str, Any]]] = None
     serial_number_photos: Optional[List[Dict[str, Any]]] = None
     installation_documents: Optional[List[Dict[str, Any]]] = None
@@ -2235,6 +2241,7 @@ class ComplaintCloseRequest(BaseModel):
     job_completed_satisfactorily: Optional[bool] = None
     completion_date: Optional[date] = None
     completion_time: Optional[str] = None
+    pm_checklist_data: Optional[Dict[str, Any]] = None
     pm_checklist_data: Optional[Dict[str, Any]] = None
 
 class ComplaintApproveRequest(BaseModel):
@@ -2279,6 +2286,11 @@ class ComplaintOut(ComplaintBase):
     equipment_photo_url: Optional[str] = None
     serial_number_photo_url: Optional[str] = None
     installation_report_url: Optional[str] = None
+    serial_number: Optional[str] = None
+    status_on_work_completion: Optional[str] = None
+    job_completed_satisfactorily: Optional[bool] = None
+    completion_date: Optional[date] = None
+    completion_time: Optional[str] = None
     images: List[ComplaintImageOut] = []
     documents: List[ComplaintDocumentOut] = []
     class Config:

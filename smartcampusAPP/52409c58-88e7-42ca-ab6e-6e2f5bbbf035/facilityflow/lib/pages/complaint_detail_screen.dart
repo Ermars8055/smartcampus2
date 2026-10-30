@@ -9,7 +9,12 @@ import 'package:facilityflow/pages/create_indent_screen.dart';
 import 'dart:async';
 import 'package:facilityflow/widgets/pm_checklist_form.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:facilityflow/pages/maintenance_report_screen.dart';
+import 'package:facilityflow/pages/preventive_maintenance_report_screen.dart';
+import 'package:facilityflow/services/pdf_report_service.dart';
+import 'package:facilityflow/pages/report_pdf_preview_screen.dart';
 
 @NowaGenerated()
 class ComplaintDetailScreen extends StatefulWidget {
@@ -31,9 +36,36 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   Map<String, dynamic>? _rwo;
   Timer? _pollingTimer;
 
+  late Complaint _complaint;
+  String? _savedRemarks;
+  String? _savedReason;
+  String? _savedStatus;
+  String? _savedCompletionDate;
+  String? _savedCompletionTime;
+  Map<String, dynamic> _savedPmData = {};
+  List<File> _savedImages = [];
+  List<File> _savedEquipmentPhotos = [];
+  List<File> _savedSerialNumberPhotos = [];
+  List<File> _savedInstallationReports = [];
+  List<File> _savedSignedReports = [];
+  List<File> _savedOtherDocs = [];
+  bool _savedNoSerialNumber = false;
+  String? _savedSerialNumber;
+
   @override
   void initState() {
     super.initState();
+    _complaint = widget.complaint;
+    _savedRemarks = _complaint.resolutionEntered;
+    _savedReason = _complaint.closureReason;
+    _savedStatus = _complaint.statusOnWorkCompletion;
+    _savedCompletionDate = _complaint.completionDate;
+    _savedCompletionTime = _complaint.completionTime;
+    if (_complaint.pmChecklistData != null) {
+      _savedPmData = Map<String, dynamic>.from(_complaint.pmChecklistData!);
+    }
+    _savedNoSerialNumber = _complaint.serialNumber == 'NA';
+    _savedSerialNumber = _complaint.serialNumber;
     _fetchDetails();
     _pollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
       _fetchDetails(silent: true);
@@ -54,6 +86,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
         api.getIndents(complaintId: widget.complaint.id),
         api.getIssues(),
         api.getRwos(),
+        api.getComplaintDetail(widget.complaint.id),
       ]);
       if (mounted) {
         setState(() {
@@ -73,6 +106,19 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                 .firstWhere((r) => r['complaint_id'] == widget.complaint.id);
           } catch (_) {
             _rwo = null;
+          }
+
+          if (results.length > 3 && results[3].data != null) {
+            _complaint = Complaint.fromJson(results[3].data);
+            _savedRemarks ??= _complaint.resolutionEntered;
+            _savedReason ??= _complaint.closureReason;
+            _savedStatus ??= _complaint.statusOnWorkCompletion;
+            _savedCompletionDate ??= _complaint.completionDate;
+            _savedCompletionTime ??= _complaint.completionTime;
+            if (_savedPmData.isEmpty && _complaint.pmChecklistData != null) {
+              _savedPmData =
+                  Map<String, dynamic>.from(_complaint.pmChecklistData!);
+            }
           }
         });
       }
@@ -317,11 +363,12 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   }
 
   void _showResolveDialog() {
+    final complaintObj = _complaint;
     final isInstallation =
-        widget.complaint.complaintType.toLowerCase().contains('installation');
-    final isPm = widget.complaint.isPmCalibrationCall ||
-        widget.complaint.complaintType.toLowerCase().contains('pm') ||
-        widget.complaint.complaintType
+        complaintObj.complaintType.toLowerCase().contains('installation');
+    final isPm = complaintObj.isPmCalibrationCall ||
+        complaintObj.complaintType.toLowerCase().contains('pm') ||
+        complaintObj.complaintType
             .toLowerCase()
             .contains('preventive maintenance');
 
@@ -329,43 +376,245 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
         context: context,
         builder: (ctx) {
           final remarksController = TextEditingController(
-              text: widget.complaint.resolutionEntered ?? '');
+              text: _savedRemarks ?? complaintObj.resolutionEntered ?? '');
           final statusController = TextEditingController(
-              text: widget.complaint.statusOnWorkCompletion ?? '');
-          final reasonController =
-              TextEditingController(text: widget.complaint.closureReason ?? '');
+              text: _savedStatus ??
+                  complaintObj.statusOnWorkCompletion ??
+                  'Operational');
+          final reasonController = TextEditingController(
+              text: _savedReason ?? complaintObj.closureReason ?? '');
           final serialNumberController = TextEditingController(
-              text: widget.complaint.serialNumber == 'NA'
-                  ? ''
-                  : (widget.complaint.serialNumber ?? ''));
+              text: _savedSerialNumber ??
+                  (complaintObj.serialNumber == 'NA'
+                      ? ''
+                      : (complaintObj.serialNumber ?? '')));
 
-          bool jobSatisfactory = true;
-          String completionDate =
+          String completionDate = _savedCompletionDate ??
+              complaintObj.completionDate ??
               DateTime.now().toIso8601String().split('T')[0];
-          String completionTime =
+          String completionTime = _savedCompletionTime ??
+              complaintObj.completionTime ??
               '${TimeOfDay.now().hour.toString().padLeft(2, '0')}:${TimeOfDay.now().minute.toString().padLeft(2, '0')}';
-          Map<String, dynamic> pmData = {};
+          Map<String, dynamic> pmData = Map<String, dynamic>.from(_savedPmData);
 
-          List<File> images = [];
-          File? equipmentPhoto;
-          File? serialNumberPhoto;
-          File? installationReport;
-          File? signedReport;
-          List<File> otherDocs = [];
-          bool noSerialNumber = widget.complaint.serialNumber == 'NA';
+          List<File> images = List<File>.from(_savedImages);
+          List<File> equipmentPhotos = List<File>.from(_savedEquipmentPhotos);
+          List<File> serialNumberPhotos =
+              List<File>.from(_savedSerialNumberPhotos);
+          List<File> installationReports =
+              List<File>.from(_savedInstallationReports);
+          List<File> signedReports = List<File>.from(_savedSignedReports);
+          List<File> otherDocs = List<File>.from(_savedOtherDocs);
+          bool noSerialNumber = _savedNoSerialNumber;
 
           bool isSubmitting = false;
 
           return StatefulBuilder(builder: (dialogCtx, setStateDialog) {
-            void pickImage(Function(File) onPicked) async {
-              final picker = ImagePicker();
-              final picked =
-                  await picker.pickImage(source: ImageSource.gallery);
-              if (picked != null) {
-                setStateDialog(() {
-                  onPicked(File(picked.path));
-                });
-              }
+            Future<void> pickUpload({
+              required String title,
+              required Function(List<File>) onFilesAdded,
+              bool allowMultiple = true,
+            }) async {
+              await showModalBottomSheet(
+                context: dialogCtx,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                builder: (sheetCtx) => SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Wrap(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                          child: Text(title,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const CircleAvatar(
+                            backgroundColor: Color(0xFFEFF6FF),
+                            child: Icon(Icons.camera_alt, color: Color(0xFF2563EB)),
+                          ),
+                          title: const Text('Capture with Camera',
+                              style: TextStyle(fontWeight: FontWeight.w600)),
+                          subtitle: const Text('Take a photo directly with camera'),
+                          onTap: () async {
+                            Navigator.pop(sheetCtx);
+                            try {
+                              final picker = ImagePicker();
+                              final photo =
+                                  await picker.pickImage(source: ImageSource.camera);
+                              if (photo != null) {
+                                setStateDialog(() {
+                                  onFilesAdded([File(photo.path)]);
+                                });
+                              }
+                            } catch (_) {}
+                          },
+                        ),
+                        ListTile(
+                          leading: const CircleAvatar(
+                            backgroundColor: Color(0xFFF0FDF4),
+                            child: Icon(Icons.file_upload, color: Color(0xFF16A34A)),
+                          ),
+                          title: Text(allowMultiple
+                              ? 'Upload Multiple Files / Photos'
+                              : 'Upload File / Photo',
+                              style: const TextStyle(fontWeight: FontWeight.w600)),
+                          subtitle: const Text('Select images, PDFs, or documents from device'),
+                          onTap: () async {
+                            Navigator.pop(sheetCtx);
+                            try {
+                              final picked = await FilePicker.pickFiles(
+                                type: FileType.custom,
+                                allowedExtensions: [
+                                  'jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'
+                                ],
+                              );
+                              if (picked.isNotEmpty) {
+                                final selected = picked
+                                    .where((f) => f.path != null)
+                                    .map((f) => File(f.path!))
+                                    .toList();
+                                if (selected.isNotEmpty) {
+                                  setStateDialog(() {
+                                    onFilesAdded(allowMultiple
+                                        ? selected
+                                        : [selected.first]);
+                                  });
+                                }
+                              }
+                            } catch (_) {
+                              try {
+                                final picker = ImagePicker();
+                                final imgs = await picker.pickMultiImage();
+                                if (imgs.isNotEmpty) {
+                                  setStateDialog(() {
+                                    onFilesAdded(imgs.map((x) => File(x.path)).toList());
+                                  });
+                                }
+                              } catch (_) {}
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            Widget buildUploadSection({
+              required String title,
+              required List<File> files,
+              required VoidCallback onAdd,
+              bool isRequired = false,
+              String? subtitle,
+            }) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  border: Border.all(
+                    color: isRequired && files.isEmpty
+                        ? Colors.red.shade300
+                        : Colors.grey.shade300,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text.rich(
+                            TextSpan(
+                              text: title,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 13),
+                              children: [
+                                if (isRequired)
+                                  const TextSpan(
+                                      text: ' *',
+                                      style: TextStyle(color: Colors.red)),
+                                if (files.isNotEmpty)
+                                  TextSpan(
+                                      text: ' (${files.length})',
+                                      style: TextStyle(
+                                          color: Colors.blue.shade700,
+                                          fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFEFF6FF),
+                            foregroundColor: const Color(0xFF2563EB),
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+                            minimumSize: Size.zero,
+                          ),
+                          icon: const Icon(Icons.add_a_photo, size: 14),
+                          label: Text(files.isEmpty ? 'Upload' : '+ Add',
+                              style: const TextStyle(fontSize: 12)),
+                          onPressed: onAdd,
+                        ),
+                      ],
+                    ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(subtitle,
+                          style: TextStyle(
+                              fontSize: 11, color: Colors.grey.shade600)),
+                    ],
+                    if (files.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: files.map((file) {
+                          final name = file.path.split('/').last;
+                          final isPdf = name.toLowerCase().endsWith('.pdf');
+                          return Chip(
+                            avatar: CircleAvatar(
+                              backgroundColor:
+                                  isPdf ? Colors.red.shade100 : Colors.blue.shade100,
+                              child: Icon(
+                                isPdf ? Icons.picture_as_pdf : Icons.image,
+                                size: 14,
+                                color: isPdf ? Colors.red : Colors.blue,
+                              ),
+                            ),
+                            label: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 130),
+                              child: Text(
+                                name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 11),
+                              ),
+                            ),
+                            deleteIcon: const Icon(Icons.close, size: 14),
+                            onDeleted: () {
+                              setStateDialog(() {
+                                files.remove(file);
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ],
+                ),
+              );
             }
 
             return AlertDialog(
@@ -398,17 +647,6 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                             labelText: 'Status on Work Completion',
                             border: OutlineInputBorder()),
                         maxLines: 2,
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          const Text('Job Completed Satisfactorily?'),
-                          Switch(
-                            value: jobSatisfactory,
-                            onChanged: (val) =>
-                                setStateDialog(() => jobSatisfactory = val),
-                          ),
-                        ],
                       ),
                       const SizedBox(height: 16),
                       Row(
@@ -466,18 +704,16 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.red)),
-                        const SizedBox(height: 8),
-                        ListTile(
-                          title: const Text('Equipment Photo *'),
-                          trailing: IconButton(
-                              icon: const Icon(Icons.camera_alt),
-                              onPressed: () =>
-                                  pickImage((f) => equipmentPhoto = f)),
-                          subtitle: equipmentPhoto != null
-                              ? const Text('Attached',
-                                  style: TextStyle(color: Colors.green))
-                              : const Text('Required',
-                                  style: TextStyle(color: Colors.red)),
+                        const SizedBox(height: 12),
+                        buildUploadSection(
+                          title: 'Upload Equipment Photos',
+                          isRequired: true,
+                          files: equipmentPhotos,
+                          subtitle: 'Direct camera capture or select files',
+                          onAdd: () => pickUpload(
+                            title: 'Upload Equipment Photo',
+                            onFilesAdded: (f) => equipmentPhotos.addAll(f),
+                          ),
                         ),
                         TextField(
                           controller: serialNumberController,
@@ -493,96 +729,61 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                               () => noSerialNumber = val ?? false),
                         ),
                         if (!noSerialNumber)
-                          ListTile(
-                            title: const Text('Serial Number Photo *'),
-                            trailing: IconButton(
-                                icon: const Icon(Icons.camera_alt),
-                                onPressed: () =>
-                                    pickImage((f) => serialNumberPhoto = f)),
-                            subtitle: serialNumberPhoto != null
-                                ? const Text('Attached',
-                                    style: TextStyle(color: Colors.green))
-                                : const Text('Required',
-                                    style: TextStyle(color: Colors.red)),
+                          buildUploadSection(
+                            title: 'Upload Serial Number Photo',
+                            isRequired: true,
+                            files: serialNumberPhotos,
+                            subtitle: 'Direct camera capture or select files',
+                            onAdd: () => pickUpload(
+                              title: 'Upload Serial Number Photo',
+                              onFilesAdded: (f) => serialNumberPhotos.addAll(f),
+                            ),
                           ),
-                        ListTile(
-                          title: const Text('Installation Report *'),
-                          trailing: IconButton(
-                              icon: const Icon(Icons.camera_alt),
-                              onPressed: () =>
-                                  pickImage((f) => installationReport = f)),
-                          subtitle: installationReport != null
-                              ? const Text('Attached',
-                                  style: TextStyle(color: Colors.green))
-                              : const Text('Required',
-                                  style: TextStyle(color: Colors.red)),
+                        buildUploadSection(
+                          title: 'Upload Installation Documents / Reports',
+                          isRequired: true,
+                          files: installationReports,
+                          subtitle: 'Direct camera capture or select documents/PDFs',
+                          onAdd: () => pickUpload(
+                            title: 'Upload Installation Documents / Reports',
+                            onFilesAdded: (f) => installationReports.addAll(f),
+                          ),
                         ),
                         const Divider(),
                       ],
                       if (!isInstallation) ...[
                         const SizedBox(height: 16),
-                        ListTile(
-                          title: Text(isPm
-                              ? 'Upload Signed PM Report *'
-                              : 'Upload Signed Engineer Evaluation Report *'),
-                          trailing: IconButton(
-                              icon: const Icon(Icons.upload_file),
-                              onPressed: () =>
-                                  pickImage((f) => signedReport = f)),
-                          subtitle: signedReport != null
-                              ? const Text('Attached',
-                                  style: TextStyle(color: Colors.green))
-                              : const Text('Required',
-                                  style: TextStyle(color: Colors.red)),
+                        buildUploadSection(
+                          title: isPm
+                              ? 'Upload Signed PM Report'
+                              : 'Upload Signed Service Report / Maintenance Report',
+                          isRequired: true,
+                          files: signedReports,
+                          subtitle: 'Direct camera capture or select documents/PDFs',
+                          onAdd: () => pickUpload(
+                            title: isPm
+                                ? 'Upload Signed PM Report'
+                                : 'Upload Signed Service Report / Maintenance Report',
+                            onFilesAdded: (f) => signedReports.addAll(f),
+                          ),
                         ),
-                        ListTile(
-                          title: const Text('Upload Other Service Documents'),
-                          trailing: IconButton(
-                              icon: const Icon(Icons.upload_file),
-                              onPressed: () =>
-                                  pickImage((f) => otherDocs.add(f))),
-                          subtitle: Text('${otherDocs.length} attached'),
+                        buildUploadSection(
+                          title: 'Upload Equipment Photos / Post-Repair Photos',
+                          files: images,
+                          subtitle: 'Direct camera capture or select multiple photos',
+                          onAdd: () => pickUpload(
+                            title: 'Upload Equipment Photos / Post-Repair Photos',
+                            onFilesAdded: (f) => images.addAll(f),
+                          ),
                         ),
-                      ],
-                      const SizedBox(height: 16),
-                      if (!isInstallation)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Upload Post Repair Photos'),
-                            IconButton(
-                                onPressed: () =>
-                                    pickImage((f) => images.add(f)),
-                                icon: const Icon(Icons.add_a_photo)),
-                          ],
-                        ),
-                      if (images.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            for (var img in images)
-                              Stack(
-                                children: [
-                                  Image.file(img,
-                                      width: 80, height: 80, fit: BoxFit.cover),
-                                  Positioned(
-                                    right: 0,
-                                    top: 0,
-                                    child: GestureDetector(
-                                      onTap: () => setStateDialog(
-                                          () => images.remove(img)),
-                                      child: Container(
-                                        color: Colors.black54,
-                                        child: const Icon(Icons.close,
-                                            color: Colors.white, size: 16),
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              )
-                          ],
+                        buildUploadSection(
+                          title: 'Upload Other Service Documents / Reports',
+                          files: otherDocs,
+                          subtitle: 'Direct camera capture or select documents/PDFs',
+                          onAdd: () => pickUpload(
+                            title: 'Upload Other Service Documents / Reports',
+                            onFilesAdded: (f) => otherDocs.addAll(f),
+                          ),
                         ),
                       ],
                     ],
@@ -599,33 +800,151 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                         : () async {
                             try {
                               setStateDialog(() => isSubmitting = true);
-                              await ApiService()
+                              _savedRemarks = remarksController.text;
+                              _savedReason = reasonController.text;
+                              _savedStatus = statusController.text;
+                              _savedCompletionDate = completionDate;
+                              _savedCompletionTime = completionTime;
+                              _savedPmData =
+                                  Map<String, dynamic>.from(pmData);
+                              _savedImages = List.from(images);
+                              _savedSignedReports = List.from(signedReports);
+                              _savedOtherDocs = List.from(otherDocs);
+                              _savedEquipmentPhotos =
+                                  List.from(equipmentPhotos);
+                              _savedSerialNumberPhotos =
+                                  List.from(serialNumberPhotos);
+                              _savedInstallationReports =
+                                  List.from(installationReports);
+                              _savedNoSerialNumber = noSerialNumber;
+                              _savedSerialNumber = serialNumberController.text;
+
+                              final res = await ApiService()
                                   .updateComplaint(widget.complaint.id, {
                                 'resolution_entered': remarksController.text,
                                 'closure_reason': reasonController.text,
                                 'status_on_work_completion':
                                     statusController.text,
-                                'job_completed_satisfactorily': jobSatisfactory,
                                 'completion_date': completionDate,
                                 'completion_time': completionTime,
                                 'pm_checklist_data': isPm ? pmData : null,
                               });
-                              if (mounted)
+                              if (res.data != null) {
+                                _complaint = Complaint.fromJson(res.data);
+                              }
+                              if (mounted) {
+                                setState(() {});
                                 ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                         content: Text(
-                                            'Details saved successfully')));
+                                            'Details saved successfully!')));
+                              }
                             } catch (e) {
-                              if (mounted)
+                              if (mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                         content:
                                             Text('Failed to save details')));
+                              }
                             } finally {
                               setStateDialog(() => isSubmitting = false);
                             }
                           },
                     child: const Text('Save Details')),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red.shade700,
+                    side: BorderSide(color: Colors.red.shade400),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 8),
+                  ),
+                  icon: const Icon(Icons.picture_as_pdf, size: 16),
+                  label: const Text(
+                    'Preview PDF',
+                    style:
+                        TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ReportPdfPreviewScreen(
+                          title: isPm
+                              ? 'PM Report - ${_complaint.docketNo}'
+                              : 'Maintenance Report - ${_complaint.docketNo}',
+                          buildPdf: (format) => isPm
+                              ? PdfReportService
+                                  .generatePreventiveMaintenanceReportPdf(
+                                  format,
+                                  complaint: _complaint,
+                                  resolutionEntered: remarksController.text,
+                                  statusOnWorkCompletion: statusController.text,
+                                  completionDate: completionDate,
+                                  completionTime: completionTime,
+                                  pmChecklistData: pmData,
+                                  materialIssues: _materialIssues,
+                                )
+                              : PdfReportService
+                                  .generateMaintenanceReportPdf(
+                                  format,
+                                  complaint: _complaint,
+                                  resolutionEntered: remarksController.text,
+                                  statusOnWorkCompletion: statusController.text,
+                                  completionDate: completionDate,
+                                  completionTime: completionTime,
+                                  materialIssues: _materialIssues,
+                                ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF1E40AF),
+                    side: const BorderSide(color: Color(0xFF3B82F6)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 8),
+                  ),
+                  icon: const Icon(Icons.description_outlined, size: 16),
+                  label: Text(
+                    isPm ? 'Generate PM Report' : 'Generate Maintenance Report',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  onPressed: () {
+                    if (isPm) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              PreventiveMaintenanceReportScreen(
+                            complaint: _complaint,
+                            resolutionEntered: remarksController.text,
+                            statusOnWorkCompletion: statusController.text,
+                            completionDate: completionDate,
+                            completionTime: completionTime,
+                            pmChecklistData: pmData,
+                            materialIssues: _materialIssues,
+                          ),
+                        ),
+                      );
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MaintenanceReportScreen(
+                            complaint: _complaint,
+                            resolutionEntered: remarksController.text,
+                            statusOnWorkCompletion: statusController.text,
+                            completionDate: completionDate,
+                            completionTime: completionTime,
+                            materialIssues: _materialIssues,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
@@ -648,14 +967,14 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                             return;
                           }
                           if (isInstallation) {
-                            if (equipmentPhoto == null ||
+                            if (equipmentPhotos.isEmpty ||
                                 (!noSerialNumber &&
-                                    serialNumberPhoto == null) ||
+                                    serialNumberPhotos.isEmpty) ||
                                 (!noSerialNumber &&
                                     serialNumberController.text
                                         .trim()
                                         .isEmpty) ||
-                                installationReport == null) {
+                                installationReports.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                       content: Text(
@@ -663,7 +982,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                               return;
                             }
                           } else {
-                            if (signedReport == null) {
+                            if (signedReports.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                       content:
@@ -691,36 +1010,67 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                             List<String> imageUrls = [];
                             for (var img in images) {
                               final res = await api.uploadComplaintImage(img);
-                              imageUrls.add(res.data['url']);
+                              if (res.data != null && res.data['url'] != null) {
+                                imageUrls.add(res.data['url'].toString());
+                              }
                             }
                             List<String> docUrls = [];
-                            if (signedReport != null) {
-                              final res =
-                                  await api.uploadComplaintImage(signedReport!);
-                              docUrls.add(res.data['url']);
+                            for (var doc in signedReports) {
+                              final res = await api.uploadComplaintImage(doc);
+                              if (res.data != null && res.data['url'] != null) {
+                                docUrls.add(res.data['url'].toString());
+                              }
                             }
                             for (var doc in otherDocs) {
                               final res = await api.uploadComplaintImage(doc);
-                              docUrls.add(res.data['url']);
+                              if (res.data != null && res.data['url'] != null) {
+                                docUrls.add(res.data['url'].toString());
+                              }
                             }
 
+                            List<Map<String, dynamic>> equipPhotoObjs = [];
                             String? equipUrl;
-                            if (equipmentPhoto != null) {
-                              final res = await api
-                                  .uploadComplaintImage(equipmentPhoto!);
-                              equipUrl = res.data['url'];
+                            for (var doc in equipmentPhotos) {
+                              final res = await api.uploadComplaintImage(doc);
+                              if (res.data != null && res.data['url'] != null) {
+                                final url = res.data['url'].toString();
+                                equipUrl ??= url;
+                                equipPhotoObjs.add({
+                                  'url': url,
+                                  'name': doc.path.split('/').last
+                                });
+                                docUrls.add(url);
+                              }
                             }
+
+                            List<Map<String, dynamic>> serialPhotoObjs = [];
                             String? serialUrl;
-                            if (serialNumberPhoto != null) {
-                              final res = await api
-                                  .uploadComplaintImage(serialNumberPhoto!);
-                              serialUrl = res.data['url'];
+                            for (var doc in serialNumberPhotos) {
+                              final res = await api.uploadComplaintImage(doc);
+                              if (res.data != null && res.data['url'] != null) {
+                                final url = res.data['url'].toString();
+                                serialUrl ??= url;
+                                serialPhotoObjs.add({
+                                  'url': url,
+                                  'name': doc.path.split('/').last
+                                });
+                                docUrls.add(url);
+                              }
                             }
+
+                            List<Map<String, dynamic>> installDocObjs = [];
                             String? reportUrl;
-                            if (installationReport != null) {
-                              final res = await api
-                                  .uploadComplaintImage(installationReport!);
-                              reportUrl = res.data['url'];
+                            for (var doc in installationReports) {
+                              final res = await api.uploadComplaintImage(doc);
+                              if (res.data != null && res.data['url'] != null) {
+                                final url = res.data['url'].toString();
+                                reportUrl ??= url;
+                                installDocObjs.add({
+                                  'url': url,
+                                  'name': doc.path.split('/').last
+                                });
+                                docUrls.add(url);
+                              }
                             }
 
                             await api.resolveComplaint(
@@ -729,13 +1079,22 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                               imageUrls,
                               closureReason: reasonController.text,
                               statusOnWorkCompletion: statusController.text,
-                              jobCompletedSatisfactorily: jobSatisfactory,
+                              jobCompletedSatisfactorily: true,
                               completionDate: completionDate,
                               completionTime: completionTime,
                               pmChecklistData: isPm ? pmData : null,
                               equipmentPhotoUrl: equipUrl,
                               serialNumberPhotoUrl: serialUrl,
                               installationReportUrl: reportUrl,
+                              equipmentPhotos: equipPhotoObjs.isNotEmpty
+                                  ? equipPhotoObjs
+                                  : null,
+                              serialNumberPhotos: serialPhotoObjs.isNotEmpty
+                                  ? serialPhotoObjs
+                                  : null,
+                              installationDocuments: installDocObjs.isNotEmpty
+                                  ? installDocObjs
+                                  : null,
                               serialNumber: noSerialNumber
                                   ? 'NA'
                                   : serialNumberController.text.trim(),
@@ -748,8 +1107,9 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                                 const SnackBar(
                                     content:
                                         Text('Closure workflow initiated.')));
-                            if (Navigator.canPop(context))
+                            if (Navigator.canPop(context)) {
                               Navigator.pop(context);
+                            }
                           } catch (e) {
                             setStateDialog(() => isSubmitting = false);
                             if (!mounted) return;
@@ -784,9 +1144,8 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final statusColor = _getStatusColor(widget.complaint.status);
-    final dateStr = DateFormat('dd MMM yyyy').format(widget.complaint.complaintDate);
-    final timeStr = widget.complaint.complaintTime ?? DateFormat('hh:mm a').format(widget.complaint.complaintDate);
-    final formattedDate = '$dateStr, $timeStr';
+    final formattedDate =
+        DateFormat('dd MMM yyyy, hh:mm a').format(widget.complaint.complaintDate);
 
     // Determine which actions to show based on web app logic
     final isAssigned = widget.complaint.status == 'Assigned' ||

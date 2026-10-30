@@ -506,7 +506,7 @@ class _EditComplaintScreenState extends State<EditComplaintScreen> {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Failed to log issue. Please try again.'),
+          content: Text('Failed to update complaint. Please try again.'),
           backgroundColor: Color(0xFFDC2626),
         ),
       );
@@ -746,6 +746,7 @@ class _EditComplaintScreenState extends State<EditComplaintScreen> {
                       focusNode: focusNode,
                       decoration: InputDecoration(
                         labelText: 'Equipment (Optional)',
+                        hintText: 'Search by equipment code, name, or make...',
                         prefixIcon:
                             const Icon(Icons.precision_manufacturing_outlined),
                         suffixIcon: _selectedEquipment != null
@@ -911,7 +912,7 @@ class _EditComplaintScreenState extends State<EditComplaintScreen> {
                   child: ElevatedButton(
                     onPressed: _submitComplaint,
                     child: const Text(
-                      'Log Issue / File Complaint',
+                      'Save Complaint',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

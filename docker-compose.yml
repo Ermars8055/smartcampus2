@@ -38,6 +38,8 @@ services:
       ENV: production
     ports:
       - "8007:8000"
+    volumes:
+      - uploads_data:/app/uploads
     networks:
       - backend-net
       - frontend-net
@@ -92,3 +94,4 @@ networks:
 
 volumes:
   pgdata:
+  uploads_data:

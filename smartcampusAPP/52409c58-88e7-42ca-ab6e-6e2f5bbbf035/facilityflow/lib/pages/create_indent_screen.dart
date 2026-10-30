@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
 import 'package:facilityflow/widgets/forms/app_dropdown_field.dart';
 import 'package:facilityflow/widgets/forms/bottom_picker_helper.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +35,6 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   List<dynamic> _buildingsList = [];
   List<dynamic> _floorsList = [];
   List<dynamic> _roomsList = [];
-  List<dynamic> _materialsList = [];
   List<dynamic> _storesList = [];
 
   String? _selectedInstitutionId;
@@ -48,8 +45,6 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   String? _selectedStoreId;
   String? _selectedStoreName;
 
-  File? _attachment;
-
   final List<Map<String, dynamic>> _addedItems = [];
 
   bool _isLoading = true;
@@ -59,6 +54,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     super.initState();
     if (widget.cloneFrom != null) {
       _remarksController.text = widget.cloneFrom!.remarks;
+      _addedItems.clear();
       for (var item in widget.cloneFrom!.items) {
         _addedItems.add({
           'material_id': item.materialId,
@@ -87,7 +83,6 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
       final instRes = await api.getInstitutions();
       final deptRes = await api.getDepartments();
       final bldgRes = await api.getBuildings();
-      
 
       // Fetch Stores if available
       List<dynamic> fetchedStores = [];
@@ -103,20 +98,24 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
           _institutions = instRes.data ?? [];
           _allDepartments = deptRes.data ?? [];
           _allBuildings = bldgRes.data ?? [];
-          
           _storesList = fetchedStores;
-          
-
-
-          if (_institutions.length == 1) {
-            _selectedInstitutionId = _institutions[0]['id'].toString();
-            _handleInstitutionChange(_selectedInstitutionId!);
-          } else {
-            _departmentsList =
-                _allDepartments.map((d) => d['name']).toSet().toList();
-          }
-          _isLoading = false;
         });
+
+        if (widget.cloneFrom != null) {
+          await _populateFromDraft(widget.cloneFrom!);
+        } else if (_institutions.length == 1) {
+          _selectedInstitutionId = _institutions[0]['id'].toString();
+          _handleInstitutionChange(_selectedInstitutionId!);
+        } else {
+          _departmentsList =
+              _allDepartments.map((d) => d['name']).toSet().toList();
+        }
+
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     } catch (e) {
       if (!mounted) return;
@@ -124,6 +123,76 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to load form data')),
       );
+    }
+  }
+
+  Future<void> _populateFromDraft(Indent ind) async {
+    if (ind.institutionId != null) {
+      _selectedInstitutionId = ind.institutionId.toString();
+      _handleInstitutionChange(_selectedInstitutionId!);
+    } else if (ind.institutionName.isNotEmpty) {
+      final matchedInst = _institutions.firstWhere(
+        (inst) =>
+            inst['name'].toString().toLowerCase() ==
+            ind.institutionName.toLowerCase(),
+        orElse: () => null,
+      );
+      if (matchedInst != null) {
+        _selectedInstitutionId = matchedInst['id'].toString();
+        _handleInstitutionChange(_selectedInstitutionId!);
+      }
+    } else if (_institutions.length == 1) {
+      _selectedInstitutionId = _institutions[0]['id'].toString();
+      _handleInstitutionChange(_selectedInstitutionId!);
+    } else {
+      _departmentsList =
+          _allDepartments.map((d) => d['name']).toSet().toList();
+    }
+
+    if (ind.department.isNotEmpty) {
+      await _handleDepartmentChange(ind.department);
+      if (mounted) {
+        setState(() {
+          _selectedDepartmentName = ind.department;
+          if (ind.buildingId != null) {
+            _selectedBuildingId = ind.buildingId.toString();
+          } else if (ind.buildingName.isNotEmpty) {
+            final b = _buildingsList.firstWhere(
+              (bg) =>
+                  bg['name'].toString().toLowerCase() ==
+                  ind.buildingName.toLowerCase(),
+              orElse: () => null,
+            );
+            if (b != null) _selectedBuildingId = b['id'].toString();
+          }
+
+          if (ind.floor.isNotEmpty && _floorsList.isNotEmpty) {
+            final f = _floorsList.firstWhere(
+              (fl) =>
+                  fl['name'].toString().toLowerCase() ==
+                  ind.floor.toLowerCase(),
+              orElse: () => null,
+            );
+            if (f != null) {
+              _selectedFloorId = f['id'].toString();
+            }
+          }
+
+          if (ind.roomId != null) {
+            _selectedRoomId = ind.roomId.toString();
+          } else if (ind.roomName.isNotEmpty || ind.location.isNotEmpty) {
+            final targetRoom =
+                ind.roomName.isNotEmpty ? ind.roomName : ind.location;
+            final r = _roomsList.firstWhere(
+              (rm) =>
+                  rm['name'].toString().toLowerCase() ==
+                  targetRoom.toLowerCase(),
+              orElse: () => null,
+            );
+            if (r != null) _selectedRoomId = r['id'].toString();
+          }
+        });
+      }
     }
   }
 
@@ -333,38 +402,6 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     });
   }
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text('Camera'),
-              onTap: () => Navigator.of(context).pop(ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
-              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (source != null) {
-      final pickedFile = await picker.pickImage(source: source);
-      if (pickedFile != null) {
-        setState(() {
-          _attachment = File(pickedFile.path);
-        });
-      }
-    }
-  }
-
   @override
   void dispose() {
     _remarksController.dispose();
@@ -394,7 +431,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
 
 
 
-  Future<void> _submitIndent() async {
+  Future<void> _submitIndent({bool isDraft = false}) async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -413,7 +450,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     final validItems = _addedItems
         .where((item) =>
             item['material_id'] != null &&
-            (item['requestedQuantity'] as double) > 0)
+            (item['requestedQuantity'] as num? ?? 0) > 0)
         .toList();
     if (validItems.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -430,19 +467,29 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
         (r) => r['id'].toString() == _selectedRoomId,
         orElse: () => null);
 
+    final isEditingDraft =
+        (widget.cloneFrom != null && widget.cloneFrom!.status == 'Draft') ||
+        (widget.indentId != null);
+    final targetId = widget.indentId ?? widget.cloneFrom?.id;
+
     final payload = {
       'institution_id': int.tryParse(_selectedInstitutionId!),
       'department': _selectedDepartmentName,
       'building_id': _selectedBuildingId != null
           ? int.tryParse(_selectedBuildingId!)
           : null,
-      'floor': selectedFloor != null ? selectedFloor['name'] : '',
-      'location': selectedRoom != null ? selectedRoom['name'] : '',
+      'floor': selectedFloor != null
+          ? selectedFloor['name']
+          : (widget.cloneFrom?.floor ?? ''),
+      'location': selectedRoom != null
+          ? selectedRoom['name']
+          : (widget.cloneFrom?.location ?? ''),
       'room_id':
           _selectedRoomId != null ? int.tryParse(_selectedRoomId!) : null,
       'store_id':
           _selectedStoreId != null ? int.tryParse(_selectedStoreId!) : null,
       'remarks': _remarksController.text.trim(),
+      'is_draft': isDraft,
       if (widget.linkedComplaintId != null)
         'complaint_id': widget.linkedComplaintId,
       'items': validItems
@@ -456,16 +503,16 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
+      builder: (context) => Center(
         child: Card(
           child: Padding(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Submitting Request...'),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                Text(isDraft ? 'Saving Draft...' : 'Submitting Indent...'),
               ],
             ),
           ),
@@ -476,37 +523,38 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     try {
       final api = ApiService();
 
-      if (_attachment != null) {
-        final uploadRes = await api.uploadComplaintImage(_attachment!);
-        if (uploadRes.data != null && uploadRes.data['path'] != null) {
-          payload['attachment_url'] = uploadRes.data['path'];
-        }
+      if (isEditingDraft && targetId != null) {
+        await api.dio.put('/api/indents/$targetId', data: payload);
+      } else {
+        await api.dio.post('/api/indents', data: payload);
       }
-
-      await api.dio.post('/api/indents', data: payload);
 
       if (!mounted) return;
       final appState = AppState.of(context, listen: false);
       await appState.fetchIndents(); // Refresh list
 
       if (!mounted) return;
-      Navigator.pop(context);
+      Navigator.pop(context); // Dismiss loading dialog
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Indent request created successfully!'),
-          backgroundColor: Color(0xFF059669),
+        SnackBar(
+          content: Text(isDraft
+              ? 'Draft saved successfully!'
+              : (isEditingDraft
+                  ? 'Indent updated and submitted!'
+                  : 'Indent request created successfully!')),
+          backgroundColor: const Color(0xFF059669),
         ),
       );
       if (Navigator.canPop(context)) {
-        Navigator.pop(context);
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (!mounted) return;
-      Navigator.pop(context);
+      Navigator.pop(context); // Dismiss loading dialog
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to submit request. Please try again.'),
-          backgroundColor: Color(0xFFDC2626),
+        SnackBar(
+          content: Text('Failed to ${isDraft ? "save draft" : "submit request"}. Please try again.'),
+          backgroundColor: const Color(0xFFDC2626),
         ),
       );
     }
@@ -518,18 +566,25 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final isEditingDraft =
+        (widget.cloneFrom != null && widget.cloneFrom!.status == 'Draft') ||
+        (widget.indentId != null);
+    final screenTitle = isEditingDraft
+        ? 'Edit Draft Indent'
+        : (widget.cloneFrom != null ? 'Clone Indent' : 'Create Indent');
+
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Create Indent')),
+        appBar: AppBar(title: Text(screenTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Create Indent',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          screenTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
       body: SafeArea(
@@ -675,36 +730,6 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                   ),
                 ],
                 const SizedBox(height: 16),
-                InkWell(
-                  onTap: _pickImage,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: Colors.grey.shade400,
-                          style: BorderStyle.solid),
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.grey.shade50,
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(Icons.camera_alt_outlined,
-                            color: Colors.grey.shade600, size: 32),
-                        const SizedBox(height: 8),
-                        Text(
-                          _attachment != null
-                              ? 'Image Attached: ${_attachment!.path.split('/').last}'
-                              : 'Attach Photo (Optional)',
-                          style: TextStyle(
-                              color: Colors.grey.shade700, fontSize: 14),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
                 TextFormField(
                   controller: _remarksController,
                   maxLines: 3,
@@ -822,17 +847,43 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _submitIndent,
-                    child: const Text(
-                      'Submit Indent Request',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: BorderSide(color: theme.colorScheme.primary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () => _submitIndent(isDraft: true),
+                        child: const Text(
+                          'Save as Draft',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () => _submitIndent(isDraft: false),
+                        child: Text(
+                          isEditingDraft ? 'Update & Submit' : 'Submit Indent',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

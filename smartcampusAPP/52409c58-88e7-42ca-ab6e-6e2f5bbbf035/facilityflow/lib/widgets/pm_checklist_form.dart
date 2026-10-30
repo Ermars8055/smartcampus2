@@ -34,6 +34,7 @@ class _PMChecklistFormState extends State<PMChecklistForm> {
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration(
           labelText: label,
+          hintText: 'Select',
           border: const OutlineInputBorder(),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

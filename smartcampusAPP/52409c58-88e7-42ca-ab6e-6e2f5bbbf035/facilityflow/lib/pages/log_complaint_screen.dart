@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:facilityflow/globals/app_state.dart';
 import 'package:facilityflow/services/api_service.dart';
@@ -392,6 +393,10 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
         (r) => r['id'].toString() == _selectedRoomId,
         orElse: () => null);
 
+    final now = DateTime.now();
+    final complaintDateStr = DateFormat('yyyy-MM-dd').format(now);
+    final complaintTimeStr = DateFormat('HH:mm').format(now);
+
     final payload = <String, dynamic>{
       'institution_id': int.tryParse(_selectedInstitutionId!),
       'department_name': _selectedDepartmentName,
@@ -405,6 +410,8 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
       'location': selectedRoom != null
           ? selectedRoom['name']
           : (selectedFloor != null ? selectedFloor['name'] : ''),
+      'complaint_date': complaintDateStr,
+      'complaint_time': complaintTimeStr,
       'nature_of_complaint': nature,
       'individual_detailed': description,
       'name_and_trade': _nameTradeController.text.trim(),
@@ -463,7 +470,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Failed to log issue. Please try again.'),
+          content: Text('Failed to raise complaint. Please try again.'),
           backgroundColor: Color(0xFFDC2626),
         ),
       );
@@ -517,7 +524,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
 
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Log Complaint')),
+        appBar: AppBar(title: const Text('Raise New Complaint')),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -525,7 +532,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Log Complaint',
+          'Raise New Complaint',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
@@ -698,6 +705,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                       focusNode: focusNode,
                       decoration: InputDecoration(
                         labelText: 'Equipment (Optional)',
+                        hintText: 'Search by equipment code, name, or make...',
                         prefixIcon:
                             const Icon(Icons.precision_manufacturing_outlined),
                         suffixIcon: _selectedEquipment != null
@@ -863,7 +871,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                   child: ElevatedButton(
                     onPressed: _submitComplaint,
                     child: const Text(
-                      'Log Issue / File Complaint',
+                      'Submit Complaint',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

@@ -517,14 +517,21 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                           child: InkWell(
                             borderRadius: BorderRadius.circular(12),
                             onTap: () {
+                              final appState = context.read<AppState>();
                               if (indent.status == 'Draft') {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        CreateIndentScreen(cloneFrom: indent),
+                                    builder: (context) => CreateIndentScreen(
+                                      cloneFrom: indent,
+                                      indentId: indent.id,
+                                    ),
                                   ),
-                                );
+                                ).then((val) {
+                                  if (mounted) {
+                                    appState.fetchIndents(isSilentUpdate: true);
+                                  }
+                                });
                               } else {
                                 Navigator.push(
                                   context,
@@ -532,7 +539,11 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                                     builder: (context) =>
                                         IndentDetailScreen(indent: indent),
                                   ),
-                                );
+                                ).then((val) {
+                                  if (mounted) {
+                                    appState.fetchIndents(isSilentUpdate: true);
+                                  }
+                                });
                               }
                             },
                             child: Padding(

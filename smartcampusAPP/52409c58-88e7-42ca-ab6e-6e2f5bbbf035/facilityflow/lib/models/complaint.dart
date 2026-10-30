@@ -43,15 +43,61 @@ class Complaint {
     this.managerApprovedAt,
     this.documents = const [],
     this.managerApprovedById,
+    this.pmChecklistData,
+    this.completionDate,
+    this.completionTime,
+    this.jobCompletedSatisfactorily,
   });
 
   factory Complaint.fromJson(Map<String, dynamic> json) {
     return Complaint(
       id: json['id'] as int? ?? 0,
       docketNo: json['docket_no'] as String? ?? '',
-      complaintDate: json['complaint_date'] != null
-          ? DateTime.parse(json['complaint_date'] as String)
-          : DateTime.now(),
+      complaintDate: () {
+        DateTime parsedDate = json['complaint_date'] != null
+            ? DateTime.tryParse(json['complaint_date'] as String) ?? DateTime.now()
+            : (json['created_at'] != null
+                ? DateTime.tryParse(json['created_at'] as String)?.toLocal() ?? DateTime.now()
+                : DateTime.now());
+
+        final timeStr = json['complaint_time'] as String?;
+        if (timeStr != null && timeStr.trim().isNotEmpty) {
+          try {
+            final trimmed = timeStr.trim();
+            final parts = trimmed.split(' ');
+            final timeParts = parts[0].split(':');
+            int hour = int.parse(timeParts[0]);
+            int minute = int.parse(timeParts[1]);
+            if (parts.length > 1) {
+              final ampm = parts[1].toUpperCase();
+              if (ampm == 'PM' && hour < 12) hour += 12;
+              if (ampm == 'AM' && hour == 12) hour = 0;
+            }
+            parsedDate = DateTime(
+              parsedDate.year,
+              parsedDate.month,
+              parsedDate.day,
+              hour,
+              minute,
+            );
+          } catch (_) {}
+        } else if (json['created_at'] != null) {
+          try {
+            final createdAt = DateTime.tryParse(json['created_at'] as String)?.toLocal();
+            if (createdAt != null) {
+              parsedDate = DateTime(
+                parsedDate.year,
+                parsedDate.month,
+                parsedDate.day,
+                createdAt.hour,
+                createdAt.minute,
+                createdAt.second,
+              );
+            }
+          } catch (_) {}
+        }
+        return parsedDate;
+      }(),
       complaintTime: json['complaint_time'] as String?,
       location: (json['location'] as String?)?.isNotEmpty == true 
           ? json['location'] as String 
@@ -86,6 +132,15 @@ class Complaint {
       installationReportUrl: json['installation_report_url'] as String?,
       institutionId: json['institution_id'] as int?,
       isPmCalibrationCall: json['is_pm_calibration_call'] as bool? ?? false,
+      pmChecklistData: json['pm_checklist_data'] is Map<String, dynamic>
+          ? json['pm_checklist_data'] as Map<String, dynamic>
+          : (json['pm_checklist_data'] is Map
+              ? Map<String, dynamic>.from(json['pm_checklist_data'] as Map)
+              : null),
+      completionDate: json['completion_date']?.toString(),
+      completionTime: json['completion_time']?.toString(),
+      jobCompletedSatisfactorily:
+          json['job_completed_satisfactorily'] as bool?,
       adminApprovedByName: json['admin_approved_by_name'] as String?,
       managerApprovedByName: json['manager_approved_by_name'] as String?,
       adminApprovedAt: json['admin_approved_at'] as String?,
@@ -154,6 +209,10 @@ class Complaint {
   final String complaintType;
   final int? adminApprovedById;
   final int? managerApprovedById;
+  final Map<String, dynamic>? pmChecklistData;
+  final String? completionDate;
+  final String? completionTime;
+  final bool? jobCompletedSatisfactorily;
 
   Map<String, dynamic> toJson() {
     return {

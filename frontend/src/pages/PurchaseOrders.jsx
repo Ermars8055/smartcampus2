@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { useMessage } from '../context/MessageContext';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
@@ -1744,7 +1745,7 @@ export default function PurchaseOrders() {
             <Box sx={{ mt: 3, p: 2, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
               <Typography variant="caption" sx={{ fontWeight: 700, color: '#1e293b', display: 'block', mb: 1 }}>ANNEXURE FOR {detailDialog?.po_number}:</Typography>
               {detailDialog?.annexure ? (
-                <Box sx={{ color: '#334155', fontSize: '0.8rem', '& p': { margin: 0, padding: 0 } }} dangerouslySetInnerHTML={{ __html: detailDialog.annexure.includes('<') ? detailDialog.annexure : detailDialog.annexure.replace(/\n/g, '<br/>') }} />
+                <Box sx={{ color: '#334155', fontSize: '0.8rem', '& p': { margin: 0, padding: 0 } }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(detailDialog.annexure.includes('<') ? detailDialog.annexure : detailDialog.annexure.replace(/\n/g, '<br/>')) }} />
               ) : (
                 <Typography variant="body2" sx={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.8rem' }}>
                   No annexure provided.
@@ -2482,7 +2483,7 @@ export default function PurchaseOrders() {
               <Box>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>EMAIL BODY PREVIEW</Typography>
                 <Box sx={{ bgcolor: '#fff', border: '1px solid #e2e8f0', borderRadius: 1.5, p: 2.5, maxHeight: 280, overflow: 'auto', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.04)' }}>
-                  <div dangerouslySetInnerHTML={{ __html: emailPreview.data.html_body }} />
+                  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(emailPreview.data.html_body) }} />
                 </Box>
               </Box>
             </Box>

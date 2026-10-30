@@ -41,9 +41,12 @@ export function AuthProvider({ children }) {
     const savedUser = localStorage.getItem('user');
     const savedTenant = localStorage.getItem('tenant');
     if (token && savedUser) {
-      const u = JSON.parse(savedUser);
+      let u, t;
+      try { u = JSON.parse(savedUser); } catch { u = null; }
+      try { t = savedTenant ? JSON.parse(savedTenant) : null; } catch { t = null; }
+      if (!u) { logout(); setLoading(false); return; }
       setUser(u);
-      if (savedTenant) setTenant(JSON.parse(savedTenant));
+      if (t) setTenant(t);
       api.get('/api/auth/me').then(res => {
         const data = res.data;
         setUser({ id: data.id, username: data.username, email: data.email, full_name: data.full_name, is_platform_admin: data.is_platform_admin });

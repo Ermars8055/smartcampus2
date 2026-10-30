@@ -7,7 +7,7 @@ from typing import Optional, List
 from app.database import get_db
 from app.models import Vendor, VendorCategory, Category, User, VendorStatus, ApprovalFlow, VendorApproval, VendorHistory
 from app.schemas import VendorCreate, VendorUpdate, VendorOut, VendorApprovalCreate, VendorHistoryOut
-from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
+from app.auth import get_current_user, require_permission, require_action, get_tenant_id, get_site_id
 from app.utils.sequences import get_next_number
 from datetime import datetime
 
@@ -267,7 +267,7 @@ def approve_vendor(
     id: int,
     data: Optional[VendorApprovalCreate] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_action("vendors", "can_approve")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -352,7 +352,7 @@ def reject_vendor(
     id: int,
     data: VendorApprovalCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_action("vendors", "can_reject")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):

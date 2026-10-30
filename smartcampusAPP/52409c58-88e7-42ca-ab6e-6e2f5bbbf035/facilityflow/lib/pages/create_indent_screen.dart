@@ -13,10 +13,11 @@ import 'package:facilityflow/models/indent.dart';
 @NowaGenerated()
 class CreateIndentScreen extends StatefulWidget {
   @NowaGenerated({'loader': 'auto-constructor'})
-  const CreateIndentScreen({super.key, this.linkedComplaintId, this.cloneFrom});
+  const CreateIndentScreen({super.key, this.linkedComplaintId, this.cloneFrom, this.indentId});
 
   final int? linkedComplaintId;
   final Indent? cloneFrom;
+  final int? indentId;
 
   @override
   State<CreateIndentScreen> createState() => _CreateIndentScreenState();

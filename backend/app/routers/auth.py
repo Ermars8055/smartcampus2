@@ -1,18 +1,26 @@
 """Auth router with workspace-based login (like OHC NG)."""
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+import secrets
+import logging
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from pydantic import BaseModel
 from typing import Optional, List
 from app.database import get_db
 from app.models import User, Tenant, TenantMembership, Role, RolePermission, UserRoleAssignment, Site, DataAccessScope, PasswordResetToken
-from app.auth import verify_password, get_password_hash, create_access_token, get_current_user
+from app.auth import (verify_password, get_password_hash, create_access_token,
+                      create_refresh_token, get_current_user, blocklist_token,
+                      validate_password_strength, SECRET_KEY, ALGORITHM)
 from app.models import AuditLog
-import random
-import string
+from jose import JWTError, jwt
 from datetime import timedelta
 from app.utils.tz import get_now_ist
 from app.utils.email_utils import send_html_email
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+log = logging.getLogger(__name__)
+limiter = Limiter(key_func=get_remote_address)
 
 SCOPE_RANKS = {
     "Self Only": 1,
@@ -41,7 +49,6 @@ class ChangePasswordRequest(BaseModel):
 
 class ForgotPasswordRequest(BaseModel):
     email: str
-    frontend_url: str
 
 class ResetPasswordRequest(BaseModel):
     email: str
@@ -55,25 +62,28 @@ def list_workspaces(db: Session = Depends(get_db)):
     return [{"slug": t.slug, "name": t.name} for t in tenants]
 
 @router.post("/login")
-def login(request: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(func.lower(User.username) == request.username.lower(), User.is_deleted == False).first()
-    if not user or not verify_password(request.password, user.hashed_password):
+@limiter.limit("10/minute")
+def login(request: Request, body: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(func.lower(User.username) == body.username.lower(), User.is_deleted == False).first()
+    if not user or not verify_password(body.password, user.hashed_password):
         raise HTTPException(401, "Invalid credentials")
     if not user.is_active:
         raise HTTPException(403, "Account disabled")
 
     # Platform admin login (no workspace needed)
-    if user.is_platform_admin and not request.workspace:
-        token = create_access_token({
+    if user.is_platform_admin and not body.workspace:
+        token_data = {
             "sub": user.username, "is_platform_admin": True,
             "tenant_id": None, "site_ids": [], "roles": [], "permissions": {},
             "data_access_scope": "Full Administrative Access"
-        })
-        # Removed manual AuditLog
-        # db.add(AuditLog(user_id=user.id, action="LOGIN", entity_type="User", entity_id=user.id))
+        }
+        token = create_access_token(token_data)
+        refresh = create_refresh_token(token_data)
+        log.info("LOGIN: user=%s (platform_admin)", user.username)
         db.commit()
         return {
             "access_token": token,
+            "refresh_token": refresh,
             "token_type": "bearer",
             "user": {
                 "id": user.id,
@@ -90,10 +100,19 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         }
 
     # Workspace required for non-platform-admins
-    if not request.workspace:
+    if not body.workspace:
         raise HTTPException(400, "Workspace ID is required")
 
-    tenant = db.query(Tenant).filter(Tenant.slug == request.workspace.lower()).first()
+    cleaned_ws = body.workspace.lower().strip()
+    normalized_ws = cleaned_ws.replace("-", "").replace("_", "").replace(" ", "")
+    tenant = db.query(Tenant).filter(
+        or_(
+            Tenant.slug == cleaned_ws,
+            Tenant.slug == normalized_ws,
+            func.lower(Tenant.name) == cleaned_ws,
+            func.lower(Tenant.name) == normalized_ws
+        )
+    ).first()
     if not tenant:
         raise HTTPException(404, "Workspace not found")
     if tenant.status != "Active":
@@ -157,7 +176,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         sites_db = db.query(Site).filter(Site.id.in_(site_ids)).all()
         sites_info = [{"id": s.id, "name": s.name, "location": s.location} for s in sites_db]
 
-    token = create_access_token({
+    token_data = {
         "sub": user.username,
         "tenant_id": tenant.id,
         "site_ids": site_ids,
@@ -165,13 +184,14 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         "roles": roles,
         "is_platform_admin": user.is_platform_admin,
         "data_access_scope": data_access_scope
-    })
-        # Removed manual AuditLog
-        # db.add(AuditLog(tenant_id=tenant.id, user_id=user.id, action="LOGIN", entity_type="User", entity_id=user.id))
+    }
+    token = create_access_token(token_data)
+    refresh = create_refresh_token(token_data)
+    log.info("LOGIN: user=%s tenant=%s", user.username, tenant.slug)
     db.commit()
 
     return {
-        "access_token": token, "token_type": "bearer",
+        "access_token": token, "refresh_token": refresh, "token_type": "bearer",
         "user": {"id": user.id, "username": user.username, "email": user.email, "full_name": user.full_name},
         "tenant": {"id": tenant.id, "name": tenant.name, "slug": tenant.slug},
         "sites": sites_info,
@@ -180,6 +200,46 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         "permissions": permissions,
         "data_access_scope": data_access_scope
     }
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+@router.post("/refresh")
+def refresh_token(body: RefreshRequest, db: Session = Depends(get_db)):
+    """Issue a new access token using a valid refresh token."""
+    try:
+        payload = jwt.decode(body.refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "refresh":
+            raise HTTPException(401, "Invalid token type")
+        username = payload.get("sub")
+        if not username:
+            raise HTTPException(401, "Invalid token")
+    except JWTError:
+        raise HTTPException(401, "Invalid or expired refresh token")
+    user = db.query(User).filter(User.username == username, User.is_deleted == False).first()
+    if not user or not user.is_active:
+        raise HTTPException(401, "User not found or inactive")
+    # Re-issue access token with minimal claims
+    new_token = create_access_token({"sub": user.username, "is_platform_admin": user.is_platform_admin,
+                                      "tenant_id": payload.get("tenant_id"), "site_ids": payload.get("site_ids", []),
+                                      "roles": payload.get("roles", []), "data_access_scope": payload.get("data_access_scope", "Self Only")})
+    return {"access_token": new_token, "token_type": "bearer"}
+
+@router.post("/logout")
+def logout(request: Request, current_user: User = Depends(get_current_user)):
+    """Revoke the current access token."""
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header.replace("Bearer ", "") if auth_header.startswith("Bearer ") else ""
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            jti = payload.get("jti")
+            if jti:
+                blocklist_token(jti)
+        except JWTError:
+            pass
+    log.info("LOGOUT: user=%s", current_user.username)
+    return {"message": "Logged out successfully"}
 
 @router.get("/me")
 def get_me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -250,18 +310,23 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
 def change_password(req: ChangePasswordRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not verify_password(req.current_password, current_user.hashed_password):
         raise HTTPException(400, "Current password incorrect")
+    pwd_err = validate_password_strength(req.new_password)
+    if pwd_err:
+        raise HTTPException(400, pwd_err)
     current_user.hashed_password = get_password_hash(req.new_password)
     db.commit()
+    log.info("PASSWORD_CHANGE: user=%s", current_user.username)
     return {"message": "Password changed"}
 
 @router.post("/forgot-password")
-def forgot_password(req: ForgotPasswordRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def forgot_password(request: Request, req: ForgotPasswordRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     user = db.query(User).filter(func.lower(User.email) == req.email.lower(), User.is_deleted == False).first()
     if not user:
-        raise HTTPException(404, "User not found")
-        
-    # Generate 10-char alphanumeric token
-    token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        return {"message": "A password reset link has been sent to your email address"}
+
+    # Generate secure token
+    token = secrets.token_urlsafe(32)
     
     # Invalidate previous tokens
     db.query(PasswordResetToken).filter(PasswordResetToken.user_id == user.id).delete()
@@ -276,7 +341,8 @@ def forgot_password(req: ForgotPasswordRequest, background_tasks: BackgroundTask
     db.commit()
     
     # Send Email
-    reset_link = f"{req.frontend_url}/reset-password?token={token}&email={user.email}"
+    from app.config import FRONTEND_URL
+    reset_link = f"{FRONTEND_URL}/reset-password?token={token}&email={user.email}"
     subject = "Password Reset - Eastpoint Smart Campus"
     html_body = f"""
     <p>Dear {user.full_name},</p>
@@ -291,27 +357,34 @@ def forgot_password(req: ForgotPasswordRequest, background_tasks: BackgroundTask
     return {"message": "A password reset link has been sent to your email address"}
 
 @router.post("/reset-password")
-def reset_password(req: ResetPasswordRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def reset_password(request: Request, req: ResetPasswordRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    # Prevent user enumeration — use generic error for all failures
+    generic_error = "Invalid or expired reset link"
     user = db.query(User).filter(func.lower(User.email) == req.email.lower(), User.is_deleted == False).first()
     if not user:
-        raise HTTPException(404, "User not found")
-        
+        raise HTTPException(400, generic_error)
+
     token_entry = db.query(PasswordResetToken).filter(
         PasswordResetToken.user_id == user.id,
-        PasswordResetToken.otp == req.token
     ).first()
-    
-    if not token_entry:
-        raise HTTPException(400, "Invalid or expired reset link")
-        
+
+    # Constant-time comparison to prevent timing attacks
+    if not token_entry or not secrets.compare_digest(token_entry.otp, req.token):
+        raise HTTPException(400, generic_error)
+
     if token_entry.expires_at < get_now_ist().replace(tzinfo=None):
         raise HTTPException(400, "Reset link has expired")
-        
-    # Reset password
+
+    # Validate password strength
+    pwd_err = validate_password_strength(req.new_password)
+    if pwd_err:
+        raise HTTPException(400, pwd_err)
     user.hashed_password = get_password_hash(req.new_password)
     db.query(PasswordResetToken).filter(PasswordResetToken.user_id == user.id).delete()
     db.commit()
-    
+    log.info("PASSWORD_RESET: user=%s", user.username)
+
     # Send Confirmation Email
     subject = "Password Reset Successful - Eastpoint Smart Campus"
     html_body = f"""
@@ -321,5 +394,5 @@ def reset_password(req: ResetPasswordRequest, background_tasks: BackgroundTasks,
     <p>Regards,<br>Eastpoint Smart Campus</p>
     """
     background_tasks.add_task(send_html_email, user.email, subject, html_body)
-    
+
     return {"message": "Password reset successfully"}

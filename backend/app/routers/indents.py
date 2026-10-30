@@ -225,8 +225,8 @@ def create_indent(
     except Exception as e:
         db.rollback()
         import logging
-        logging.error(f"Error creating indent: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        logging.getLogger(__name__).error(f"Error creating indent: {str(e)}")
+        raise HTTPException(status_code=500, detail="An internal error occurred")
 
     
     indent.requester_name = current_user.full_name

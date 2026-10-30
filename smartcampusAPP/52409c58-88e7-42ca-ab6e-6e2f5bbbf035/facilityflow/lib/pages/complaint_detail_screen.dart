@@ -784,8 +784,9 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final statusColor = _getStatusColor(widget.complaint.status);
-    final formattedDate = DateFormat('dd MMM yyyy, hh:mm a')
-        .format(widget.complaint.complaintDate);
+    final dateStr = DateFormat('dd MMM yyyy').format(widget.complaint.complaintDate);
+    final timeStr = widget.complaint.complaintTime ?? DateFormat('hh:mm a').format(widget.complaint.complaintDate);
+    final formattedDate = '$dateStr, $timeStr';
 
     // Determine which actions to show based on web app logic
     final isAssigned = widget.complaint.status == 'Assigned' ||
@@ -803,8 +804,11 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.complaint.docketNo,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(widget.complaint.docketNo,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+        ),
       ),
       bottomNavigationBar: _buildBottomActionBar(
           isRegistered, isAssigned, isUnderInspection, isMaterialPending, isInProgress, isPendingApproval, isClosed),
@@ -853,7 +857,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                                 style: theme.textTheme.titleMedium
                                     ?.copyWith(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 12),
-                            Text('LOCATION / ROOM',
+                            Text('LOCATION / DEPT',
                                 style: theme.textTheme.bodySmall
                                     ?.copyWith(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
@@ -1203,9 +1207,8 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                         ),
                       ),
                     ],
-                    if (widget.complaint.status == 'Closed' &&
-                        (widget.complaint.resolutionEntered != null ||
-                            widget.complaint.resolutionRemarks.isNotEmpty)) ...[
+                    if ((widget.complaint.resolutionEntered != null && widget.complaint.resolutionEntered!.isNotEmpty) ||
+                        widget.complaint.resolutionRemarks.isNotEmpty || widget.complaint.closureReason != null) ...[
                       Text('Closure Details',
                           style: theme.textTheme.titleSmall
                               ?.copyWith(color: const Color(0xFF059669))),
@@ -1642,13 +1645,15 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
     }
 
     bool canStartRepair = _rwo != null ||
-        _materialIssues.isNotEmpty ||
-        _materialIndents.every((i) => i['status'] == 'Rejected');
+        (_materialIssues.isNotEmpty && _materialIssues.every((i) => i['is_acknowledged'] == true)) ||
+        (_materialIndents.isNotEmpty && _materialIndents.every((i) => i['status'] == 'Rejected'));
     bool canClose = true;
     if (_materialIndents.isNotEmpty) {
       canClose = _materialIndents.every((ind) =>
               ind['status'] == 'Issued' ||
               ind['status'] == 'Rejected' ||
+              ind['status'] == 'Partially Issued' ||
+              ind['status'] == 'Completed' ||
               ind['status'] == 'Closed') &&
           _materialIssues.every((i) => i['is_acknowledged'] == true);
     }

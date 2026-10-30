@@ -44,4 +44,5 @@ uvloop==0.22.1
 watchfiles==1.2.0
 websockets==16.0
 apscheduler==3.10.4
+slowapi==0.1.9
 cloudinary>=1.36.0

@@ -1,9 +1,12 @@
 """Eastpoint Smart Campus - FastAPI main application."""
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 import os, logging
 
 from app.config import APP_TITLE, APP_SUBTITLE, APP_VERSION, CORS_ORIGINS
@@ -50,23 +53,30 @@ async def lifespan(app: FastAPI):
     shutdown_scheduler()
 
 
+_is_production = os.getenv("ENV", "development") == "production"
 app = FastAPI(
     title=APP_TITLE,
     description=APP_SUBTITLE,
     version=APP_VERSION,
-    docs_url="/api/docs",
-    redoc_url="/api/redoc",
+    docs_url=None if _is_production else "/api/docs",
+    redoc_url=None if _is_production else "/api/redoc",
     lifespan=lifespan,
 )
 
-# Improved CORS middleware for local and production networking
+# Rate limiter
+from app.routers.auth import limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# CORS middleware — support Vercel, localhost, and custom domains with full header access
+origins = [o for o in CORS_ORIGINS if o != "*"]
+if not origins:
+    origins = ["https://smartcampus2.vercel.app"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5174",
-        "http://127.0.0.1:5174",
-        "http://0.0.0.0:5174",
-    ] + [f"http://192.168.0.{i}:5174" for i in range(1, 101)],
+    allow_origins=origins,
+    allow_origin_regex=r"^https://.*\.vercel\.app$|^https://.*\.onrender\.com$|^http://localhost(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -75,9 +85,11 @@ app.add_middleware(
 
 
 
-# Static files for uploads
+# Uploads directory
 os.makedirs("uploads", exist_ok=True)
-app.mount("/api/uploads", StaticFiles(directory="uploads"), name="uploads")
+# NOTE: Uploads are now served via authenticated endpoint in routers/uploads.py
+# If public access is intentionally needed, uncomment the line below:
+# app.mount("/api/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Register routers
 app.include_router(auth.router)
@@ -118,11 +130,7 @@ app.include_router(menus.router)
 app.include_router(credit_notes.router)
 @app.get("/api/health")
 def health_check():
-    return {
-        "status": "healthy",
-        "application": APP_TITLE,
-        "version": APP_VERSION
-    }
+    return {"status": "healthy"}
 
 
 @app.get("/api/config")
@@ -134,8 +142,25 @@ def get_app_config():
     }
 
 @app.websocket("/api/ws/indents")
-async def websocket_indents(websocket: WebSocket):
-    await manager.connect(websocket)
+async def websocket_indents(websocket: WebSocket, token: str = None):
+    # Authenticate WebSocket via query parameter: ws://host/api/ws/indents?token=JWT
+    if not token:
+        await websocket.close(code=1008, reason="Authentication required")
+        return
+    from jose import JWTError, jwt as jose_jwt
+    from app.config import SECRET_KEY, ALGORITHM
+    try:
+        payload = jose_jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if not payload.get("sub"):
+            await websocket.close(code=1008, reason="Invalid token")
+            return
+    except JWTError:
+        await websocket.close(code=1008, reason="Invalid or expired token")
+        return
+
+    connected = await manager.connect(websocket)
+    if not connected:
+        return
     try:
         while True:
             await websocket.receive_text()

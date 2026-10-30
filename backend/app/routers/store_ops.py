@@ -357,7 +357,9 @@ def create_issue(
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=400, detail=f"Creation Error: {str(e)}")
+        import logging
+        logging.getLogger(__name__).error(f"Creation Error: {str(e)}")
+        raise HTTPException(status_code=400, detail="An internal error occurred")
 
 
 @router.put("/issues/{issue_id}/acknowledge")

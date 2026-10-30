@@ -15,9 +15,9 @@ class ApiService {
 
   ApiService._internal() {
     // Load API URL from .env file
-    String baseUrl = dotenv.env['API_URL'] ?? '';
+    String baseUrl = dotenv.env['API_URL'] ?? 'https://smartcampus2.onrender.com';
     if (baseUrl.isEmpty) {
-      throw Exception('API_URL not found in .env file');
+      baseUrl = 'https://smartcampus2.onrender.com';
     }
 
     dio = Dio(
@@ -47,6 +47,7 @@ class ApiService {
         onError: (DioException e, handler) async {
           // Handle global API errors here (e.g., 401 Unauthorized -> logout)
           if (e.response?.statusCode == 401) {
+            clearCaches();
             const storage = FlutterSecureStorage();
             await storage.deleteAll();
             final prefs = await SharedPreferences.getInstance();
@@ -73,6 +74,12 @@ class ApiService {
   static Response? _instCache;
   static Response? _deptCache;
   static Response? _bldgCache;
+
+  static void clearCaches() {
+    _instCache = null;
+    _deptCache = null;
+    _bldgCache = null;
+  }
 
   // Lookups
   Future<Response> getInstitutions() async {

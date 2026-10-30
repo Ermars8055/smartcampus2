@@ -29,14 +29,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _initVideo() async {
-    _videoController =
-        VideoPlayerController.asset('assets/videos/login_bg.mp4');
-    await _videoController!.initialize();
-    _videoController!.setLooping(true);
-    _videoController!.setVolume(0.0);
-    _videoController!.play();
-    if (mounted) {
-      setState(() {});
+    try {
+      _videoController =
+          VideoPlayerController.asset('assets/videos/login_bg.mp4');
+      await _videoController!.initialize();
+      _videoController!.setLooping(true);
+      _videoController!.setVolume(0.0);
+      _videoController!.play();
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      debugPrint("Video init failed: $e");
     }
   }
 
@@ -50,6 +54,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
+    // Validate inputs before calling API
+    final workspace = _workspaceController.text.trim();
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+
+    if (workspace.isEmpty || username.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please fill in all fields.';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;

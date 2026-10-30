@@ -4,7 +4,7 @@
     <application
         android:label="facilityflow"
         android:name="${applicationName}"
-        android:usesCleartextTraffic="true"
+        android:usesCleartextTraffic="false"
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher">

@@ -69,6 +69,8 @@ def update_approval_flow(
         raise HTTPException(404, "Approval Flow not found")
         
     for k, v in data.dict().items():
+        if k in ("id", "tenant_id", "site_id", "created_at"):
+            continue
         setattr(flow, k, v)
         
     db.commit()

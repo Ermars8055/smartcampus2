@@ -315,7 +315,7 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
                                                 fontWeight: FontWeight.bold,
                                                 color: theme.colorScheme.primary,
                                               ),
-                                              overflow: TextOverflow.ellipsis,
+                                              softWrap: true,
                                             ),
                                           ),
                                           const SizedBox(width: 8),
@@ -379,7 +379,7 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
                                             child: Text(
                                               complaint.individualDetailed,
                                               maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
+                                              softWrap: true,
                                               style: theme.textTheme.bodySmall,
                                             ),
                                           ),
@@ -494,10 +494,10 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
                       ),
                     ],
                   ),
-                  // Right side: Log Issue button
+                  // Right side: Raise Complaint button
                   ElevatedButton.icon(
                     icon: const Icon(Icons.add_comment, size: 16),
-                    label: const Text('Log Issue', style: TextStyle(fontSize: 12)),
+                    label: const Text('Raise Complaint', style: TextStyle(fontSize: 12)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
                       foregroundColor: Colors.white,

@@ -6,6 +6,18 @@ from app.auth import get_password_hash
 
 
 def seed_database(db: Session):
+    from app.models import MenuItem
+    if db.query(MenuItem).count() == 0:
+        try:
+            from scripts.seed_menus import seed_menus
+            seed_menus()
+            from scripts.sync_reports_menu import sync_reports_menu
+            sync_reports_menu()
+            from scripts.sync_credit_notes_menu import sync_credit_notes_menu
+            sync_credit_notes_menu()
+        except Exception as e:
+            print(f"Error auto-seeding menus: {e}")
+
     from app.models import Role, RolePermission
     # Always sync equipment permissions for existing roles
     roles = db.query(Role).all()

@@ -4,11 +4,6 @@ __pycache__/
 .env
 .git/
 *.db
-scripts/reset_db.py
-scripts/seed_*.py
-scripts/check_*.py
-scripts/migrate_*.py
-scripts/restore_*.py
 tests/
 venv/
 *.log

@@ -25,6 +25,12 @@ MIGRATION_STATEMENTS = [
     "ALTER TABLE equipment_items ADD COLUMN IF NOT EXISTS installation_documents JSON DEFAULT '[]'::json;",
     "ALTER TABLE equipment_items ADD COLUMN IF NOT EXISTS other_documents JSON DEFAULT '[]'::json;",
 
+    # Indent new fields
+    "ALTER TABLE indents ADD COLUMN IF NOT EXISTS priority VARCHAR(50) DEFAULT 'Normal';",
+    "ALTER TABLE indents ADD COLUMN IF NOT EXISTS cost_center VARCHAR(100);",
+    "ALTER TABLE indents ADD COLUMN IF NOT EXISTS attachment_url VARCHAR(500);",
+    "UPDATE indents SET priority = 'Normal' WHERE priority IS NULL;",
+
     # Normalize NULLs to empty JSON arrays where applicable
     "UPDATE tenant_configurations SET po_short_close_notify_users = '[]'::json WHERE po_short_close_notify_users IS NULL;",
     "UPDATE tenant_configurations SET wo_short_close_notify_roles = '[]'::json WHERE wo_short_close_notify_roles IS NULL;",

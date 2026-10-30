@@ -19,6 +19,10 @@ docker compose exec -T db psql -U nissigrid -d nissigrid_stores < database/nissi
 
 echo "=== [3/4] Granting privileges to user nissigrid ==="
 docker compose exec -T db psql -U nissigrid -d nissigrid_stores << 'EOF'
+ALTER TABLE indents ADD COLUMN IF NOT EXISTS priority VARCHAR(50) DEFAULT 'Normal';
+ALTER TABLE indents ADD COLUMN IF NOT EXISTS cost_center VARCHAR(100);
+ALTER TABLE indents ADD COLUMN IF NOT EXISTS attachment_url VARCHAR(500);
+UPDATE indents SET priority = 'Normal' WHERE priority IS NULL;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO nissigrid;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO nissigrid;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO nissigrid;

@@ -520,7 +520,7 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        CreateIndentScreen(indentId: indent.id),
+                                        CreateIndentScreen(cloneFrom: indent),
                                   ),
                                 );
                               } else {

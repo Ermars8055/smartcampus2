@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:facilityflow/models/complaint.dart';
@@ -788,19 +787,19 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
     final formattedDate = DateFormat('dd MMM yyyy, hh:mm a')
         .format(widget.complaint.complaintDate);
 
-    final appState = AppState.of(context);
-    final materialIssues = appState.materialIssues
-        .where((issue) => issue.relatedComplaintId == widget.complaint.id)
-        .toList();
-
     // Determine which actions to show based on web app logic
     final isAssigned = widget.complaint.status == 'Assigned' ||
         (widget.complaint.status == 'Open' &&
             widget.complaint.assignedToName != null);
-    final isRegistered = widget.complaint.status == 'Registered' || (widget.complaint.status == 'Open' && widget.complaint.assignedToName == null);
+    final isRegistered = widget.complaint.status == 'Registered' ||
+        widget.complaint.status == 'Reopened' ||
+        (widget.complaint.status == 'Open' &&
+            widget.complaint.assignedToName == null);
     final isUnderInspection = widget.complaint.status == 'Under Inspection';
     final isMaterialPending = widget.complaint.status == 'Material Pending';
     final isInProgress = widget.complaint.status == 'In Progress';
+    final isPendingApproval = widget.complaint.status == 'Pending Approval' || widget.complaint.status == 'Pending Admin Approval';
+    final isClosed = widget.complaint.status == 'Closed';
 
     return Scaffold(
       appBar: AppBar(
@@ -808,7 +807,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
             style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
       bottomNavigationBar: _buildBottomActionBar(
-          isRegistered, isAssigned, isUnderInspection, isMaterialPending, isInProgress),
+          isRegistered, isAssigned, isUnderInspection, isMaterialPending, isInProgress, isPendingApproval, isClosed),
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -1279,7 +1278,103 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                                     ),
                                   );
                                 }).toList()
-                              ]
+                              ],
+                              if (widget.complaint.adminApprovedByName != null ||
+                                  widget.complaint.managerApprovedByName != null ||
+                                  widget.complaint.status == 'Pending Approval' ||
+                                  widget.complaint.status == 'Pending Admin Approval') ...[
+                                const SizedBox(height: 12),
+                                const Text('Closure Approvals:',
+                                    style: TextStyle(fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 6),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: widget.complaint.adminApprovedByName != null
+                                        ? const Color(0xFFECFDF5)
+                                        : const Color(0xFFFFFBEB),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: widget.complaint.adminApprovedByName != null
+                                          ? const Color(0xFFA7F3D0)
+                                          : const Color(0xFFFDE68A),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        widget.complaint.adminApprovedByName != null
+                                            ? Icons.check_circle
+                                            : Icons.pending,
+                                        size: 16,
+                                        color: widget.complaint.adminApprovedByName != null
+                                            ? const Color(0xFF059669)
+                                            : const Color(0xFFD97706),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          widget.complaint.adminApprovedByName != null
+                                              ? 'Level 1 Approved by ${widget.complaint.adminApprovedByName}'
+                                              : 'Pending Level 1 (Admin) Approval',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: widget.complaint.adminApprovedByName != null
+                                                ? const Color(0xFF065F46)
+                                                : const Color(0xFF92400E),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: widget.complaint.managerApprovedByName != null
+                                        ? const Color(0xFFECFDF5)
+                                        : const Color(0xFFFFFBEB),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: widget.complaint.managerApprovedByName != null
+                                          ? const Color(0xFFA7F3D0)
+                                          : const Color(0xFFFDE68A),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        widget.complaint.managerApprovedByName != null
+                                            ? Icons.check_circle
+                                            : Icons.pending,
+                                        size: 16,
+                                        color: widget.complaint.managerApprovedByName != null
+                                            ? const Color(0xFF059669)
+                                            : const Color(0xFFD97706),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          widget.complaint.managerApprovedByName != null
+                                              ? 'Level 2 Approved by ${widget.complaint.managerApprovedByName}'
+                                              : 'Pending Level 2 (Manager) Approval',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: widget.complaint.managerApprovedByName != null
+                                                ? const Color(0xFF065F46)
+                                                : const Color(0xFF92400E),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -1528,9 +1623,21 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
     );
   }
 
-  Widget? _buildBottomActionBar(bool isRegistered, bool isAssigned, bool isUnderInspection,
-      bool isMaterialPending, bool isInProgress) {
-    if (!isRegistered && !isAssigned && !isUnderInspection && !isMaterialPending && !isInProgress) {
+  Widget? _buildBottomActionBar(
+      bool isRegistered,
+      bool isAssigned,
+      bool isUnderInspection,
+      bool isMaterialPending,
+      bool isInProgress,
+      bool isPendingApproval,
+      bool isClosed) {
+    if (!isRegistered &&
+        !isAssigned &&
+        !isUnderInspection &&
+        !isMaterialPending &&
+        !isInProgress &&
+        !isPendingApproval &&
+        !isClosed) {
       return null;
     }
 
@@ -1628,6 +1735,40 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                         icon: const Icon(Icons.check_circle),
                         label: const Text('Resolve & Close'),
                       ),
+                    ),
+                  ),
+                if (isPendingApproval) ...[
+                  if (widget.complaint.adminApprovedById == null)
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showApproveDialog('admin'),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal),
+                        icon: const Icon(Icons.verified_user),
+                        label: const Text('Level 1 Approve'),
+                      ),
+                    ),
+                  if (widget.complaint.adminApprovedById != null &&
+                      widget.complaint.managerApprovedById == null)
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showApproveDialog('manager'),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple),
+                        icon: const Icon(Icons.verified_user),
+                        label: const Text('Level 2 Approve'),
+                      ),
+                    ),
+                ],
+                if (isClosed)
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _showReopenDialog,
+                      style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red)),
+                      icon: const Icon(Icons.replay),
+                      label: const Text('Reopen Complaint'),
                     ),
                   ),
               ],

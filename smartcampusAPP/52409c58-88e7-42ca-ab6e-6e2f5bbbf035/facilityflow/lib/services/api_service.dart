@@ -230,6 +230,9 @@ class ApiService {
       String? equipmentPhotoUrl,
       String? serialNumberPhotoUrl,
       String? installationReportUrl,
+      List<Map<String, dynamic>>? equipmentPhotos,
+      List<Map<String, dynamic>>? serialNumberPhotos,
+      List<Map<String, dynamic>>? installationDocuments,
       String? serialNumber,
       List<String>? documentUrls}) async {
     return await dio.post('/api/complaints/$id/close', data: {
@@ -247,8 +250,17 @@ class ApiService {
         'serial_number_photo_url': serialNumberPhotoUrl,
       if (installationReportUrl != null)
         'installation_report_url': installationReportUrl,
+      if (equipmentPhotos != null) 'equipment_photos': equipmentPhotos,
+      if (serialNumberPhotos != null) 'serial_number_photos': serialNumberPhotos,
+      if (installationDocuments != null) 'installation_documents': installationDocuments,
       if (serialNumber != null) 'serial_number': serialNumber,
       if (documentUrls != null) 'document_urls': documentUrls,
+    });
+  }
+
+  Future<Response> cancelComplaint(int id, String remarks) async {
+    return await dio.post('/api/complaints/$id/cancel', data: {
+      'remarks': remarks,
     });
   }
 

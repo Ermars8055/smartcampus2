@@ -25,13 +25,15 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
   late TabController _tabController;
   final List<String> _tabs = [
     'All',
-    'Open / Assigned',
+    'Registered',
+    'Open',
+    'Assigned',
     'Under Inspection',
     'Material Pending',
-    'Pending Approval',
     'In Progress',
+    'Pending Approval',
+    'Closed',
     'Reopened',
-    'Closed'
   ];
 
   @override
@@ -61,15 +63,28 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> with Single
 
   String? _getApiStatusForTab(int index) {
     switch (index) {
-      case 0: return null; // All
-      case 1: return 'Registered,Open,Assigned';
-      case 2: return 'Under Inspection';
-      case 3: return 'Material Pending';
-      case 4: return 'Pending Approval';
-      case 5: return 'In Progress';
-      case 6: return 'Reopened';
-      case 7: return 'Closed,Resolved,Rejected';
-      default: return null;
+      case 0:
+        return null; // All
+      case 1:
+        return 'Registered';
+      case 2:
+        return 'Open';
+      case 3:
+        return 'Assigned';
+      case 4:
+        return 'Under Inspection';
+      case 5:
+        return 'Material Pending';
+      case 6:
+        return 'In Progress';
+      case 7:
+        return 'Pending Approval,Pending Admin Approval';
+      case 8:
+        return 'Closed,Resolved';
+      case 9:
+        return 'Reopened,Rejected';
+      default:
+        return null;
     }
   }
 

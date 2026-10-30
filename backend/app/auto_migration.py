@@ -76,3 +76,16 @@ def run_auto_migrations():
     except Exception as e:
         log.error(f"Error running auto-migrations on startup: {e}")
 
+    try:
+        from scripts.sync_reports_menu import sync_reports_menu
+        sync_reports_menu()
+    except Exception as e:
+        log.warning(f"Reports menu sync during auto-migration skipped: {e}")
+
+    try:
+        from scripts.sync_credit_notes_menu import sync_credit_notes_menu
+        sync_credit_notes_menu()
+    except Exception as e:
+        log.warning(f"Credit notes menu sync during auto-migration skipped: {e}")
+
+

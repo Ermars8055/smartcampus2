@@ -47,6 +47,16 @@ async def lifespan(app: FastAPI):
         
     from app.scheduler import start_scheduler, shutdown_scheduler
     start_scheduler()
+
+    # Auto-extract uploads.zip if uploads directory is not yet populated
+    if os.path.exists("uploads.zip") and (not os.path.exists("uploads/complaints") or len(os.listdir("uploads")) <= 1):
+        try:
+            import zipfile
+            with zipfile.ZipFile("uploads.zip", "r") as zf:
+                zf.extractall(".")
+            log.info("Auto-extracted uploads.zip successfully.")
+        except Exception as e:
+            log.warning(f"Could not auto-extract uploads.zip: {e}")
     
     yield
     
@@ -87,9 +97,8 @@ app.add_middleware(
 
 # Uploads directory
 os.makedirs("uploads", exist_ok=True)
-# NOTE: Uploads are now served via authenticated endpoint in routers/uploads.py
-# If public access is intentionally needed, uncomment the line below:
-# app.mount("/api/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/api/uploads", StaticFiles(directory="uploads"), name="api_uploads")
 
 # Register routers
 app.include_router(auth.router)
